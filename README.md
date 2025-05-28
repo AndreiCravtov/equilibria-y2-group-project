@@ -2,23 +2,24 @@
 
 STACK:
 
-- Yarn
-- Tamagui
-- ReAnimated
-- Flashlists
-- Zustand (maybe)
+- Yarn => Package manager
+- Expo Router => React Native wrapper
+- Tamagui => UI components
+- FlashList => Better performance lists
+-
 
+TO SORT:
+
+- Zustand (maybe)
 - T4 Stack
-- + Tamagui
-- + Expo
-- + Supabase Auth
-- + Drizzle
-- + tRPC
-- + Hono
-- + Valibot
-- + Million.js
-- + Virtualized Lists
-- + Pattycake + ts-pattern
+- - Supabase Auth
+- - Drizzle
+- - tRPC
+- - Hono
+- - Valibot
+- - Million.js
+- - Virtualized Lists
+- - Pattycake + ts-pattern
 
 - Convex for DB
 - Clerk + Convex for Auth
