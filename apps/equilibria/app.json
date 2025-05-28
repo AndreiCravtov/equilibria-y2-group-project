@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.kravtsov.x200439.equilibria"
+      "bundleIdentifier": "com.y2project.equilibria"
     },
     "android": {
       "adaptiveIcon": {
@@ -18,7 +18,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.kravtsov.x200439.equilibria"
+      "package": "com.y2project.equilibria"
     },
     "web": {
       "bundler": "metro",
