@@ -8,7 +8,9 @@ STACK:
 - FlashList => Better performance lists
 - Valibot => [Standard Schema](https://github.com/standard-schema/standard-schema)-compliant schema validator library of choice
 - t3-env => typesafe .env configurations
--
+- Convex => Fullstack backend, DB, Auth, etc.
+
+---
 
 TO SORT:
 
@@ -22,6 +24,5 @@ TO SORT:
 - - Virtualized Lists
 - - Pattycake + ts-pattern
 
-- Convex for DB
 - Clerk + Convex for Auth
 - Drizzle maybe?? tRPC maybe?? Supabase Auth??
