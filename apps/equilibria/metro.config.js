@@ -5,7 +5,6 @@
 const { getDefaultConfig } = require("expo/metro-config");
 const path = require("path");
 const findWorkspaceRoot = require("find-yarn-workspace-root");
-// const { withTamagui } = require("@tamagui/metro-plugin");
 
 // Find the project and workspace directories
 const projectRoot = __dirname;
@@ -26,11 +25,10 @@ config.resolver.nodeModulesPaths = [
 // 3. Make `.mjs` sources work as well
 config.resolver.sourceExts.push("mjs");
 
-module.exports = config;
-
-// // 4. Build config with Tamagui
-// module.exports = withTamagui(config, {
-//   components: ["tamagui"],
-//   config: "./tamagui.config.ts",
-//   outputCSS: "./tamagui-web.css",
-// });
+// Tamagui support
+const { withTamagui } = require("@tamagui/metro-plugin");
+module.exports = withTamagui(config, {
+  components: ["tamagui"],
+  config: "./tamagui.config.ts",
+  outputCSS: "./tamagui-web.css",
+});
