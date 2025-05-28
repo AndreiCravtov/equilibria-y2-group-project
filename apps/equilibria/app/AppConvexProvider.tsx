@@ -15,22 +15,22 @@ const secureStorage = {
   removeItem: SecureStore.deleteItemAsync,
 };
 
-export function AppConvexProvider({ children }: { children: ReactNode }) {
-  return (
-    <ConvexAuthProvider
-      client={convex}
-      storage={(() => {
-        switch (Platform.OS) {
-          case "android":
-            return secureStorage;
-          case "ios":
-            throw new Error("IOS secure storage not configured yet");
-          default:
-            throw new Error(`Unsupported platform: ${Platform.OS}`);
-        }
-      })()}
-    >
-      {children}
-    </ConvexAuthProvider>
-  );
-}
+// export function AppConvexProvider({ children }: { children: ReactNode }) {
+//   return (
+//     <ConvexAuthProvider
+//       client={convex}
+//       storage={(() => {
+//         switch (Platform.OS) {
+//           case "android":
+//             return secureStorage;
+//           case "ios":
+//             throw new Error("IOS secure storage not configured yet");
+//           default:
+//             throw new Error(`Unsupported platform: ${Platform.OS}`);
+//         }
+//       })()}
+//     >
+//       {children}
+//     </ConvexAuthProvider>
+//   );
+// }

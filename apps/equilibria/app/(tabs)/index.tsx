@@ -52,7 +52,7 @@ export default function TabOneScreen() {
         </Paragraph>
       </XStack>
 
-      <SignIn />
+      {/* <SignIn /> */}
     </YStack>
   );
 }

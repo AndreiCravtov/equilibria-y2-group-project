@@ -55,9 +55,9 @@ export default function RootLayout() {
 
 const Providers = ({ children }: { children: React.ReactNode }) => {
   return (
-    <AppConvexProvider>
-      <AppTamaguiProvider>{children}</AppTamaguiProvider>
-    </AppConvexProvider>
+    // <AppConvexProvider>
+    <AppTamaguiProvider>{children}</AppTamaguiProvider>
+    // </AppConvexProvider>
   );
 };
 
