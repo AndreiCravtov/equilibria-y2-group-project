@@ -1,7 +1,7 @@
 import "ts-node/register"; // Add this to import TypeScript files
 import type { ConfigContext, ExpoConfig } from "@expo/config";
 
-import "./env"; // This will run environment validation on build
+// import "./env"; // This will run environment validation on build
 
 module.exports = ({ config }: ConfigContext): ExpoConfig => {
   console.log("Loading `app.config.ts` configurations");
@@ -10,6 +10,7 @@ module.exports = ({ config }: ConfigContext): ExpoConfig => {
     name: "equilibria",
     slug: "equilibria",
     version: "1.0.0",
+    owner: "equilibria_y2_group_project",
     orientation: "portrait",
     icon: "./assets/images/icon.png",
     scheme: "equilibria",
@@ -47,6 +48,11 @@ module.exports = ({ config }: ConfigContext): ExpoConfig => {
     ],
     experiments: {
       typedRoutes: true,
+    },
+    extra: {
+      eas: {
+        projectId: "75253099-e75b-4090-a35d-535a8abc0d1b",
+      },
     },
   };
 };

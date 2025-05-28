@@ -7,6 +7,7 @@ SETUP:
 - Run `yarn` in root folder
 - Set up `.env.local` in `apps/equilibria` & run `npx convex dev` and to set up Convex
 - In `apps/equilibria` run `yarn expo prebuild` & `yarn expo android` (or `ios` maybe??)
+- - Run `npm install --global eas-cli` and in `apps/equilibria`
 
 STACK:
 
