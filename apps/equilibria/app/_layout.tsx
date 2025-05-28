@@ -12,6 +12,7 @@ import { useFonts } from "expo-font";
 import { SplashScreen, Stack } from "expo-router";
 import { Provider } from "./Provider";
 import { useTheme } from "tamagui";
+import { env } from "@/env";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -27,6 +28,10 @@ export const unstable_settings = {
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  // useEffect(() => { // Tests type safe environment config
+  //   console.log(env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY);
+  // });
+
   const [interLoaded, interError] = useFonts({
     Inter: require("@tamagui/font-inter/otf/Inter-Medium.otf"),
     InterBold: require("@tamagui/font-inter/otf/Inter-Bold.otf"),
