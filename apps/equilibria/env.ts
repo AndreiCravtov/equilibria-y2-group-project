@@ -3,8 +3,7 @@ import * as v from "valibot";
 
 export const env = createEnv({
   server: {
-    DATABASE_URL: v.string(),
-    OPEN_AI_API_KEY: v.string(),
+    CONVEX_DEPLOYMENT: v.string(),
   },
 
   /**
@@ -14,7 +13,7 @@ export const env = createEnv({
   clientPrefix: "EXPO_PUBLIC_",
 
   client: {
-    EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY: v.string(),
+    EXPO_PUBLIC_CONVEX_URL: v.string(),
   },
 
   /**
@@ -22,9 +21,7 @@ export const env = createEnv({
    * from `server` and `client` in your `runtimeEnv`.
    */
   runtimeEnvStrict: {
-    DATABASE_URL: process.env.DATABASE_URL,
-    OPEN_AI_API_KEY: process.env.OPEN_AI_API_KEY,
-    EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY:
-      process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY,
+    CONVEX_DEPLOYMENT: process.env.CONVEX_DEPLOYMENT,
+    EXPO_PUBLIC_CONVEX_URL: process.env.EXPO_PUBLIC_CONVEX_URL,
   },
 });
