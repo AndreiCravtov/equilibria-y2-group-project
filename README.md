@@ -1,5 +1,13 @@
 # equilibria-y2-group-project
 
+SETUP:
+
+- Install Android Studio/Sdk + Emulator
+- Install npm+yarn
+- Run `yarn` in root folder
+- Set up `.env.local` in `apps/equilibria` & run `npx convex dev` and to set up Convex
+- In `apps/equilibria` run `yarn expo prebuild` & `yarn expo android` (or `ios` maybe??)
+
 STACK:
 
 - Yarn => Package manager
