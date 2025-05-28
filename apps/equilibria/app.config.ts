@@ -43,6 +43,7 @@ module.exports = ({ config }: ConfigContext): ExpoConfig => {
           backgroundColor: "#ffffff",
         },
       ],
+      "expo-secure-store",
     ],
     experiments: {
       typedRoutes: true,

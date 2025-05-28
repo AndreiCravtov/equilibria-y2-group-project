@@ -10,14 +10,11 @@ import {
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { SplashScreen, Stack } from "expo-router";
-import { AppTamaguiProvider } from "./AppTamaguiProvider";
 import { useTheme } from "tamagui";
 import { env } from "@/env";
-import { ConvexProvider, ConvexReactClient } from "convex/react";
 
-const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONVEX_URL!, {
-  unsavedChangesWarning: false,
-});
+import { AppTamaguiProvider } from "./AppTamaguiProvider";
+import { AppConvexProvider } from "./AppConvexProvider";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -33,10 +30,6 @@ export const unstable_settings = {
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  // useEffect(() => { // Tests type safe environment config
-  //   console.log(env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY);
-  // });
-
   const [interLoaded, interError] = useFonts({
     Inter: require("@tamagui/font-inter/otf/Inter-Medium.otf"),
     InterBold: require("@tamagui/font-inter/otf/Inter-Bold.otf"),
@@ -62,9 +55,9 @@ export default function RootLayout() {
 
 const Providers = ({ children }: { children: React.ReactNode }) => {
   return (
-    <ConvexProvider client={convex}>
+    <AppConvexProvider>
       <AppTamaguiProvider>{children}</AppTamaguiProvider>
-    </ConvexProvider>
+    </AppConvexProvider>
   );
 };
 
