@@ -10,9 +10,14 @@ import {
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { SplashScreen, Stack } from "expo-router";
-import { Provider } from "./Provider";
+import { AppTamaguiProvider } from "./AppTamaguiProvider";
 import { useTheme } from "tamagui";
 import { env } from "@/env";
+import { ConvexProvider, ConvexReactClient } from "convex/react";
+
+const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONVEX_URL!, {
+  unsavedChangesWarning: false,
+});
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -56,7 +61,11 @@ export default function RootLayout() {
 }
 
 const Providers = ({ children }: { children: React.ReactNode }) => {
-  return <Provider>{children}</Provider>;
+  return (
+    <ConvexProvider client={convex}>
+      <AppTamaguiProvider>{children}</AppTamaguiProvider>
+    </ConvexProvider>
+  );
 };
 
 function RootLayoutNav() {

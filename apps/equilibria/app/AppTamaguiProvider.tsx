@@ -4,7 +4,7 @@ import { ToastProvider, ToastViewport } from "@tamagui/toast";
 import { CurrentToast } from "./CurrentToast";
 import { tamaguiConfig } from "../tamagui.config";
 
-export function Provider({
+export function AppTamaguiProvider({
   children,
   ...rest
 }: Omit<TamaguiProviderProps, "config">) {
