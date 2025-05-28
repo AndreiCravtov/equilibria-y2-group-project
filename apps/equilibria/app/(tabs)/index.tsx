@@ -2,6 +2,7 @@ import { ExternalLink } from "@tamagui/lucide-icons";
 import { Anchor, H2, Paragraph, XStack, YStack } from "tamagui";
 import { ToastControl } from "@/app/CurrentToast";
 import { SignIn } from "../SignIn";
+import { Authenticated, Unauthenticated } from "convex/react";
 
 export default function TabOneScreen() {
   return (
@@ -52,7 +53,12 @@ export default function TabOneScreen() {
         </Paragraph>
       </XStack>
 
-      <SignIn />
+      <Unauthenticated>
+        <SignIn />
+      </Unauthenticated>
+      <Authenticated>
+        <SignIn />
+      </Authenticated>
     </YStack>
   );
 }
