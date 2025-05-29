@@ -4,14 +4,20 @@
     "appVersionSource": "remote"
   },
   "build": {
+    "common": {
+      "yarn": "4.9.1"
+    },
     "development": {
+      "extends": "common",
       "developmentClient": true,
       "distribution": "internal"
     },
     "preview": {
+      "extends": "common",
       "distribution": "internal"
     },
     "production": {
+      "extends": "common",
       "autoIncrement": true
     }
   },
