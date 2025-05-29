@@ -12,4 +12,9 @@ export default defineSchema({
   numbers: defineTable({
     value: v.number(),
   }),
+  // products table for friday meeting
+  products: defineTable({
+      name: v.string(),
+      calories: v.int64(),
+  }),
 });
