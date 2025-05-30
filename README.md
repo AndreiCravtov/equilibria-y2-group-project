@@ -31,12 +31,7 @@ TO SORT:
 
 - Zustand (maybe)
 - T4 Stack
-- - Supabase Auth
-- - Drizzle
-- - tRPC
-- - Hono
 - - Million.js
-- - Virtualized Lists
 - - Pattycake + ts-pattern
 
 - Clerk + Convex for Auth
