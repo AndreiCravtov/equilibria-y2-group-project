@@ -11,6 +11,7 @@ SETUP:
 
 Extra steps for Windows:
 You would likely have to increase max absolute filepath char limit.
+
 - run in PowerShell as administrator `New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force` to set LongPathEnabled to 1
 - Update SDK's Ninja at `C:\Users\Your username\AppData\Local\Android\Sdk\cmake\3.22.1\bin\ninja.exe` to latest version
 
@@ -18,7 +19,7 @@ STACK:
 
 - Yarn => Package manager
 - Expo Router => React Native wrapper
-- Tamagui => UI components
+- Tamagui => UI Components
 - FlashList => Better performance lists
 - Valibot => [Standard Schema](https://github.com/standard-schema/standard-schema)-compliant schema validator library of choice
 - t3-env => typesafe .env configurations
