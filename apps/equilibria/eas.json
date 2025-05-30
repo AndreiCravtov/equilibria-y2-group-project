@@ -4,9 +4,7 @@
     "appVersionSource": "remote"
   },
   "build": {
-    "common": {
-      "yarn": "4.9.1"
-    },
+    "common": {},
     "development": {
       "extends": "common",
       "developmentClient": true,
