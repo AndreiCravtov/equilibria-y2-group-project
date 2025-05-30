@@ -53,12 +53,7 @@ export default function TabOneScreen() {
         </Paragraph>
       </XStack>
 
-      <Unauthenticated>
-        <SignIn />
-      </Unauthenticated>
-      <Authenticated>
-        <SignIn />
-      </Authenticated>
+      <SignIn />
     </YStack>
   );
 }

@@ -1,10 +1,12 @@
 import { useAuthActions } from "@convex-dev/auth/react";
-import { Authenticated, Unauthenticated } from "convex/react";
+import { Authenticated, Unauthenticated, useQuery } from "convex/react";
 import { useState } from "react";
-import { TextInput, View } from "react-native";
-import { Button } from "tamagui";
+import { Button, Input, YStack, Text } from "tamagui";
+import { api } from "@/convex/_generated/api";
 
 export function SignIn() {
+  const foo = useQuery(api.users.getCurrentUser);
+
   const { signIn, signOut } = useAuthActions();
   const [step, setStep] = useState<"signUp" | "signIn">("signIn");
   const [email, setEmail] = useState("");
@@ -12,15 +14,15 @@ export function SignIn() {
   return (
     <>
       <Unauthenticated>
-        <View>
-          <TextInput
+        <YStack>
+          <Input
             placeholder="Email"
             onChangeText={setEmail}
             value={email}
             inputMode="email"
             autoCapitalize="none"
           />
-          <TextInput
+          <Input
             placeholder="Password"
             onChangeText={setPassword}
             value={password}
@@ -38,9 +40,10 @@ export function SignIn() {
           >
             {step === "signIn" ? "Sign up instead" : "Sign in instead"}
           </Button>
-        </View>
+        </YStack>
       </Unauthenticated>
       <Authenticated>
+        <Text>Current user: {foo?.email ?? "Missing User Email!!"}</Text>
         <Button onPress={() => void signOut()}>Sign Out</Button>
       </Authenticated>
     </>
