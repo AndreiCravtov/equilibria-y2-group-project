@@ -1,7 +1,7 @@
 import "ts-node/register"; // Add this to import TypeScript files
 import type { ConfigContext, ExpoConfig } from "@expo/config";
 
-// import "./env"; // This will run environment validation on build
+import "./env"; // This will run environment validation on build
 
 module.exports = ({ config }: ConfigContext): ExpoConfig => {
   console.log("Loading `app.config.ts` configurations");
