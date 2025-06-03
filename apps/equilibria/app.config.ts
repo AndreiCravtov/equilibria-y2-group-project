@@ -48,7 +48,6 @@ module.exports = ({ config }: ConfigContext): ExpoConfig => {
         },
       ],
       "expo-secure-store",
-      "react-native-reanimated/plugin",
     ],
     experiments: {
       typedRoutes: true,
