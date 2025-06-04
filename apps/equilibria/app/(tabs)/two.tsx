@@ -1,40 +1,36 @@
 import { Authenticated, Unauthenticated, useQuery } from "convex/react";
-import { Text, View, ScrollView, YStack, Card } from "tamagui";
+import { Text, View, ScrollView, YStack, Card, TextInput, FlatList } from "tamagui";
 import { api } from "@/convex/_generated/api";
+import { useState } from "react";
 
 export default function TabTwoScreen() {
-  const productItems = useQuery(api.products.list);
+  const userId = useQuery(api.users.getCurrentUser);
 
-  // Show loading state
-  if (!productItems) {
-      return (
-          <View flex={1} items="center" justify="center" bg="$background">
-            <Text>Loading...</Text>
-          </View>
-        );
-  }
-  // Show empty state
-  if (productItems.length === 0) {
+  console.log(userId);
+  if (!userId) {
     return (
-      <View flex={1} justifyContent="center" alignItems="center" bg="$background">
-        <Text>No products in the database!</Text>
+      <View flex={1} items="center" justify="center" bg="$background">
+        <Text>Not authenticated!</Text>
       </View>
     );
   }
 
-  productItems.forEach(({ name, calories }, idx) => {
-    console.log(`Product ${idx}: name = ${name}, calories = ${calories}`);
-  });
-  // Show list of products
+  const date = "2025-04-06"; // placeholder value
+
+  // Only call the query when userId is available
+  const waterEntries = useQuery(api.water.getWaterByUserAndDate,
+    { uid: userId, date: date }
+  );
+
   return (
     <ScrollView contentContainerStyle={{ padding: 16 }}>
       <YStack space="$4">
-        {productItems.filter(Boolean).map((item) => (
+        {waterEntries.filter(Boolean).map((item) => (
           <Card key={item._id} padded bordered elevate>
             <Text fontWeight="bold" fontSize="$6">
-              {item.name ?? "Unnamed Product" }
+              { item.water_intake }
             </Text>
-            <Text>Calories: { item.calories }</Text>
+            <Text>Calories: { item.date }</Text>
           </Card>
         ) )}
       </YStack>
