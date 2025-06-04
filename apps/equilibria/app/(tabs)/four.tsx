@@ -11,8 +11,19 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import AppAnimated from "@/components/app-animated";
-import { Canvas, Path, Skia } from "@shopify/react-native-skia";
-import { useEffect } from "react";
+import {
+  Canvas,
+  Path,
+  Skia,
+  Text as SkiaText,
+  Group,
+  SkFont,
+  SkTypeface,
+  FontWeight,
+  FontWidth,
+  FontSlant,
+} from "@shopify/react-native-skia";
+import { useEffect, useMemo } from "react";
 
 const WAVE_HEIGHT = 30; // Amplitude of the wave - Made shallower
 const WAVE_SPEED = 0.01; // Speed of the wave animation - Made slower
@@ -21,9 +32,28 @@ const WATER_COLOR = "#0077FF"; // Blue color for the water
 interface TestAnimatedProps {
   percentage: number; // 0 to 100, represents how full the water level is
   yPad: number; // Percentage of parent height for top/bottom padding
+  mainText?: string;
+  mainTextSize?: number;
+  mainTextColorAboveWater?: string;
+  mainTextColorUnderWater?: string;
+  subText?: string;
+  subTextSize?: number;
+  subTextColorAboveWater?: string;
+  subTextColorUnderWater?: string;
 }
 
-const TestAnimated = ({ percentage, yPad }: TestAnimatedProps) => {
+const TestAnimated = ({
+  percentage,
+  yPad,
+  mainText = "1.800ml",
+  mainTextSize = 60,
+  mainTextColorAboveWater = "#1E3A8A", // Dark Blue
+  mainTextColorUnderWater = "#FFFFFF",
+  subText = "Remaining 600ml",
+  subTextSize = 18,
+  subTextColorAboveWater = "#60A5FA", // Lighter Blue/Grey
+  subTextColorUnderWater = "#FFFFFF",
+}: TestAnimatedProps) => {
   const phase = useSharedValue(0);
   const layoutWidth = useSharedValue(0);
   const layoutHeight = useSharedValue(0);
@@ -50,6 +80,80 @@ const TestAnimated = ({ percentage, yPad }: TestAnimatedProps) => {
       (phase.value + timeDelta * WAVE_SPEED * 0.1) % (2 * Math.PI);
     phase.value = newPhase;
   });
+
+  // Font creation using Skia's default font manager
+  const fonts = useMemo(() => {
+    let mainFt: SkFont | null = null;
+    let subFt: SkFont | null = null;
+    try {
+      // Attempt to get the system font manager instance
+      const fontMgr = Skia.FontMgr.System();
+      if (fontMgr) {
+        const mainTypeface: SkTypeface | null = fontMgr.matchFamilyStyle(
+          "sans-serif",
+          {
+            weight: FontWeight.Bold,
+            width: FontWidth.Normal,
+            slant: FontSlant.Upright,
+          }
+        );
+        if (mainTypeface) {
+          mainFt = Skia.Font(mainTypeface, mainTextSize);
+        }
+        const subTypeface: SkTypeface | null = fontMgr.matchFamilyStyle(
+          "sans-serif",
+          {
+            weight: FontWeight.Normal,
+            width: FontWidth.Normal,
+            slant: FontSlant.Upright,
+          }
+        );
+        if (subTypeface) {
+          subFt = Skia.Font(subTypeface, subTextSize);
+        }
+      }
+    } catch (e) {
+      console.error("Failed to load system font:", e);
+    }
+    return { mainFont: mainFt, subFont: subFt };
+  }, [mainTextSize, subTextSize]);
+
+  const { mainFont, subFont } = fonts;
+
+  // Derived values for text positioning (centered horizontally)
+  const mainTextPosition = useReanimatedDerivedValue(() => {
+    "worklet";
+    if (
+      !mainFont ||
+      !mainText ||
+      layoutWidth.value === 0 ||
+      layoutHeight.value === 0
+    )
+      return { x: 0, y: 0, visible: false };
+    const textWidth = mainFont.measureText(mainText).width;
+    return {
+      x: (layoutWidth.value - textWidth) / 2,
+      y: layoutHeight.value * 0.38, // Adjusted based on reference (approximate)
+      visible: true,
+    };
+  }, [mainFont, mainText, layoutWidth, layoutHeight]);
+
+  const subTextPosition = useReanimatedDerivedValue(() => {
+    "worklet";
+    if (
+      !subFont ||
+      !subText ||
+      layoutWidth.value === 0 ||
+      layoutHeight.value === 0
+    )
+      return { x: 0, y: 0, visible: false };
+    const textWidth = subFont.measureText(subText).width;
+    return {
+      x: (layoutWidth.value - textWidth) / 2,
+      y: layoutHeight.value * 0.48, // Adjusted based on reference (approximate)
+      visible: true,
+    };
+  }, [subFont, subText, layoutWidth, layoutHeight]);
 
   const path = useReanimatedDerivedValue(() => {
     "worklet";
@@ -115,7 +219,50 @@ const TestAnimated = ({ percentage, yPad }: TestAnimatedProps) => {
         layoutHeight.value = event.nativeEvent.layout.height;
       }}
     >
+      {/* 1. Water Wave Background */}
       <Path path={path} color={WATER_COLOR} />
+
+      {/* 2. "Above water" text rendering */}
+      {mainFont && mainTextPosition.value.visible && (
+        <SkiaText
+          x={mainTextPosition.value.x}
+          y={mainTextPosition.value.y}
+          text={mainText}
+          font={mainFont}
+          color={mainTextColorAboveWater}
+        />
+      )}
+      {subFont && subTextPosition.value.visible && (
+        <SkiaText
+          x={subTextPosition.value.x}
+          y={subTextPosition.value.y}
+          text={subText}
+          font={subFont}
+          color={subTextColorAboveWater}
+        />
+      )}
+
+      {/* 3. "Under water" text rendering (clipped) */}
+      <Group clip={path}>
+        {mainFont && mainTextPosition.value.visible && (
+          <SkiaText
+            x={mainTextPosition.value.x}
+            y={mainTextPosition.value.y}
+            text={mainText}
+            font={mainFont}
+            color={mainTextColorUnderWater}
+          />
+        )}
+        {subFont && subTextPosition.value.visible && (
+          <SkiaText
+            x={subTextPosition.value.x}
+            y={subTextPosition.value.y}
+            text={subText}
+            font={subFont}
+            color={subTextColorUnderWater}
+          />
+        )}
+      </Group>
     </Canvas>
   );
 };
@@ -123,12 +270,17 @@ const TestAnimated = ({ percentage, yPad }: TestAnimatedProps) => {
 export default function TabFourScreen() {
   return (
     <AppAnimated.YStack flex={1} bg="$background">
-      <TestAnimated yPad={1} percentage={100} />
-      {/* You can add other UI elements on top of TestAnimated here, using absolute positioning if needed */}
-      {/* For example, the "Hello Jane" text and the "+" button from the reference */}
-      {/* <YStack position="absolute" top={50} left={20} >
-        <H2>Hello Jane</H2>
-      </YStack> */}
+      <TestAnimated
+        yPad={1}
+        percentage={53} // Example: 80% full
+        mainText="1.800ml"
+        mainTextSize={56} // Slightly adjusted
+        mainTextColorAboveWater="#1E40AF" // Tailwind blue-800
+        subText="Remaining 600ml"
+        subTextSize={16} // Slightly adjusted
+        subTextColorAboveWater="#60A5FA" // Tailwind blue-400
+        // mainTextColorUnderWater and subTextColorUnderWater default to white
+      />
     </AppAnimated.YStack>
   );
 }
