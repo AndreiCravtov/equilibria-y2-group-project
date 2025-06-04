@@ -8,9 +8,11 @@ import Animated, {
   useFrameCallback,
   Easing as ReanimatedEasing,
   useDerivedValue as useReanimatedDerivedValue,
+  withSpring,
 } from "react-native-reanimated";
 import AppAnimated from "@/components/app-animated";
 import { Canvas, Path, Skia } from "@shopify/react-native-skia";
+import { useEffect } from "react";
 
 const WAVE_HEIGHT = 30; // Amplitude of the wave - Made shallower
 const WAVE_SPEED = 0.01; // Speed of the wave animation - Made slower
@@ -25,6 +27,21 @@ const TestAnimated = ({ percentage, yPad }: TestAnimatedProps) => {
   const phase = useSharedValue(0);
   const layoutWidth = useSharedValue(0);
   const layoutHeight = useSharedValue(0);
+  const animatedPercentageSV = useSharedValue(percentage);
+
+  // Spring configuration - adjusted for a slower, smoother, water-like feel
+  const springConfig = {
+    mass: 4, // Increased mass for a heavier, slower feel
+    damping: 100, // Significantly increased damping to make it glide smoothly
+    stiffness: 120, // Moderate stiffness
+    overshootClamping: true, // Prevents the water level from overshooting the target
+    restDisplacementThreshold: 0.01, // How close to the target to consider it settled
+    restSpeedThreshold: 0.5, // How slow it needs to be moving to be considered settled
+  };
+
+  useEffect(() => {
+    animatedPercentageSV.value = withSpring(percentage, springConfig);
+  }, [percentage, animatedPercentageSV, springConfig]);
 
   useFrameCallback((frameInfo) => {
     "worklet";
@@ -47,7 +64,7 @@ const TestAnimated = ({ percentage, yPad }: TestAnimatedProps) => {
     const p = Skia.Path.Make();
 
     const normalizedUserPercentage =
-      Math.max(0, Math.min(100, percentage)) / 100;
+      Math.max(0, Math.min(100, animatedPercentageSV.value)) / 100;
     const normalizedYPad = Math.max(0, yPad) / 100; // yPad is a percentage e.g. 5 for 5%
 
     const pixelYPad = normalizedYPad * currentHeight;
@@ -88,7 +105,7 @@ const TestAnimated = ({ percentage, yPad }: TestAnimatedProps) => {
     p.lineTo(0, currentHeight); // Bottom-left corner of the component
     p.close(); // Close the path to fill it
     return p;
-  }, [phase, percentage, layoutWidth, layoutHeight, yPad]); // Added yPad to dependencies
+  }, [phase, animatedPercentageSV, layoutWidth, layoutHeight, yPad]); // Use animatedPercentageSV in dependencies
 
   return (
     <Canvas
@@ -106,7 +123,7 @@ const TestAnimated = ({ percentage, yPad }: TestAnimatedProps) => {
 export default function TabFourScreen() {
   return (
     <AppAnimated.YStack flex={1} bg="$background">
-      <TestAnimated yPad={1} percentage={0} />
+      <TestAnimated yPad={1} percentage={100} />
       {/* You can add other UI elements on top of TestAnimated here, using absolute positioning if needed */}
       {/* For example, the "Hello Jane" text and the "+" button from the reference */}
       {/* <YStack position="absolute" top={50} left={20} >
