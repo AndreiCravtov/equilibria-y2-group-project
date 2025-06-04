@@ -6,7 +6,6 @@ import { useState } from "react";
 export default function TabTwoScreen() {
   const userId = useQuery(api.users.getCurrentUser);
 
-  console.log(userId);
   if (!userId) {
     return (
       <View flex={1} items="center" justify="center" bg="$background">
@@ -19,9 +18,19 @@ export default function TabTwoScreen() {
 
   // Only call the query when userId is available
   const waterEntries = useQuery(api.water.getWaterByUserAndDate,
-    { uid: userId, date: date }
+    { uid: userId._id, date: date }
   );
+  if (!waterEntries) return <Text>Loading water entries...</Text>;
 
+  if (waterEntries.length === 0) {
+    return (
+      <View flex={1} justifyContent="center" alignItems="center" bg="$background">
+        <Text>No water records for this user and date in the database!</Text>
+      </View>
+    );
+  }
+
+  console.log(`waterEntries: ${waterEntries}`);
   return (
     <ScrollView contentContainerStyle={{ padding: 16 }}>
       <YStack space="$4">

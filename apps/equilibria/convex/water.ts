@@ -7,14 +7,12 @@ export const getWaterByUserAndDate = query({
     date: v.string()
   },
   handler: async (ctx, args) => {
-
     const entries = await ctx.db
       .query("water")
-      .withIndex("by_uid")
       .filter((q) =>
         q.and(
           q.eq(q.field("uid"), args.uid),
-          q.eq(q.field("date"), date)
+          q.eq(q.field("date"), args.date)
         )
       )
       .collect();
