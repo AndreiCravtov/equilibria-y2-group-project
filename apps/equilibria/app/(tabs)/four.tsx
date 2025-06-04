@@ -15,17 +15,21 @@ import { Dimensions } from "react-native";
 
 const { width, height: screenHeight } = Dimensions.get("window");
 
-const WAVE_HEIGHT = 100; // Amplitude of the wave
+const WAVE_HEIGHT = 30; // Amplitude of the wave - Made shallower
 const WAVE_LENGTH = width; // Width of a single wave cycle
-const WAVE_SPEED = 0.05; // Speed of the wave animation
+const WAVE_SPEED = 0.01; // Speed of the wave animation - Made slower
 const WATER_COLOR = "#0077FF"; // Blue color for the water
 
-const TestAnimated = () => {
+interface TestAnimatedProps {
+  percentage: number; // 0 to 100, represents how full the water level is
+}
+
+const TestAnimated = ({ percentage }: TestAnimatedProps) => {
   const phase = useSharedValue(0);
 
   useFrameCallback((frameInfo) => {
     "worklet";
-    const timeDelta = frameInfo.timeSincePreviousFrame ?? 1 / 60; // Handle null on first frame, assume 60FPS
+    const timeDelta = frameInfo.timeSincePreviousFrame ?? 1 / 60;
     const newPhase =
       (phase.value + timeDelta * WAVE_SPEED * 0.1) % (2 * Math.PI);
     phase.value = newPhase;
@@ -34,7 +38,9 @@ const TestAnimated = () => {
   const path = useReanimatedDerivedValue(() => {
     "worklet";
     const p = Skia.Path.Make();
-    const waveBaseline = screenHeight * 0.6; // 60% from the top
+    // Ensure percentage is within 0-100 range
+    const normalizedPercentage = Math.max(0, Math.min(100, percentage)) / 100;
+    const waveBaseline = (1 - normalizedPercentage) * screenHeight; // Water level based on percentage
 
     p.moveTo(0, waveBaseline);
 
@@ -50,7 +56,7 @@ const TestAnimated = () => {
     p.lineTo(0, screenHeight); // Bottom-left corner
     p.close(); // Close the path to fill it
     return p;
-  }, [phase]);
+  }, [phase, percentage]);
 
   return (
     <Canvas style={{ flex: 1, width, height: screenHeight }}>
@@ -69,7 +75,7 @@ export default function TabFourScreen() {
       // pt="$5" // Removed for full screen effect
       bg="$background"
     >
-      <TestAnimated />
+      <TestAnimated percentage={60} />
       {/* You can add other UI elements on top of TestAnimated here, using absolute positioning if needed */}
       {/* For example, the "Hello Jane" text and the "+" button from the reference */}
       {/* <YStack position="absolute" top={50} left={20} >
