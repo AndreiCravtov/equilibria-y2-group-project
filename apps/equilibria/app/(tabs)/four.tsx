@@ -1,5 +1,5 @@
 import { ExternalLink } from "@tamagui/lucide-icons";
-import { Anchor, H2, Paragraph, XStack, YStack } from "tamagui";
+import { Anchor, H2, Paragraph, XStack, YStack, useTheme } from "tamagui";
 import { ToastControl } from "@/app/CurrentToast";
 import { SignIn } from "../SignIn";
 import { Authenticated, Unauthenticated } from "convex/react";
@@ -26,7 +26,7 @@ import {
 import { useEffect, useMemo } from "react";
 
 const WAVE_HEIGHT = 30; // Amplitude of the wave - Made shallower
-const WAVE_SPEED = 0.01; // Speed of the wave animation - Made slower
+const WAVE_SPEED = 0.005; // Speed of the wave animation - Made slower
 const WATER_COLOR = "#0077FF"; // Blue color for the water
 
 interface TestAnimatedProps {
@@ -34,11 +34,11 @@ interface TestAnimatedProps {
   yPad: number; // Percentage of parent height for top/bottom padding
   mainText?: string;
   mainTextSize?: number;
-  mainTextColorAboveWater?: string;
+  themedMainTextColor?: string;
   mainTextColorUnderWater?: string;
   subText?: string;
   subTextSize?: number;
-  subTextColorAboveWater?: string;
+  themedSubTextColor?: string;
   subTextColorUnderWater?: string;
 }
 
@@ -47,11 +47,11 @@ const TestAnimated = ({
   yPad,
   mainText = "1.800ml",
   mainTextSize = 60,
-  mainTextColorAboveWater = "#1E3A8A", // Dark Blue
+  themedMainTextColor = "#000000",
   mainTextColorUnderWater = "#FFFFFF",
   subText = "Remaining 600ml",
   subTextSize = 18,
-  subTextColorAboveWater = "#60A5FA", // Lighter Blue/Grey
+  themedSubTextColor = "#333333",
   subTextColorUnderWater = "#FFFFFF",
 }: TestAnimatedProps) => {
   const phase = useSharedValue(0);
@@ -120,40 +120,50 @@ const TestAnimated = ({
 
   const { mainFont, subFont } = fonts;
 
-  // Derived values for text positioning (centered horizontally)
-  const mainTextPosition = useReanimatedDerivedValue(() => {
+  // Derived values for main text properties
+  const mainTextX = useReanimatedDerivedValue(() => {
     "worklet";
-    if (
-      !mainFont ||
-      !mainText ||
-      layoutWidth.value === 0 ||
-      layoutHeight.value === 0
-    )
-      return { x: 0, y: 0, visible: false };
-    const textWidth = mainFont.measureText(mainText).width;
-    return {
-      x: (layoutWidth.value - textWidth) / 2,
-      y: layoutHeight.value * 0.38, // Adjusted based on reference (approximate)
-      visible: true,
-    };
-  }, [mainFont, mainText, layoutWidth, layoutHeight]);
+    if (layoutWidth.value > 0 && mainFont && mainText) {
+      return (layoutWidth.value - mainFont.measureText(mainText).width) / 2;
+    }
+    return 0;
+  }, [mainFont, mainText, layoutWidth]);
 
-  const subTextPosition = useReanimatedDerivedValue(() => {
+  const mainTextY = useReanimatedDerivedValue(() => {
     "worklet";
-    if (
-      !subFont ||
-      !subText ||
-      layoutWidth.value === 0 ||
-      layoutHeight.value === 0
-    )
-      return { x: 0, y: 0, visible: false };
-    const textWidth = subFont.measureText(subText).width;
-    return {
-      x: (layoutWidth.value - textWidth) / 2,
-      y: layoutHeight.value * 0.48, // Adjusted based on reference (approximate)
-      visible: true,
-    };
-  }, [subFont, subText, layoutWidth, layoutHeight]);
+    return layoutHeight.value > 0 ? layoutHeight.value * 0.38 : 0;
+  }, [layoutHeight]);
+
+  const mainTextOpacity = useReanimatedDerivedValue(() => {
+    "worklet";
+    return layoutWidth.value > 0 &&
+      layoutHeight.value > 0 &&
+      mainFont &&
+      mainText
+      ? 1
+      : 0;
+  }, [layoutWidth, layoutHeight, mainFont, mainText]);
+
+  // Derived values for sub text properties
+  const subTextX = useReanimatedDerivedValue(() => {
+    "worklet";
+    if (layoutWidth.value > 0 && subFont && subText) {
+      return (layoutWidth.value - subFont.measureText(subText).width) / 2;
+    }
+    return 0;
+  }, [subFont, subText, layoutWidth]);
+
+  const subTextY = useReanimatedDerivedValue(() => {
+    "worklet";
+    return layoutHeight.value > 0 ? layoutHeight.value * 0.48 : 0;
+  }, [layoutHeight]);
+
+  const subTextOpacity = useReanimatedDerivedValue(() => {
+    "worklet";
+    return layoutWidth.value > 0 && layoutHeight.value > 0 && subFont && subText
+      ? 1
+      : 0;
+  }, [layoutWidth, layoutHeight, subFont, subText]);
 
   const path = useReanimatedDerivedValue(() => {
     "worklet";
@@ -222,45 +232,55 @@ const TestAnimated = ({
       {/* 1. Water Wave Background */}
       <Path path={path} color={WATER_COLOR} />
 
-      {/* 2. "Above water" text rendering */}
-      {mainFont && mainTextPosition.value.visible && (
-        <SkiaText
-          x={mainTextPosition.value.x}
-          y={mainTextPosition.value.y}
-          text={mainText}
-          font={mainFont}
-          color={mainTextColorAboveWater}
-        />
-      )}
-      {subFont && subTextPosition.value.visible && (
-        <SkiaText
-          x={subTextPosition.value.x}
-          y={subTextPosition.value.y}
-          text={subText}
-          font={subFont}
-          color={subTextColorAboveWater}
-        />
-      )}
-
-      {/* 3. "Under water" text rendering (clipped) */}
-      <Group clip={path}>
-        {mainFont && mainTextPosition.value.visible && (
+      {/* Main Text - Above Water */}
+      {mainFont && (
+        <Group opacity={mainTextOpacity}>
           <SkiaText
-            x={mainTextPosition.value.x}
-            y={mainTextPosition.value.y}
+            x={mainTextX}
+            y={mainTextY}
             text={mainText}
             font={mainFont}
-            color={mainTextColorUnderWater}
+            color={themedMainTextColor}
           />
-        )}
-        {subFont && subTextPosition.value.visible && (
+        </Group>
+      )}
+
+      {/* Sub Text - Above Water */}
+      {subFont && (
+        <Group opacity={subTextOpacity}>
           <SkiaText
-            x={subTextPosition.value.x}
-            y={subTextPosition.value.y}
+            x={subTextX}
+            y={subTextY}
             text={subText}
             font={subFont}
-            color={subTextColorUnderWater}
+            color={themedSubTextColor}
           />
+        </Group>
+      )}
+
+      {/* Clipped Group for Under Water Text */}
+      <Group clip={path}>
+        {mainFont && (
+          <Group opacity={mainTextOpacity}>
+            <SkiaText
+              x={mainTextX}
+              y={mainTextY}
+              text={mainText}
+              font={mainFont}
+              color={mainTextColorUnderWater}
+            />
+          </Group>
+        )}
+        {subFont && (
+          <Group opacity={subTextOpacity}>
+            <SkiaText
+              x={subTextX}
+              y={subTextY}
+              text={subText}
+              font={subFont}
+              color={subTextColorUnderWater}
+            />
+          </Group>
         )}
       </Group>
     </Canvas>
@@ -268,18 +288,22 @@ const TestAnimated = ({
 };
 
 export default function TabFourScreen() {
+  const theme = useTheme();
+
+  const mainTextColorFromTheme = theme.color10.get();
+  const subTextColorFromTheme = theme.color8.get();
+
   return (
     <AppAnimated.YStack flex={1} bg="$background">
       <TestAnimated
         yPad={1}
-        percentage={53} // Example: 80% full
+        percentage={54}
         mainText="1.800ml"
-        mainTextSize={56} // Slightly adjusted
-        mainTextColorAboveWater="#1E40AF" // Tailwind blue-800
+        mainTextSize={56}
+        themedMainTextColor={mainTextColorFromTheme}
         subText="Remaining 600ml"
-        subTextSize={16} // Slightly adjusted
-        subTextColorAboveWater="#60A5FA" // Tailwind blue-400
-        // mainTextColorUnderWater and subTextColorUnderWater default to white
+        subTextSize={16}
+        themedSubTextColor={subTextColorFromTheme}
       />
     </AppAnimated.YStack>
   );
