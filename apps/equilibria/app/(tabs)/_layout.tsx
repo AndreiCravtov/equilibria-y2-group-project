@@ -5,6 +5,9 @@ import {
   AudioWaveform,
   AlarmClock,
   Droplet,
+  House,
+  Settings,
+  ChartColumn,
 } from "@tamagui/lucide-icons";
 
 export default function TabLayout() {
@@ -26,10 +29,10 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="analysis"
         options={{
-          title: "Tab One",
-          tabBarIcon: ({ color }) => <Atom color={color as any} />,
+          title: "Analysis",
+          tabBarIcon: ({ color }) => <ChartColumn color={color as any} />,
           headerRight: () => (
             <Link href="/modal" asChild>
               <Button mr="$4" bg="$green8" color="$green12">
@@ -40,10 +43,18 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="two"
+        name="index"
         options={{
-          title: "Tab Two",
-          tabBarIcon: ({ color }) => <Droplet color={color as any} />,
+          title: "Home",
+          tabBarIcon: ({ color }) => <House color={color as any} />,
+        }}
+      />
+
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: "Settings",
+          tabBarIcon: ({ color }) => <Settings color={color as any} />,
         }}
       />
     </Tabs>

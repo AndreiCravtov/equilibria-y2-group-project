@@ -1,25 +1,44 @@
-import { Authenticated, Unauthenticated, useQuery, useMutation } from "convex/react";
-import { Text, View, ScrollView, YStack, XStack, Card,
-  Input, Button, Group, H3, useTheme, Separator } from "tamagui";
-import { AlarmClock, ActivitySquare, AirVent, Edit3 } from "@tamagui/lucide-icons";
+import {
+  Authenticated,
+  Unauthenticated,
+  useQuery,
+  useMutation,
+} from "convex/react";
+import {
+  Text,
+  View,
+  ScrollView,
+  YStack,
+  XStack,
+  Card,
+  Input,
+  Button,
+  Group,
+  H3,
+  useTheme,
+  Separator,
+} from "tamagui";
+import { AlarmClock, ActivitySquare, AirVent } from "@tamagui/lucide-icons";
 import { api } from "@/convex/_generated/api";
 import { useState } from "react";
+import { Result } from "@/util/result";
 
-export default function TabTwoScreen() {
+export default function AddWaterScreen() {
+  const theme = useTheme();
   const date = "2025-04-06"; // placeholder value
 
-  const waterEntries = useQuery(api.water.getWaterByDate,
-    { date: date }
-  );
+  const waterEntries = useQuery(api.water.getWaterByDate, {
+    date: date,
+  });
 
   const addWater = useMutation(api.water.addWaterEntry);
   const [newAmount, setNewAmount] = useState("");
 
   if (!waterEntries) return <Text>Loading water entries...</Text>;
 
-//   console.log(`waterEntries: ${waterEntries}`);
+  console.log(`waterEntries: ${waterEntries}`);
   const handleAddEntry = async (amount: number | bigint) => {
-    await addWater({ date, water_intake: BigInt(amount) });
+    await addWater({ date, waterIntake: BigInt(amount) });
     setNewAmount("");
   };
 
