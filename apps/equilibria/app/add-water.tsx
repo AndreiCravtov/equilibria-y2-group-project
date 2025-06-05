@@ -34,13 +34,13 @@ export default function AddWaterScreen() {
   const addWater = useMutation(api.water.addWaterEntry);
   const [newAmount, setNewAmount] = useState("");
 
-  if (!waterEntries) return <Text>Loading water entries...</Text>;
-
-  console.log(`waterEntries: ${waterEntries}`);
   const handleAddEntry = async (amount: number | bigint) => {
     await addWater({ date, waterIntake: BigInt(amount) });
     setNewAmount("");
   };
+
+  if (!waterEntries) return <Text>Loading water entries...</Text>;
+  console.log(`waterEntries: ${waterEntries}`);
 
   return (
     <ScrollView style={{ padding: 16 }} bounces={false}>
