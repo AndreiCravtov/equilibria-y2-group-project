@@ -60,13 +60,6 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <Droplet color={color as any} />,
         }}
       />
-      <Tabs.Screen
-        name="five"
-        options={{
-          title: "Tab Five",
-          tabBarIcon: ({ color }) => <Droplet color={color as any} />,
-        }}
-      />
     </Tabs>
   );
 }

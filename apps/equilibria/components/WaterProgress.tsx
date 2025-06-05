@@ -1,12 +1,14 @@
-import { Canvas, Path, Skia } from "@shopify/react-native-skia";
+import Svg, { Path as SvgPath } from "react-native-svg";
 import { useEffect } from "react";
 import Animated, {
   useFrameCallback,
   useSharedValue,
-  useDerivedValue as useReanimatedDerivedValue,
+  useAnimatedProps,
   withSpring,
+  SharedValue,
 } from "react-native-reanimated";
 import { SpringConfig } from "react-native-reanimated/lib/typescript/animation/springUtils";
+import { ColorValue } from "react-native";
 
 const WAVE_HEIGHT = 30; // Amplitude of the wave - Made shallower
 const WAVE_LENGTH = 2_000; // Speed of the wave animation - Made slower
@@ -14,16 +16,23 @@ const WATER_COLOR = "#0077FF"; // Blue color for the water
 const WIDTH_MARGIN = 0.1; // Draws wave wider than actual, to prevent weird artifacts around edges
 const WAVE_RES = 5; // Number of pixels between each wave-point
 
-interface WaterProgressProps {
+// Create an Animated component for the SvgPath
+const AnimatedSvgPath = Animated.createAnimatedComponent(SvgPath);
+
+export interface WaterProgressProps {
   /// 0% to 100%, represents how full the water level is
   percentage: number;
-  // Percentage of parent height for top/bottom padding
+  /// Percentage of parent height for top/bottom padding
   yPad?: number;
+  /// The fill of the water
+  fill?: ColorValue | SharedValue<ColorValue | undefined> | undefined;
 }
 
 export function WaterProgress(props: WaterProgressProps) {
-  const { percentage, yPad } = {
-    yPad: 1,
+  // Unpack & default props
+  const { percentage, yPad, fill } = {
+    yPad: props.yPad ?? 1,
+    fill: props.fill ?? WATER_COLOR,
     ...props,
   };
 
@@ -55,25 +64,24 @@ export function WaterProgress(props: WaterProgressProps) {
     phase.value = newPhase;
   });
 
-  const path = useReanimatedDerivedValue(() => {
+  // SVG path string generation for useAnimatedProps
+  const animatedProps = useAnimatedProps(() => {
     "worklet";
     if (layoutWidth.value === 0 || layoutHeight.value === 0) {
-      return Skia.Path.Make(); // Return an empty path if layout is not determined yet
+      return { d: "" }; // Return an empty path string for SVG
     }
 
-    const currentWidth = layoutWidth.value;
     const currentHeight = layoutHeight.value;
 
-    const currentWidthMargin = currentWidth * WIDTH_MARGIN;
+    // Compute margin, left/right-most points, and wave-length
+    const currentWidthMargin = layoutWidth.value * WIDTH_MARGIN;
     const leftMostPoint = -currentWidthMargin;
-    const rightMostPoint = currentWidth + currentWidthMargin;
-    const currentWaveLength = rightMostPoint - leftMostPoint; // Wave length is the full width of the component
-
-    const p = Skia.Path.Make();
+    const rightMostPoint = layoutWidth.value + currentWidthMargin;
+    const currentWaveLength = rightMostPoint - leftMostPoint;
 
     const normalizedUserPercentage =
       Math.max(0, Math.min(100, animatedPercentageSV.value)) / 100;
-    const normalizedYPad = Math.max(0, animatedYPadSV.value) / 100; // yPad is a percentage e.g. 5 for 5%
+    const normalizedYPad = Math.max(0, animatedYPadSV.value) / 100;
 
     const pixelYPad = normalizedYPad * currentHeight;
 
@@ -82,7 +90,6 @@ export function WaterProgress(props: WaterProgressProps) {
     // Bottom Y where wave trough should be at 0% water level
     const waveTroughAtBottomLimit = currentHeight - pixelYPad;
 
-    // Calculate baseline limits
     const highestPossibleWaveBaseline = waveCrestAtTopLimit + WAVE_HEIGHT / 2;
     const lowestPossibleWaveBaseline =
       waveTroughAtBottomLimit - WAVE_HEIGHT / 2;
@@ -99,21 +106,22 @@ export function WaterProgress(props: WaterProgressProps) {
       highestPossibleWaveBaseline +
       (1 - normalizedUserPercentage) * clampedBaselineSpan;
 
-    p.moveTo(leftMostPoint, waveBaseline);
+    let d = `M ${leftMostPoint} ${waveBaseline}`;
 
     for (let x = leftMostPoint; x < rightMostPoint; x += WAVE_RES) {
       const y =
         waveBaseline +
         (WAVE_HEIGHT / 2) *
           Math.sin((x / currentWaveLength) * 2 * Math.PI + phase.value);
-      p.lineTo(x, y);
+      d += ` L ${x} ${y}`;
     }
 
-    p.lineTo(rightMostPoint, currentHeight); // Bottom-right corner of the component
-    p.lineTo(leftMostPoint, currentHeight); // Bottom-left corner of the component
-    p.close(); // Close the path to fill it
-    return p;
-  }, [phase, animatedPercentageSV, layoutWidth, layoutHeight, yPad]); // Use animatedPercentageSV in dependencies
+    d += ` L ${rightMostPoint} ${currentHeight}`; // Bottom-right corner of the component
+    d += ` L ${leftMostPoint} ${currentHeight}`; // Bottom-left corner of the component
+    d += ` Z`; // Close the path to fill it
+
+    return { d };
+  }, [phase, animatedPercentageSV, layoutWidth, layoutHeight, animatedYPadSV]); // Ensure all dependencies are correct, including animatedYPadSV
 
   return (
     <Animated.View
@@ -123,16 +131,23 @@ export function WaterProgress(props: WaterProgressProps) {
         width: "100%",
         height: "100%",
       }}
+      onLayout={(event) => {
+        layoutWidth.value = event.nativeEvent.layout.width;
+        layoutHeight.value = event.nativeEvent.layout.height;
+      }}
     >
-      <Canvas
-        style={{ flex: 1 }} // Canvas fills its parent container
-        onLayout={(event) => {
-          layoutWidth.value = event.nativeEvent.layout.width;
-          layoutHeight.value = event.nativeEvent.layout.height;
-        }}
+      <Svg
+        width="100%"
+        height="100%"
+        viewBox={
+          layoutWidth.value > 0 && layoutHeight.value > 0
+            ? `0 0 ${layoutWidth.value} ${layoutHeight.value}`
+            : undefined
+        } // Set viewBox for proper scaling
+        style={{ width: "100%", height: "100%" }} // Ensure Svg fills the view
       >
-        <Path path={path} color={WATER_COLOR} />
-      </Canvas>
+        <AnimatedSvgPath animatedProps={animatedProps} fill={WATER_COLOR} />
+      </Svg>
     </Animated.View>
   );
 }
