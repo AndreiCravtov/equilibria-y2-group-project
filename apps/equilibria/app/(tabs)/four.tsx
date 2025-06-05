@@ -10,6 +10,7 @@ import {
   ZStack,
   H1,
   GetThemeValueForKey,
+  Button,
 } from "tamagui";
 import { ToastControl } from "@/app/CurrentToast";
 import { Authenticated, Unauthenticated } from "convex/react";
@@ -23,13 +24,22 @@ import Animated, {
 } from "react-native-reanimated";
 import AppAnimated from "@/components/app-animated";
 import { useEffect, useMemo } from "react";
-import CustomDropletIcon from "@/components/CustomDropletIcon";
-import { OpaqueColorValue, Pressable, View } from "react-native";
+import { DropletPlusFill } from "@/components/DropletPlusFill";
+import {
+  GestureResponderEvent,
+  OpaqueColorValue,
+  Pressable,
+  View,
+} from "react-native";
 import MaskedView from "@react-native-masked-view/masked-view";
 import { WaterProgress } from "@/components/WaterProgress";
 
 export default function TabFourScreen() {
   const waterPercentage = 22;
+
+  function onPressAdd(e: GestureResponderEvent) {
+    console.log("this does what I want :))");
+  }
 
   return (
     <ZStack width="100%" height="100%">
@@ -47,6 +57,19 @@ export default function TabFourScreen() {
         {/* Render content that IS under water - inverted styling */}
         <Content bg="$blue10" color="$background" />
       </MaskedView>
+
+      {/* Create hidden clickable item to act as the button */}
+      <Pressable
+        style={{
+          width: 100,
+          height: 100,
+          position: "absolute",
+          bottom: "20%", // This puts it 75% down from the top (25% from bottom)
+          left: "50%",
+          transform: [{ translateX: -50 }],
+        }}
+        onPress={onPressAdd}
+      />
     </ZStack>
   );
 }
@@ -62,15 +85,24 @@ interface ContentProps {
 
 function Content({ bg, color }: ContentProps) {
   return (
-    <YStack flex={1} items="center" gap="$8" px="$10" pt="$5" bg={bg}>
+    <YStack flex={1} items="center" bg={bg}>
       <H1 color={color}>Foobar</H1>
-      <H1 color={color}>Foobar</H1>
-      <H1 color={color}>Foobar</H1>
-      <H1 color={color}>Foobar</H1>
-      <H1 color={color}>Foobar</H1>
-      <H1 color={color}>Foobar</H1>
-      <H1 color={color}>Foobar</H1>
-      <H1 color={color}>Foobar</H1>
+
+      {/* Relative button */}
+      <View
+        style={{
+          position: "absolute",
+          bottom: "20%", // This puts it 75% down from the top (25% from bottom)
+          left: "50%",
+          transform: [{ translateX: -50 }],
+        }}
+      >
+        <DropletPlusFill
+          size={100}
+          // @ts-ignore
+          color={color}
+        />
+      </View>
     </YStack>
   );
 }
