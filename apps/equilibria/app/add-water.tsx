@@ -1,28 +1,15 @@
 import { Authenticated, Unauthenticated, useQuery, useMutation } from "convex/react";
 import { Text, View, ScrollView, YStack, XStack, Card,
-  Input, FlatList, Button, Icon, Group, H3, H6, useTheme, Separator } from "tamagui";
+  Input, Button, Group, H3, useTheme, Separator } from "tamagui";
 import { AlarmClock, ActivitySquare, AirVent, Edit3 } from "@tamagui/lucide-icons";
 import { api } from "@/convex/_generated/api";
 import { useState } from "react";
 
 export default function TabTwoScreen() {
-  const theme = useTheme();
-
-  const waterEntries = useQuery(api.water.getWaterByUserAndDate);
-  const user = useQuery(api.users.getCurrentUser);
-
-  if (!user) {
-    return (
-      <View flex={1} items="center" justify="center" bg="$background">
-        <Text>Not authenticated!</Text>
-      </View>
-    );
-  }
-
   const date = "2025-04-06"; // placeholder value
 
-  const waterEntries = useQuery(api.water.getWaterByUserAndDate,
-    { uid: user._id, date: date }
+  const waterEntries = useQuery(api.water.getWaterByDate,
+    { date: date }
   );
 
   const addWater = useMutation(api.water.addWaterEntry);
@@ -32,8 +19,7 @@ export default function TabTwoScreen() {
 
 //   console.log(`waterEntries: ${waterEntries}`);
   const handleAddEntry = async (amount: number | bigint) => {
-    if (!user) return;
-    await addWater({ uid: user._id, date, water_intake: BigInt(amount) });
+    await addWater({ date, water_intake: BigInt(amount) });
     setNewAmount("");
   };
 
@@ -47,7 +33,7 @@ export default function TabTwoScreen() {
     bgColor: string
   }) {
     return (
-      <Group.Item flex={1} key={value}>
+      <Group.Item key={value}>
         <Button
           flex={1}
           onPress={() => handleAddEntry(value)}
@@ -63,7 +49,7 @@ export default function TabTwoScreen() {
   }
 
   return (
-    <ScrollView contentContainerStyle={{ padding: 16 }} bounces={false} bg="#FFFFFF">
+    <ScrollView padding="$4" bounces={false} bg="#FFFFFF">
       <YStack space="$4">
         <H3 fontWeight="bold" textAlign="center" color="$indigo8Dark">Add records</H3>
         {/* Input to add water */}
@@ -92,7 +78,7 @@ export default function TabTwoScreen() {
           </Button>
         </YStack>
 
-        <Separator marginVertical={15} color="indigo8Dark"/>
+        <Separator my={15} bg="$indigo8Dark"/>
 
         <H3 fontWeight="bold" textAlign="center" color="$indigo8Dark">{date} entries</H3>
 

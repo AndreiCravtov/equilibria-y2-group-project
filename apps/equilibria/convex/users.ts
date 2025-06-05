@@ -5,7 +5,7 @@ export const getCurrentUser = query({
   args: {},
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
-    if (!userId) return "cant findUser";
+    // if (!userId) return "cant findUser";
 
     return await ctx.db
       .query("users")

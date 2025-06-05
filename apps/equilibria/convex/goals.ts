@@ -1,19 +1,19 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import {getAuthUserId} from "@convex-dev/auth/server";
 
 export const getUserGoal = query({
-  args: {
-    uid: v.string(),
-  },
+  args: {},
   handler: async (ctx, args) => {
+    const uid = await getAuthUserId(ctx);
     const entry = await ctx.db
       .query("goals")
-      .filter((q) => q.eq(q.field("uid"), args.uid))
+      .filter((q) => q.eq(q.field("uid"), uid))
       .collect();
 
     if (!entry) {
       // Return a default goal if none is found
-      return { uid: args.uid, water_goal: 2000 };
+      return { uid, water_goal: 2000 };
     }
     return entry;
   },
@@ -21,10 +21,11 @@ export const getUserGoal = query({
 
 export const addGoal = mutation({
   args: {
-    uid: v.string(),
     water_goal: v.int64(),
   },
   handler: async (ctx, args) => {
-    await ctx.db.insert("goals", args);
+    const uid = await getAuthUserId(ctx);
+    if (!uid) return;
+    await ctx.db.insert("goals", {uid, water_goal: args.water_goal});
   },
 });
