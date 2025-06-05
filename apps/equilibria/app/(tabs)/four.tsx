@@ -8,6 +8,7 @@ import Animated, {
   useFrameCallback,
   Easing as ReanimatedEasing,
   useDerivedValue as useReanimatedDerivedValue,
+  useAnimatedStyle,
   withSpring,
 } from "react-native-reanimated";
 import AppAnimated from "@/components/app-animated";
@@ -31,6 +32,9 @@ const WAVE_HEIGHT = 30; // Amplitude of the wave - Made shallower
 const WAVE_SPEED = 0.005; // Speed of the wave animation - Made slower
 const WATER_COLOR = "#0077FF"; // Blue color for the water
 
+const ICON_PATH_DATA =
+  "M 7,0 C 6.5,2.5 5,4.9 3,6.5 1,8.1 0,10 0,12 a 7,7 0 0 0 7,7 7,7 0 0 0 7,-7 C 14,10 13,8.1 11,6.5 9,4.9 7.5,2.5 7,0 Z m 0,8.320312 a 0.83990323,0.83990323 0 0 1 0.839844,0.839844 v 2.03711 h 2.037109 a 0.83990323,0.83990323 0 0 1 0.837891,0.83789 0.83990323,0.83990323 0 0 1 -0.837891,0.84375 H 7.839844 v 2.033203 A 0.83990323,0.83990323 0 0 1 7,15.755859 0.83990323,0.83990323 0 0 1 6.160156,14.912109 V 12.878906 H 4.1230469 a 0.83990323,0.83990323 0 0 1 -0.8398438,-0.84375 0.83990323,0.83990323 0 0 1 0.8398438,-0.83789 H 6.160156 V 9.160156 A 0.83990323,0.83990323 0 0 1 7,8.320312 Z";
+
 interface TestAnimatedProps {
   percentage: number; // 0 to 100, represents how full the water level is
   yPad: number; // Percentage of parent height for top/bottom padding
@@ -53,9 +57,6 @@ interface TestAnimatedProps {
 // Create an animated version of Pressable for Reanimated styles
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-const ICON_PATH_DATA =
-  "M 7,0 C 6.5,2.5 5,4.9 3,6.5 1,8.1 0,10 0,12 a 7,7 0 0 0 7,7 7,7 0 0 0 7,-7 C 14,10 13,8.1 11,6.5 9,4.9 7.5,2.5 7,0 Z m 0,8.320312 a 0.83990323,0.83990323 0 0 1 0.839844,0.839844 v 2.03711 h 2.037109 a 0.83990323,0.83990323 0 0 1 0.837891,0.83789 0.83990323,0.83990323 0 0 1 -0.837891,0.84375 H 7.839844 v 2.033203 A 0.83990323,0.83990323 0 0 1 7,15.755859 0.83990323,0.83990323 0 0 1 6.160156,14.912109 V 12.878906 H 4.1230469 a 0.83990323,0.83990323 0 0 1 -0.8398438,-0.84375 0.83990323,0.83990323 0 0 1 0.8398438,-0.83789 H 6.160156 V 9.160156 A 0.83990323,0.83990323 0 0 1 7,8.320312 Z";
-
 const TestAnimated = ({
   percentage,
   yPad,
@@ -73,7 +74,7 @@ const TestAnimated = ({
   iconColorUnderWater = "#FFFFFF",
   iconCenterYFactor = 0.78, // Default vertical center for the icon (78% from top)
   onIconPress = () => {
-    console.log("Icon Pressed!");
+    console.log("Default Icon Pressed!");
   },
 }: TestAnimatedProps) => {
   const phase = useSharedValue(0);
@@ -220,19 +221,21 @@ const TestAnimated = ({
   const pressableIconPositionAndSize = useReanimatedDerivedValue(() => {
     "worklet";
     if (layoutWidth.value === 0 || layoutHeight.value === 0 || !iconSkPath) {
-      return { left: -1000, top: -1000, width: 0, height: 0 };
+      return { left: -1000, top: -1000, width: 0, height: 0 }; // Off-screen and zero size initially
     }
-    const originalIconWidth = 14,
-      originalIconHeight = 19;
-    const scale = iconSize / originalIconHeight;
-    const actualWidth = originalIconWidth * scale;
-    const pressableX = (layoutWidth.value - actualWidth) / 2;
-    const pressableY = layoutHeight.value * iconCenterYFactor - iconSize / 2;
+    // For the pressable area, we want a square with side length equal to iconSize
+    const pressableWidth = iconSize;
+    const pressableHeight = iconSize;
+
+    const pressableX = (layoutWidth.value - pressableWidth) / 2; // Center the square
+    const pressableY =
+      layoutHeight.value * iconCenterYFactor - pressableHeight / 2; // Center vertically based on iconCenterYFactor and square height
+
     return {
       left: pressableX,
       top: pressableY,
-      width: actualWidth,
-      height: iconSize,
+      width: pressableWidth,
+      height: pressableHeight,
     };
   }, [layoutWidth, layoutHeight, iconSize, iconSkPath, iconCenterYFactor]);
 
@@ -242,6 +245,23 @@ const TestAnimated = ({
       layoutWidth.value > 0 && layoutHeight.value > 0 && showIcon && iconSkPath
     );
   }, [layoutWidth, layoutHeight, showIcon, iconSkPath]);
+
+  const animatedPressableStyle = useAnimatedStyle(() => {
+    "worklet";
+    const { left, top, width, height } = pressableIconPositionAndSize.value;
+    const interactive = isIconActuallyInteractive.value;
+    return {
+      position: "absolute",
+      left,
+      top,
+      width,
+      height,
+      backgroundColor: "transparent", // No more debug background
+      zIndex: 1000,
+      opacity: interactive ? 1 : 0, // Control opacity based on interactivity
+      pointerEvents: interactive ? "auto" : "none", // Control touchability
+    };
+  }, [pressableIconPositionAndSize, isIconActuallyInteractive]); // Added isIconActuallyInteractive to dependencies
 
   const path = useReanimatedDerivedValue(() => {
     "worklet";
@@ -380,16 +400,10 @@ const TestAnimated = ({
       {/* Clickable overlay for the icon */}
       {onIconPress && (
         <AnimatedPressable
-          style={[
-            {
-              position: "absolute",
-              backgroundColor: "rgba(255, 0, 0, 0.5)",
-              opacity: 1,
-            },
-            pressableIconPositionAndSize,
-          ]}
+          style={animatedPressableStyle}
           onPress={() => {
-            if (isIconActuallyInteractive.value) {
+            // No need to log here anymore, the actual onIconPress will be called
+            if (isIconActuallyInteractive.value && onIconPress) {
               onIconPress();
             }
           }}
@@ -423,7 +437,7 @@ export default function TabFourScreen() {
         subTextSize={16}
         themedSubTextColor={subTextColorFromTheme}
         showIcon={true}
-        iconSize={50}
+        iconSize={75}
         iconColorAboveWater={iconColorFromTheme}
         iconCenterYFactor={0.78}
         onIconPress={handleIconPress}
