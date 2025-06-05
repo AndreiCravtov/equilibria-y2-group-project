@@ -25,7 +25,7 @@ export const addWaterEntry = mutation({
   args: {
     uid: v.string(),
     date: v.string(),
-    water_intake: v.number(),
+    water_intake: v.int64(),
   },
   handler: async (ctx, args) => {
     await ctx.db.insert("water", args);

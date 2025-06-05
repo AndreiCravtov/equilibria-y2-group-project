@@ -20,6 +20,6 @@ export default defineSchema({
   water: defineTable({
       uid: v.string(),
       date: v.string(), // or use "number" if you store timestamps
-      water_intake: v.number(),
+      water_intake: v.int64(),
   }),
 });
