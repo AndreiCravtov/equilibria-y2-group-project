@@ -17,4 +17,9 @@ export default defineSchema({
       name: v.string(),
       calories: v.int64(),
   }),
+  water: defineTable({
+      uid: v.string(),
+      date: v.string(), // or use "number" if you store timestamps
+      water_intake: v.int64(),
+  }),
 });

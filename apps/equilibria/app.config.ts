@@ -14,7 +14,7 @@ module.exports = ({ config }: ConfigContext): ExpoConfig => {
     orientation: "portrait",
     icon: "./assets/images/icon.png",
     scheme: "equilibria",
-    userInterfaceStyle: "automatic",
+    userInterfaceStyle: "light", // Force light mode - for visual consistency
     newArchEnabled: true,
     ios: {
       supportsTablet: true,
