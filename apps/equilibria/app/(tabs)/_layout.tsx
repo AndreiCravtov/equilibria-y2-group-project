@@ -43,13 +43,6 @@ export default function TabLayout() {
         name="two"
         options={{
           title: "Tab Two",
-          tabBarIcon: ({ color }) => <AudioWaveform color={color as any} />,
-        }}
-      />
-      <Tabs.Screen
-        name="three"
-        options={{
-          title: "Tab Three",
           tabBarIcon: ({ color }) => <Droplet color={color as any} />,
         }}
       />
