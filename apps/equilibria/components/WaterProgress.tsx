@@ -14,7 +14,7 @@ const WAVE_HEIGHT = 30; // Amplitude of the wave - Made shallower
 const WAVE_LENGTH = 2_000; // Speed of the wave animation - Made slower
 const WATER_COLOR = "#0077FF"; // Blue color for the water
 const WIDTH_MARGIN = 0.1; // Draws wave wider than actual, to prevent weird artifacts around edges
-const WAVE_RES = 5; // Number of pixels between each wave-point
+const WAVE_RES = 10; // Number of pixels between each wave-point
 
 // Create an Animated component for the SvgPath
 const AnimatedSvgPath = Animated.createAnimatedComponent(SvgPath);
@@ -106,14 +106,42 @@ export function WaterProgress(props: WaterProgressProps) {
       highestPossibleWaveBaseline +
       (1 - normalizedUserPercentage) * clampedBaselineSpan;
 
-    let d = `M ${leftMostPoint} ${waveBaseline}`;
+    // New path generation using Quadratic Bézier curves:
+    const p = phase.value;
+    const wH = WAVE_HEIGHT;
+    const cwl = currentWaveLength;
 
-    for (let x = leftMostPoint; x < rightMostPoint; x += WAVE_RES) {
-      const y =
-        waveBaseline +
-        (WAVE_HEIGHT / 2) *
-          Math.sin((x / currentWaveLength) * 2 * Math.PI + phase.value);
-      d += ` L ${x} ${y}`;
+    const yAtX = (xPos: number) => {
+      "worklet";
+      if (cwl === 0) return waveBaseline; // Avoid division by zero if width is 0
+      return waveBaseline + (wH / 2) * Math.sin((xPos / cwl) * 2 * Math.PI + p);
+    };
+
+    let d = `M ${leftMostPoint} ${yAtX(leftMostPoint)}`;
+    let currentX = leftMostPoint;
+
+    const step = WAVE_RES > 0 ? WAVE_RES : 1; // Use a safe step value
+    while (currentX < rightMostPoint) {
+      const controlPointXCandidate = currentX + step;
+      const endPointXCandidate = currentX + 2 * step;
+
+      if (endPointXCandidate <= rightMostPoint) {
+        // Full quadratic segment
+        const controlY = yAtX(controlPointXCandidate);
+        const endY = yAtX(endPointXCandidate);
+        d += ` Q ${controlPointXCandidate} ${controlY}, ${endPointXCandidate} ${endY}`;
+        currentX = endPointXCandidate;
+      } else {
+        // Last segment: from currentX to rightMostPoint
+        if (rightMostPoint > currentX) {
+          // If there's any remaining length
+          const lastMidX = (currentX + rightMostPoint) / 2;
+          const lastMidY = yAtX(lastMidX);
+          const lastEndY = yAtX(rightMostPoint);
+          d += ` Q ${lastMidX} ${lastMidY}, ${rightMostPoint} ${lastEndY}`;
+        }
+        currentX = rightMostPoint; // Terminate loop
+      }
     }
 
     d += ` L ${rightMostPoint} ${currentHeight}`; // Bottom-right corner of the component
@@ -146,7 +174,7 @@ export function WaterProgress(props: WaterProgressProps) {
         } // Set viewBox for proper scaling
         style={{ width: "100%", height: "100%" }} // Ensure Svg fills the view
       >
-        <AnimatedSvgPath animatedProps={animatedProps} fill={WATER_COLOR} />
+        <AnimatedSvgPath animatedProps={animatedProps} fill={fill} />
       </Svg>
     </Animated.View>
   );
