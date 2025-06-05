@@ -12,9 +12,7 @@ import {
   XStack,
   Card,
   Input,
-  FlatList,
   Button,
-  Icon,
   Group,
   H3,
   useTheme,
@@ -23,24 +21,13 @@ import {
 import { AlarmClock, ActivitySquare, AirVent } from "@tamagui/lucide-icons";
 import { api } from "@/convex/_generated/api";
 import { useState } from "react";
+import { Result } from "@/util/result";
 
 export default function AddWaterScreen() {
   const theme = useTheme();
-  //   console.log(theme);
-  const user = useQuery(api.users.getCurrentUser);
-
-  if (!user) {
-    return (
-      <View flex={1} items="center" justify="center" bg="$background">
-        <Text>Not authenticated!</Text>
-      </View>
-    );
-  }
-
   const date = "2025-04-06"; // placeholder value
 
-  const waterEntries = useQuery(api.water.getWaterByUserAndDate, {
-    uid: user._id,
+  const waterEntries = useQuery(api.water.getWaterByDate, {
     date: date,
   });
 
@@ -49,25 +36,16 @@ export default function AddWaterScreen() {
 
   if (!waterEntries) return <Text>Loading water entries...</Text>;
 
-  //   if (waterEntries.length === 0) {
-  //     return (
-  //       <View flex={1} justifyContent="center" alignItems="center" bg="$background">
-  //         <Text>No water records for this user and date in the database!</Text>
-  //       </View>
-  //     );
-  //   }
-
   console.log(`waterEntries: ${waterEntries}`);
   const handleAddEntry = async (amount: number | bigint) => {
-    if (!user) return;
-    await addWater({ uid: user._id, date, water_intake: BigInt(amount) });
+    await addWater({ date, waterIntake: BigInt(amount) });
     setNewAmount("");
   };
 
   return (
-    <ScrollView contentContainerStyle={{ padding: 16 }} bounces={false}>
+    <ScrollView style={{ padding: 16 }} bounces={false}>
       <YStack space="$4">
-        <H3 fontWeight="bold" textAlign="center" color={theme.color.indigo10}>
+        <H3 fontWeight="bold" textAlign="center" color="$color.indigo10">
           Add records
         </H3>
         {/* Input to add water */}

@@ -1,5 +1,23 @@
+import { Auth } from "convex/server";
 import { query } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { Result, ResultAsync } from "@/util/result";
+import { USER_NOT_AUTHENTICATED, UserNotAuthenticated } from "./errors";
+import { Id } from "./_generated/dataModel";
+
+export const tryGetUserId = async (ctx: {
+  auth: Auth;
+}): ResultAsync<Id<"users">, UserNotAuthenticated> => {
+  const userId = await getAuthUserId(ctx);
+  if (!userId) return Result.Error(USER_NOT_AUTHENTICATED);
+  return Result.Data(userId);
+};
+
+export const getUserId = async (ctx: { auth: Auth }): Promise<Id<"users">> => {
+  const userId = await getAuthUserId(ctx);
+  if (!userId) throw Error(USER_NOT_AUTHENTICATED);
+  return userId;
+};
 
 export const getCurrentUser = query({
   args: {},
