@@ -1,16 +1,14 @@
-import { createTamagui } from "tamagui";
 import { defaultConfig } from "@tamagui/config/v4";
-import { themes } from "@tamagui/themes";
+import { defaultThemes } from "@tamagui/themes/v4";
+import { createTamagui } from "tamagui";
+import { tokens } from "@/constants/tokens";
+import { themes } from "@/constants/themes";
 
 export const tamaguiConfig = createTamagui({
   ...defaultConfig,
-  theme: {
-    ...defaultConfig.theme,
-    color: {
-      ...defaultConfig.theme.color,
-      ...indigoColors, // merge indigo colors here
-    },
-  },
+  defaultTheme: "light",
+  tokens,
+  themes,
 });
 
 export default tamaguiConfig;
