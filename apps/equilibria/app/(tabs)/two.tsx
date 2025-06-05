@@ -1,124 +1,102 @@
-import { Authenticated, Unauthenticated, useQuery, useMutation } from "convex/react";
-import { Text, View, ScrollView, YStack, XStack, Card,
-  Input, FlatList, Button, Icon, Group, H3, H6, useTheme, Separator } from "tamagui";
-import { AlarmClock, ActivitySquare, AirVent, Edit3 } from "@tamagui/lucide-icons";
-import { api } from "@/convex/_generated/api";
-import { useState } from "react";
+import { ExternalLink } from "@tamagui/lucide-icons";
+import {
+  Anchor,
+  H2,
+  Paragraph,
+  XStack,
+  YStack,
+  useTheme,
+  Text,
+  ZStack,
+  H1,
+  GetThemeValueForKey,
+  Button,
+  View,
+} from "tamagui";
+import { ToastControl } from "@/app/CurrentToast";
+import { Authenticated, Unauthenticated } from "convex/react";
+import Animated, {
+  useSharedValue,
+  useFrameCallback,
+  Easing as ReanimatedEasing,
+  useDerivedValue as useReanimatedDerivedValue,
+  useAnimatedStyle,
+  withSpring,
+} from "react-native-reanimated";
+import AppAnimated from "@/components/app-animated";
+import { useEffect, useMemo } from "react";
+import { DropletPlusFill } from "@/components/DropletPlusFill";
+import { OpaqueColorValue, Pressable } from "react-native";
+import MaskedView from "@react-native-masked-view/masked-view";
+import { WaterProgress } from "@/components/WaterProgress";
+import { Link } from "expo-router";
 
 export default function TabTwoScreen() {
-  const theme = useTheme();
-//   console.log(theme);
-  const user = useQuery(api.users.getCurrentUser);
-
-  if (!user) {
-    return (
-      <View flex={1} items="center" justify="center" bg="$background">
-        <Text>Not authenticated!</Text>
-      </View>
-    );
-  }
-
-  const date = "2025-04-06"; // placeholder value
-
-  const waterEntries = useQuery(api.water.getWaterByUserAndDate,
-    { uid: user._id, date: date }
-  );
-
-  const addWater = useMutation(api.water.addWaterEntry);
-  const [newAmount, setNewAmount] = useState("");
-
-
-  if (!waterEntries) return <Text>Loading water entries...</Text>;
-
-//   console.log(`waterEntries: ${waterEntries}`);
-  const handleAddEntry = async (amount: number | bigint) => {
-    if (!user) return;
-    await addWater({ uid: user._id, date, water_intake: BigInt(amount) });
-    setNewAmount("");
-  };
-
-  function createGroupButton({
-    icon,
-    value,
-    bgColor,
-  }: {
-    icon: any
-    value: number
-    bgColor: string
-  }) {
-    console.log(value);
-    return (
-      <Group.Item flex={1}>
-        <Button
-          flex={1}
-          onPress={() => handleAddEntry(value)}
-          icon={icon}
-          color="$blue8Dark"
-          fontWeight="bold"
-          bg={bgColor}
-        >
-          <Text color="$blue8Dark" fontWeight="bold" fontSize="$5">{value}ml</Text>
-        </Button>
-      </Group.Item>
-    )
-  }
+  const waterPercentage = 22;
 
   return (
-    <ScrollView contentContainerStyle={{ padding: 16 }} bounces={false} bg="#FFFFFF">
-      <YStack space="$4">
-        <H3 fontWeight="bold" textAlign="center" color="$indigo8Dark">Add records</H3>
-        {/* Input to add water */}
-        <Group orientation="horizontal" width="100%">
-          {[
-            { value: 200, bgColor: '$blue12Dark' },
-            { value: 250, bgColor: '$indigo2' },
-            { value: 500, bgColor: '$blue12Dark' },
-          ].map(({ value, bgColor }) =>
-            createGroupButton({ icon: AlarmClock, value, bgColor })
-          )}
-        </Group>
-        <YStack space="$2">
-          <Input
-            placeholder="Enter water in mL"
-            keyboardType="numeric"
-            value={newAmount}
-            onChangeText={setNewAmount}
-            placeholderTextColor="$indigo8Dark"
-            color="$indigo8Dark"
-            bg="$indigo2"
-          />
-          <Button onPress={() => handleAddEntry(Number(newAmount))}
-          color="$blue8Dark" bg="$indigo2">
-            Add Entry
-          </Button>
-        </YStack>
+    <ZStack width="100%" height="100%">
+      {/* Render content that's NOT under water - normal styling */}
+      <Content bg="$background" color="$blue10" />
 
-        <Separator marginVertical={15} color="indigo8Dark"/>
+      {/* Create masked view based on water progress */}
+      <MaskedView
+        style={{
+          height: "100%",
+          width: "100%",
+        }}
+        maskElement={<WaterProgress percentage={waterPercentage} />}
+      >
+        {/* Render content that IS under water - inverted styling */}
+        <Content bg="$blue10" color="$background" />
+      </MaskedView>
 
-        <H3 fontWeight="bold" textAlign="center" color="$indigo8Dark">{date} entries</H3>
+      {/* Create hidden clickable item to act as the button */}
+      <Link href="/add-water" asChild>
+        <Pressable
+          style={{
+            width: 100,
+            height: 100,
+            position: "absolute",
+            bottom: "20%", // This puts it 75% down from the top (25% from bottom)
+            left: "50%",
+            transform: [{ translateX: -50 }],
+          }}
+        />
+      </Link>
+    </ZStack>
+  );
+}
 
-        {/* Show entries */}
-        {waterEntries.length === 0 ? (
-          <Text>No water entries yet.</Text>
-        ) : (
-          waterEntries.map((item) => (
-            <Card key={item._id} padded bordered elevate>
-              <XStack justifyContent="space-between" alignItems="center">
-                <Text fontWeight="bold" fontSize="$6" color="$indigo8Dark">
-                  {item.water_intake} mL
-                </Text>
-                <Button
-                  size="$3"
-                  chromeless
-                  onPress={() => handleEdit(item)}
-                >
-                <Edit3 size={24} color="$indigo8Dark" />
-                </Button>
-              </XStack>
-            </Card>
-          ))
-        )}
-      </YStack>
-    </ScrollView>
+interface ContentProps {
+  bg?:
+    | OpaqueColorValue
+    | GetThemeValueForKey<"backgroundColor">
+    | null
+    | undefined;
+  color?: OpaqueColorValue | GetThemeValueForKey<"color"> | undefined;
+}
+
+function Content({ bg, color }: ContentProps) {
+  return (
+    <YStack flex={1} items="center" bg={bg}>
+      <H1 color={color}>Foobar</H1>
+
+      {/* Relative button */}
+      <View
+        style={{
+          position: "absolute",
+          bottom: "20%", // This puts it 75% down from the top (25% from bottom)
+          left: "50%",
+          transform: [{ translateX: -50 }],
+        }}
+      >
+        <DropletPlusFill
+          size={100}
+          // @ts-ignore
+          color={color}
+        />
+      </View>
+    </YStack>
   );
 }

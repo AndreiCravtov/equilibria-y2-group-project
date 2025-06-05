@@ -66,7 +66,7 @@ export function WaterProgress(props: WaterProgressProps) {
 
   // SVG path string generation for useAnimatedProps
   const animatedProps = useAnimatedProps(() => {
-    "worklet";
+    ("worklet");
     if (layoutWidth.value === 0 || layoutHeight.value === 0) {
       return { d: "" }; // Return an empty path string for SVG
     }
@@ -117,7 +117,7 @@ export function WaterProgress(props: WaterProgressProps) {
       return waveBaseline + (wH / 2) * Math.sin((xPos / cwl) * 2 * Math.PI + p);
     };
 
-    let d = `M ${leftMostPoint} ${yAtX(leftMostPoint)}`;
+    let d = [`M ${leftMostPoint} ${yAtX(leftMostPoint)}`];
     let currentX = leftMostPoint;
 
     const step = WAVE_RES > 0 ? WAVE_RES : 1; // Use a safe step value
@@ -129,7 +129,9 @@ export function WaterProgress(props: WaterProgressProps) {
         // Full quadratic segment
         const controlY = yAtX(controlPointXCandidate);
         const endY = yAtX(endPointXCandidate);
-        d += ` Q ${controlPointXCandidate} ${controlY}, ${endPointXCandidate} ${endY}`;
+        d.push(
+          `Q ${controlPointXCandidate} ${controlY}, ${endPointXCandidate} ${endY}`
+        );
         currentX = endPointXCandidate;
       } else {
         // Last segment: from currentX to rightMostPoint
@@ -138,17 +140,17 @@ export function WaterProgress(props: WaterProgressProps) {
           const lastMidX = (currentX + rightMostPoint) / 2;
           const lastMidY = yAtX(lastMidX);
           const lastEndY = yAtX(rightMostPoint);
-          d += ` Q ${lastMidX} ${lastMidY}, ${rightMostPoint} ${lastEndY}`;
+          d.push(`Q ${lastMidX} ${lastMidY}, ${rightMostPoint} ${lastEndY}`);
         }
         currentX = rightMostPoint; // Terminate loop
       }
     }
 
-    d += ` L ${rightMostPoint} ${currentHeight}`; // Bottom-right corner of the component
-    d += ` L ${leftMostPoint} ${currentHeight}`; // Bottom-left corner of the component
-    d += ` Z`; // Close the path to fill it
+    d.push(`L ${rightMostPoint} ${currentHeight}`); // Bottom-right corner of the component
+    d.push(`L ${leftMostPoint} ${currentHeight}`); // Bottom-left corner of the component
+    d.push(`Z`); // Close the path to fill it
 
-    return { d };
+    return { d: d.join(" ") };
   }, [phase, animatedPercentageSV, layoutWidth, layoutHeight, animatedYPadSV]); // Ensure all dependencies are correct, including animatedYPadSV
 
   return (
