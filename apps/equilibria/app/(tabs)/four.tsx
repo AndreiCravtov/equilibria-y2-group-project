@@ -25,21 +25,13 @@ import Animated, {
 import AppAnimated from "@/components/app-animated";
 import { useEffect, useMemo } from "react";
 import { DropletPlusFill } from "@/components/DropletPlusFill";
-import {
-  GestureResponderEvent,
-  OpaqueColorValue,
-  Pressable,
-  View,
-} from "react-native";
+import { OpaqueColorValue, Pressable, View } from "react-native";
 import MaskedView from "@react-native-masked-view/masked-view";
 import { WaterProgress } from "@/components/WaterProgress";
+import { Link } from "expo-router";
 
 export default function TabFourScreen() {
   const waterPercentage = 22;
-
-  function onPressAdd(e: GestureResponderEvent) {
-    console.log("this does what I want :))");
-  }
 
   return (
     <ZStack width="100%" height="100%">
@@ -59,17 +51,18 @@ export default function TabFourScreen() {
       </MaskedView>
 
       {/* Create hidden clickable item to act as the button */}
-      <Pressable
-        style={{
-          width: 100,
-          height: 100,
-          position: "absolute",
-          bottom: "20%", // This puts it 75% down from the top (25% from bottom)
-          left: "50%",
-          transform: [{ translateX: -50 }],
-        }}
-        onPress={onPressAdd}
-      />
+      <Link href="/modal" asChild>
+        <Pressable
+          style={{
+            width: 100,
+            height: 100,
+            position: "absolute",
+            bottom: "20%", // This puts it 75% down from the top (25% from bottom)
+            left: "50%",
+            transform: [{ translateX: -50 }],
+          }}
+        />
+      </Link>
     </ZStack>
   );
 }
