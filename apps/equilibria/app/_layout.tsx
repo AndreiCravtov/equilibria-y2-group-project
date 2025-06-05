@@ -76,6 +76,20 @@ function RootLayoutNav() {
         />
 
         <Stack.Screen
+          name="add-water"
+          options={{
+            title: "Add Water",
+            presentation: "modal",
+            animation: "slide_from_right",
+            gestureEnabled: true,
+            gestureDirection: "horizontal",
+            contentStyle: {
+              backgroundColor: theme.background.val,
+            },
+          }}
+        />
+
+        <Stack.Screen
           name="modal"
           options={{
             title: "Tamagui + Expo",

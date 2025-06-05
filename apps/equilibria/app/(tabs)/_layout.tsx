@@ -50,13 +50,6 @@ export default function TabLayout() {
         name="three"
         options={{
           title: "Tab Three",
-          tabBarIcon: ({ color }) => <AlarmClock color={color as any} />,
-        }}
-      />
-      <Tabs.Screen
-        name="four"
-        options={{
-          title: "Tab Four",
           tabBarIcon: ({ color }) => <Droplet color={color as any} />,
         }}
       />

@@ -1,61 +1,102 @@
-import { useState } from "react";
-import { useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import { Button, Input, Text, View, YStack } from "tamagui";
+import { ExternalLink } from "@tamagui/lucide-icons";
+import {
+  Anchor,
+  H2,
+  Paragraph,
+  XStack,
+  YStack,
+  useTheme,
+  Text,
+  ZStack,
+  H1,
+  GetThemeValueForKey,
+  Button,
+  View,
+} from "tamagui";
+import { ToastControl } from "@/app/CurrentToast";
+import { Authenticated, Unauthenticated } from "convex/react";
+import Animated, {
+  useSharedValue,
+  useFrameCallback,
+  Easing as ReanimatedEasing,
+  useDerivedValue as useReanimatedDerivedValue,
+  useAnimatedStyle,
+  withSpring,
+} from "react-native-reanimated";
+import AppAnimated from "@/components/app-animated";
+import { useEffect, useMemo } from "react";
+import { DropletPlusFill } from "@/components/DropletPlusFill";
+import { OpaqueColorValue, Pressable } from "react-native";
+import MaskedView from "@react-native-masked-view/masked-view";
+import { WaterProgress } from "@/components/WaterProgress";
+import { Link } from "expo-router";
 
-export default function AddProductScreen() {
-  const addProduct = useMutation(api.products.add);
-
-  const [name, setName] = useState("");
-  const [calories, setCalories] = useState("");
-  const [status, setStatus] = useState<null | string>(null);
-
-  const handleAdd = async () => {
-
-    if (!name || !calories) {
-      setStatus("Please fill out all fields.");
-      return;
-    }
-
-    const parsedCalories = BigInt(calories);
-
-    try {
-      await addProduct({
-        name,
-        calories: parsedCalories,
-      });
-      setName("");
-      setCalories("");
-      setStatus("Product added successfully!");
-    } catch (err) {
-      console.error(err);
-      setStatus("Error adding product.");
-    }
-  };
+export default function TabThreeScreen() {
+  const waterPercentage = 22;
 
   return (
-    <View flex={1} justifyContent="center" alignItems="center" padding="$4">
-      <YStack space="$3" width="100%" maxWidth={400}>
-        <Text fontSize="$6" fontWeight="bold">
-          Add New Product
-        </Text>
+    <ZStack width="100%" height="100%">
+      {/* Render content that's NOT under water - normal styling */}
+      <Content bg="$background" color="$blue10" />
 
-        <Input
-          placeholder="Product Name"
-          value={name}
-          onChangeText={setName}
+      {/* Create masked view based on water progress */}
+      <MaskedView
+        style={{
+          height: "100%",
+          width: "100%",
+        }}
+        maskElement={<WaterProgress percentage={waterPercentage} />}
+      >
+        {/* Render content that IS under water - inverted styling */}
+        <Content bg="$blue10" color="$background" />
+      </MaskedView>
+
+      {/* Create hidden clickable item to act as the button */}
+      <Link href="/add-water" asChild>
+        <Pressable
+          style={{
+            width: 100,
+            height: 100,
+            position: "absolute",
+            bottom: "20%", // This puts it 75% down from the top (25% from bottom)
+            left: "50%",
+            transform: [{ translateX: -50 }],
+          }}
         />
-        <Input
-          placeholder="Calories"
-          value={calories}
-          onChangeText={setCalories}
-          keyboardType="numeric"
+      </Link>
+    </ZStack>
+  );
+}
+
+interface ContentProps {
+  bg?:
+    | OpaqueColorValue
+    | GetThemeValueForKey<"backgroundColor">
+    | null
+    | undefined;
+  color?: OpaqueColorValue | GetThemeValueForKey<"color"> | undefined;
+}
+
+function Content({ bg, color }: ContentProps) {
+  return (
+    <YStack flex={1} items="center" bg={bg}>
+      <H1 color={color}>Foobar</H1>
+
+      {/* Relative button */}
+      <View
+        style={{
+          position: "absolute",
+          bottom: "20%", // This puts it 75% down from the top (25% from bottom)
+          left: "50%",
+          transform: [{ translateX: -50 }],
+        }}
+      >
+        <DropletPlusFill
+          size={100}
+          // @ts-ignore
+          color={color}
         />
-
-        <Button onPress={handleAdd}>Add Product</Button>
-
-        {status && <Text>{status}</Text>}
-      </YStack>
-    </View>
+      </View>
+    </YStack>
   );
 }
