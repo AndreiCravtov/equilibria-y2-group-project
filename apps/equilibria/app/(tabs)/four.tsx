@@ -24,6 +24,8 @@ import {
   FontSlant,
 } from "@shopify/react-native-skia";
 import { useEffect, useMemo } from "react";
+import CustomDropletIcon from "@/components/CustomDropletIcon";
+import { Pressable, View } from "react-native";
 
 const WAVE_HEIGHT = 30; // Amplitude of the wave - Made shallower
 const WAVE_SPEED = 0.005; // Speed of the wave animation - Made slower
@@ -40,7 +42,19 @@ interface TestAnimatedProps {
   subTextSize?: number;
   themedSubTextColor?: string;
   subTextColorUnderWater?: string;
+  showIcon?: boolean;
+  iconSize?: number;
+  iconColorAboveWater?: string;
+  iconColorUnderWater?: string;
+  iconCenterYFactor?: number;
+  onIconPress?: () => void;
 }
+
+// Create an animated version of Pressable for Reanimated styles
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+const ICON_PATH_DATA =
+  "M 7,0 C 6.5,2.5 5,4.9 3,6.5 1,8.1 0,10 0,12 a 7,7 0 0 0 7,7 7,7 0 0 0 7,-7 C 14,10 13,8.1 11,6.5 9,4.9 7.5,2.5 7,0 Z m 0,8.320312 a 0.83990323,0.83990323 0 0 1 0.839844,0.839844 v 2.03711 h 2.037109 a 0.83990323,0.83990323 0 0 1 0.837891,0.83789 0.83990323,0.83990323 0 0 1 -0.837891,0.84375 H 7.839844 v 2.033203 A 0.83990323,0.83990323 0 0 1 7,15.755859 0.83990323,0.83990323 0 0 1 6.160156,14.912109 V 12.878906 H 4.1230469 a 0.83990323,0.83990323 0 0 1 -0.8398438,-0.84375 0.83990323,0.83990323 0 0 1 0.8398438,-0.83789 H 6.160156 V 9.160156 A 0.83990323,0.83990323 0 0 1 7,8.320312 Z";
 
 const TestAnimated = ({
   percentage,
@@ -53,6 +67,14 @@ const TestAnimated = ({
   subTextSize = 18,
   themedSubTextColor = "#333333",
   subTextColorUnderWater = "#FFFFFF",
+  showIcon = true,
+  iconSize = 50, // Adjusted default icon size
+  iconColorAboveWater = "#1E3A8A",
+  iconColorUnderWater = "#FFFFFF",
+  iconCenterYFactor = 0.78, // Default vertical center for the icon (78% from top)
+  onIconPress = () => {
+    console.log("Icon Pressed!");
+  },
 }: TestAnimatedProps) => {
   const phase = useSharedValue(0);
   const layoutWidth = useSharedValue(0);
@@ -165,6 +187,62 @@ const TestAnimated = ({
       : 0;
   }, [layoutWidth, layoutHeight, subFont, subText]);
 
+  const iconSkPath = useMemo(
+    () => Skia.Path.MakeFromSVGString(ICON_PATH_DATA),
+    []
+  );
+
+  // Text and Icon opacity (visibility)
+  const iconOpacity = useReanimatedDerivedValue(() => {
+    "worklet";
+    return showIcon &&
+      layoutWidth.value > 0 &&
+      layoutHeight.value > 0 &&
+      iconSkPath
+      ? 1
+      : 0;
+  }, [showIcon, layoutWidth, layoutHeight, iconSkPath]);
+
+  // Text and Icon positions/transforms
+  const iconTransform = useReanimatedDerivedValue(() => {
+    "worklet";
+    if (!iconSkPath || layoutWidth.value === 0 || layoutHeight.value === 0)
+      return [];
+    const originalIconWidth = 14,
+      originalIconHeight = 19;
+    const scale = iconSize / originalIconHeight;
+    const scaledWidth = originalIconWidth * scale;
+    const x = (layoutWidth.value - scaledWidth) / 2;
+    const y = layoutHeight.value * iconCenterYFactor - iconSize / 2;
+    return [{ translateX: x }, { translateY: y }, { scale }];
+  }, [layoutWidth, layoutHeight, iconSize, iconSkPath, iconCenterYFactor]);
+
+  const pressableIconPositionAndSize = useReanimatedDerivedValue(() => {
+    "worklet";
+    if (layoutWidth.value === 0 || layoutHeight.value === 0 || !iconSkPath) {
+      return { left: -1000, top: -1000, width: 0, height: 0 };
+    }
+    const originalIconWidth = 14,
+      originalIconHeight = 19;
+    const scale = iconSize / originalIconHeight;
+    const actualWidth = originalIconWidth * scale;
+    const pressableX = (layoutWidth.value - actualWidth) / 2;
+    const pressableY = layoutHeight.value * iconCenterYFactor - iconSize / 2;
+    return {
+      left: pressableX,
+      top: pressableY,
+      width: actualWidth,
+      height: iconSize,
+    };
+  }, [layoutWidth, layoutHeight, iconSize, iconSkPath, iconCenterYFactor]);
+
+  const isIconActuallyInteractive = useReanimatedDerivedValue(() => {
+    "worklet";
+    return (
+      layoutWidth.value > 0 && layoutHeight.value > 0 && showIcon && iconSkPath
+    );
+  }, [layoutWidth, layoutHeight, showIcon, iconSkPath]);
+
   const path = useReanimatedDerivedValue(() => {
     "worklet";
     if (layoutWidth.value === 0 || layoutHeight.value === 0) {
@@ -222,44 +300,18 @@ const TestAnimated = ({
   }, [phase, animatedPercentageSV, layoutWidth, layoutHeight, yPad]); // Use animatedPercentageSV in dependencies
 
   return (
-    <Canvas
-      style={{ flex: 1 }} // Canvas fills its parent container
-      onLayout={(event) => {
-        layoutWidth.value = event.nativeEvent.layout.width;
-        layoutHeight.value = event.nativeEvent.layout.height;
-      }}
-    >
-      {/* 1. Water Wave Background */}
-      <Path path={path} color={WATER_COLOR} />
+    <View style={{ flex: 1 }}>
+      <Canvas
+        style={{ flex: 1 }} // Canvas fills its parent container
+        onLayout={(event) => {
+          layoutWidth.value = event.nativeEvent.layout.width;
+          layoutHeight.value = event.nativeEvent.layout.height;
+        }}
+      >
+        {/* 1. Water Wave Background */}
+        <Path path={path} color={WATER_COLOR} />
 
-      {/* Main Text - Above Water */}
-      {mainFont && (
-        <Group opacity={mainTextOpacity}>
-          <SkiaText
-            x={mainTextX}
-            y={mainTextY}
-            text={mainText}
-            font={mainFont}
-            color={themedMainTextColor}
-          />
-        </Group>
-      )}
-
-      {/* Sub Text - Above Water */}
-      {subFont && (
-        <Group opacity={subTextOpacity}>
-          <SkiaText
-            x={subTextX}
-            y={subTextY}
-            text={subText}
-            font={subFont}
-            color={themedSubTextColor}
-          />
-        </Group>
-      )}
-
-      {/* Clipped Group for Under Water Text */}
-      <Group clip={path}>
+        {/* Main Text - Above Water */}
         {mainFont && (
           <Group opacity={mainTextOpacity}>
             <SkiaText
@@ -267,10 +319,12 @@ const TestAnimated = ({
               y={mainTextY}
               text={mainText}
               font={mainFont}
-              color={mainTextColorUnderWater}
+              color={themedMainTextColor}
             />
           </Group>
         )}
+
+        {/* Sub Text - Above Water */}
         {subFont && (
           <Group opacity={subTextOpacity}>
             <SkiaText
@@ -278,12 +332,70 @@ const TestAnimated = ({
               y={subTextY}
               text={subText}
               font={subFont}
-              color={subTextColorUnderWater}
+              color={themedSubTextColor}
             />
           </Group>
         )}
-      </Group>
-    </Canvas>
+
+        {/* Icon - Above Water */}
+        {iconSkPath && (
+          <Group transform={iconTransform} opacity={iconOpacity}>
+            <Path path={iconSkPath} color={iconColorAboveWater} />
+          </Group>
+        )}
+
+        {/* Clipped Group for Under Water Text */}
+        <Group clip={path}>
+          {mainFont && (
+            <Group opacity={mainTextOpacity}>
+              <SkiaText
+                x={mainTextX}
+                y={mainTextY}
+                text={mainText}
+                font={mainFont}
+                color={mainTextColorUnderWater}
+              />
+            </Group>
+          )}
+          {subFont && (
+            <Group opacity={subTextOpacity}>
+              <SkiaText
+                x={subTextX}
+                y={subTextY}
+                text={subText}
+                font={subFont}
+                color={subTextColorUnderWater}
+              />
+            </Group>
+          )}
+          {/* Icon - Under Water (Clipped) */}
+          {iconSkPath && (
+            <Group transform={iconTransform} opacity={iconOpacity}>
+              <Path path={iconSkPath} color={iconColorUnderWater} />
+            </Group>
+          )}
+        </Group>
+      </Canvas>
+
+      {/* Clickable overlay for the icon */}
+      {onIconPress && (
+        <AnimatedPressable
+          style={[
+            {
+              position: "absolute",
+              backgroundColor: "rgba(255, 0, 0, 0.5)",
+              opacity: 1,
+            },
+            pressableIconPositionAndSize,
+          ]}
+          onPress={() => {
+            if (isIconActuallyInteractive.value) {
+              onIconPress();
+            }
+          }}
+        />
+      )}
+    </View>
   );
 };
 
@@ -292,18 +404,29 @@ export default function TabFourScreen() {
 
   const mainTextColorFromTheme = theme.color10.get();
   const subTextColorFromTheme = theme.color8.get();
+  const iconColorFromTheme = theme.blue10.get();
+
+  const handleIconPress = () => {
+    console.log("Droplet icon pressed from TabFourScreen!");
+    // Add your logic here, e.g., open a modal, increment water, etc.
+  };
 
   return (
     <AppAnimated.YStack flex={1} bg="$background">
       <TestAnimated
         yPad={1}
-        percentage={54}
+        percentage={20}
         mainText="1.800ml"
         mainTextSize={56}
         themedMainTextColor={mainTextColorFromTheme}
         subText="Remaining 600ml"
         subTextSize={16}
         themedSubTextColor={subTextColorFromTheme}
+        showIcon={true}
+        iconSize={50}
+        iconColorAboveWater={iconColorFromTheme}
+        iconCenterYFactor={0.78}
+        onIconPress={handleIconPress}
       />
     </AppAnimated.YStack>
   );
