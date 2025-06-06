@@ -18,7 +18,7 @@ import {
   useTheme,
   Separator,
 } from "tamagui";
-import { AlarmClock, ActivitySquare, AirVent } from "@tamagui/lucide-icons";
+import {AlarmClock, ActivitySquare, AirVent, Edit3} from "@tamagui/lucide-icons";
 import { api } from "@/convex/_generated/api";
 import { useState } from "react";
 import { Result } from "@/util/result";
@@ -34,49 +34,52 @@ export default function AddWaterScreen() {
   const addWater = useMutation(api.water.addWaterEntry);
   const [newAmount, setNewAmount] = useState("");
 
+  if (!waterEntries) return <Text>Loading water entries...</Text>;
+
+  console.log(`waterEntries: ${waterEntries}`);
   const handleAddEntry = async (amount: number | bigint) => {
     await addWater({ date, waterIntake: BigInt(amount) });
     setNewAmount("");
   };
 
-  if (!waterEntries) return <Text>Loading water entries...</Text>;
-  console.log(`waterEntries: ${waterEntries}`);
+  function createGroupButton({
+    icon,
+    value,
+    bgColor,
+  }: {
+    icon: any
+    value: number
+    bgColor: string
+  }) {
+    return (
+      <Group.Item key={value}>
+        <Button
+          flex={1}
+          onPress={() => handleAddEntry(value)}
+          icon={icon}
+          color="$blue8Dark"
+          fontWeight="bold"
+          bg={bgColor}
+        >
+          <Text color="$blue8Dark" fontWeight="bold" fontSize="$5">{value}ml</Text>
+        </Button>
+      </Group.Item>
+    )
+  }
 
   return (
-    <ScrollView style={{ padding: 16 }} bounces={false}>
+    <ScrollView padding="$4" bounces={false} bg="#FFFFFF">
       <YStack space="$4">
-        <H3 fontWeight="bold" textAlign="center" color="$color.indigo10">
-          Add records
-        </H3>
+        <H3 fontWeight="bold" textAlign="center" color="$indigo8Dark">Add records</H3>
         {/* Input to add water */}
-        <Group orientation="horizontal">
-          <Group.Item>
-            <Button
-              size="$5"
-              onPress={() => handleAddEntry(200)}
-              icon={AlarmClock}
-            >
-              200ml
-            </Button>
-          </Group.Item>
-          <Group.Item>
-            <Button
-              size="$5"
-              onPress={() => handleAddEntry(250)}
-              icon={AlarmClock}
-            >
-              250ml
-            </Button>
-          </Group.Item>
-          <Group.Item>
-            <Button
-              size="$5"
-              onPress={() => handleAddEntry(500)}
-              icon={AlarmClock}
-            >
-              500ml
-            </Button>
-          </Group.Item>
+        <Group orientation="horizontal" width="100%">
+          {[
+            { value: 200, bgColor: '$blue12Dark' },
+            { value: 250, bgColor: '$indigo2' },
+            { value: 500, bgColor: '$blue12Dark' },
+          ].map(({ value, bgColor }) =>
+            createGroupButton({ icon: AlarmClock, value, bgColor })
+          )}
         </Group>
         <YStack space="$2">
           <Input
@@ -84,17 +87,19 @@ export default function AddWaterScreen() {
             keyboardType="numeric"
             value={newAmount}
             onChangeText={setNewAmount}
+            placeholderTextColor="$indigo8Dark"
+            color="$indigo8Dark"
+            bg="$indigo2"
           />
-          <Button onPress={() => handleAddEntry(Number(newAmount))}>
+          <Button onPress={() => handleAddEntry(Number(newAmount))}
+          color="$blue8Dark" bg="$indigo2">
             Add Entry
           </Button>
         </YStack>
 
-        <Separator marginVertical={15} />
+        <Separator my={15} bg="$indigo8Dark"/>
 
-        <Text fontSize="$6" fontWeight="bold">
-          Water Entries for {date}
-        </Text>
+        <H3 fontWeight="bold" textAlign="center" color="$indigo8Dark">{date} entries</H3>
 
         {/* Show entries */}
         {waterEntries.length === 0 ? (
@@ -102,10 +107,18 @@ export default function AddWaterScreen() {
         ) : (
           waterEntries.map((item) => (
             <Card key={item._id} padded bordered elevate>
-              <Text fontWeight="bold" fontSize="$6">
-                {item.water_intake} mL
-              </Text>
-              <Text>Date: {item.date}</Text>
+              <XStack justifyContent="space-between" alignItems="center">
+                <Text fontWeight="bold" fontSize="$6" color="$indigo8Dark">
+                  {item.water_intake} mL
+                </Text>
+                <Button
+                  size="$3"
+                  chromeless
+                  onPress={() => handleEdit(item)}
+                >
+                <Edit3 size={24} color="$indigo8Dark" />
+                </Button>
+              </XStack>
             </Card>
           ))
         )}
