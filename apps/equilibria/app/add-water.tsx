@@ -18,7 +18,7 @@ import {
   useTheme,
   Separator,
 } from "tamagui";
-import { AlarmClock, ActivitySquare, AirVent } from "@tamagui/lucide-icons";
+import {AlarmClock, ActivitySquare, AirVent, Edit3} from "@tamagui/lucide-icons";
 import { api } from "@/convex/_generated/api";
 import { useState } from "react";
 import { Result } from "@/util/result";
