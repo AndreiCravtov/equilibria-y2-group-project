@@ -44,5 +44,3 @@ node_modules
 .expo
 ios
 android
-
-apps/equilibria/convex/_generated/*
