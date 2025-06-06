@@ -14,12 +14,16 @@ export default defineSchema({
   }),
   // products table for friday meeting
   products: defineTable({
-      name: v.string(),
-      calories: v.int64(),
+    name: v.string(),
+    calories: v.int64(),
   }),
   water: defineTable({
-      uid: v.string(),
-      date: v.string(), // or use "number" if you store timestamps
-      water_intake: v.int64(),
+    uid: v.string(),
+    date: v.string(), // or use "number" if you store timestamps
+    water_intake: v.int64(),
+  }),
+  goals: defineTable({
+    uid: v.string(),
+    water_goal: v.int64(),
   }),
 });
