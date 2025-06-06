@@ -5,6 +5,9 @@ import {
   AudioWaveform,
   AlarmClock,
   Droplet,
+  House,
+  Settings,
+  ChartColumn,
 } from "@tamagui/lucide-icons";
 
 export default function TabLayout() {
@@ -15,21 +18,21 @@ export default function TabLayout() {
       screenOptions={{
         tabBarActiveTintColor: theme.red10.val,
         tabBarStyle: {
-          backgroundColor: theme.background.val,
+          backgroundColor: theme.indigo12.val,
           borderTopColor: theme.borderColor.val,
         },
         headerStyle: {
-          backgroundColor: theme.background.val,
+          backgroundColor: theme.indigo12.val,
           borderBottomColor: theme.borderColor.val,
         },
-        headerTintColor: theme.color.val,
+        headerTintColor: theme.white1.val,
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="analysis"
         options={{
-          title: "Tab One",
-          tabBarIcon: ({ color }) => <Atom color={color as any} />,
+          title: "Analysis",
+          tabBarIcon: ({ color }) => <ChartColumn color={color as any} />,
           headerRight: () => (
             <Link href="/modal" asChild>
               <Button mr="$4" bg="$green8" color="$green12">
@@ -40,24 +43,18 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="two"
+        name="index"
         options={{
-          title: "Tab Two",
-          tabBarIcon: ({ color }) => <AudioWaveform color={color as any} />,
+          title: "Home",
+          tabBarIcon: ({ color }) => <House color={color as any} />,
         }}
       />
+
       <Tabs.Screen
-        name="three"
+        name="settings"
         options={{
-          title: "Tab Three",
-          tabBarIcon: ({ color }) => <AlarmClock color={color as any} />,
-        }}
-      />
-      <Tabs.Screen
-        name="four"
-        options={{
-          title: "Tab Four",
-          tabBarIcon: ({ color }) => <Droplet color={color as any} />,
+          title: "Settings",
+          tabBarIcon: ({ color }) => <Settings color={color as any} />,
         }}
       />
     </Tabs>

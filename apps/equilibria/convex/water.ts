@@ -1,19 +1,19 @@
+import { Result } from "@/util/result";
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { getUserId, tryGetUserId } from "./users";
+import { getAuthUserId } from "@convex-dev/auth/server";
 
 export const getWaterByUserAndDate = query({
   args: {
     uid: v.string(), // pass user ID from Convex auth
-    date: v.string()
+    date: v.string(),
   },
   handler: async (ctx, args) => {
     const entries = await ctx.db
       .query("water")
       .filter((q) =>
-        q.and(
-          q.eq(q.field("uid"), args.uid),
-          q.eq(q.field("date"), args.date)
-        )
+        q.and(q.eq(q.field("uid"), args.uid), q.eq(q.field("date"), args.date))
       )
       .collect();
 
@@ -21,13 +21,34 @@ export const getWaterByUserAndDate = query({
   },
 });
 
+export const getWaterByDate = query({
+  args: {
+    date: v.string(),
+  },
+  handler: async (ctx, { date }) => {
+    const userId = await getUserId(ctx);
+
+    return await ctx.db
+      .query("water")
+      .filter((q) =>
+        q.and(q.eq(q.field("uid"), userId), q.eq(q.field("date"), date))
+      )
+      .collect();
+  },
+});
+
 export const addWaterEntry = mutation({
   args: {
-    uid: v.string(),
     date: v.string(),
-    water_intake: v.int64(),
+    waterIntake: v.int64(),
   },
-  handler: async (ctx, args) => {
-    await ctx.db.insert("water", args);
+  handler: async (ctx, { date, waterIntake }) => {
+    const userId = await getUserId(ctx);
+
+    await ctx.db.insert("water", {
+      uid: userId,
+      date,
+      water_intake: waterIntake,
+    });
   },
 });
