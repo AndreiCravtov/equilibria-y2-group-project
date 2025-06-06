@@ -33,8 +33,6 @@ import {Link} from "expo-router";
 import {api} from "@/convex/_generated/api";
 
 export default function TabTwoScreen() {
-  const waterPercentage = 22;
-
   const date = "2025-04-06"; // placeholder value
   const waterEntries = useQuery(api.water.getWaterByDate,
     {date: date}
@@ -45,11 +43,14 @@ export default function TabTwoScreen() {
   }
 
   const totalWaterIntake = getTotalWaterIntake(waterEntries ?? []);
+  const userGoal = 2000;
+
+  const waterPercentage = totalWaterIntake / userGoal * 100
 
   return (
     <ZStack width="100%" height="100%">
       {/* Render content that's NOT under water - normal styling */}
-      <Content bg="$background" color="$blue10" totalWaterIntake={totalWaterIntake}/>
+      <Content bg="$background" color="$blue10" totalWaterIntake={totalWaterIntake} userGoal={userGoal}/>
 
       {/* Create masked view based on water progress */}
       <MaskedView
@@ -60,7 +61,7 @@ export default function TabTwoScreen() {
         maskElement={<WaterProgress percentage={waterPercentage}/>}
       >
         {/* Render content that IS under water - inverted styling */}
-        <Content bg="$blue10" color="$background" totalWaterIntake={totalWaterIntake}/>
+        <Content bg="$blue10" color="$background" totalWaterIntake={totalWaterIntake} userGoal={userGoal}/>
       </MaskedView>
 
       {/* Create hidden clickable item to act as the button */}
@@ -88,12 +89,13 @@ interface ContentProps {
     | undefined;
   color?: OpaqueColorValue | GetThemeValueForKey<"color"> | undefined;
   totalWaterIntake: number;
+  userGoal: number;
 }
 
-function Content({bg, color, totalWaterIntake}: ContentProps) {
+function Content({bg, color, totalWaterIntake, userGoal}: ContentProps) {
   return (
     <YStack flex={1} items="center" bg={bg}>
-      <H1 color={color} fontWeight={"bold"}>{totalWaterIntake}/2000ml</H1>
+      <H1 color={color} fontWeight={"bold"}>{totalWaterIntake}/{userGoal}ml</H1>
 
       {/* Relative button */}
       <View
