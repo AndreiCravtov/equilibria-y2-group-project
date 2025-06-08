@@ -1,5 +1,10 @@
 import { useAuthActions } from "@convex-dev/auth/react";
-import { Authenticated, Unauthenticated, useQuery } from "convex/react";
+import {
+  Authenticated,
+  Unauthenticated,
+  useQuery,
+  useConvexAuth,
+} from "convex/react";
 import { useState } from "react";
 import { Button, Input, YStack, Text } from "tamagui";
 import { api } from "@/convex/_generated/api";
