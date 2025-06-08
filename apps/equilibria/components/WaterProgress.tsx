@@ -11,10 +11,11 @@ import { SpringConfig } from "react-native-reanimated/lib/typescript/animation/s
 import { ColorValue } from "react-native";
 
 const WAVE_HEIGHT = 30; // Amplitude of the wave - Made shallower
-const WAVE_LENGTH = 2_000; // Speed of the wave animation - Made slower
+const WAVE_LENGTH = 1_000; // Speed of the wave animation - Made slower
 const WATER_COLOR = "#0077FF"; // Blue color for the water
 const WIDTH_MARGIN = 0.1; // Draws wave wider than actual, to prevent weird artifacts around edges
-const WAVE_RES = 10; // Number of pixels between each wave-point
+const WAVE_RES = 100; // Number of pixels between each wave-point
+const TARGET_FPS = 30; // Target frame rate for smoother performance
 
 // Create an Animated component for the SvgPath
 const AnimatedSvgPath = Animated.createAnimatedComponent(SvgPath);
@@ -41,6 +42,7 @@ export function WaterProgress(props: WaterProgressProps) {
   const layoutHeight = useSharedValue(0);
   const animatedPercentageSV = useSharedValue(percentage);
   const animatedYPadSV = useSharedValue(yPad);
+  const lastFrameTime = useSharedValue(0); // For 30fps throttling
 
   useEffect(() => {
     // Spring configuration - adjusted for a slower, smoother, water-like feel
@@ -59,14 +61,24 @@ export function WaterProgress(props: WaterProgressProps) {
 
   useFrameCallback((frameInfo) => {
     "worklet";
-    const timeDelta = frameInfo.timeSincePreviousFrame ?? 1 / 60;
-    const newPhase = (phase.value + timeDelta / WAVE_LENGTH) % (2 * Math.PI);
-    phase.value = newPhase;
+    const currentTime = frameInfo.timestamp;
+    const targetFrameInterval = 1000 / TARGET_FPS; // ~33.33ms for 30fps
+
+    // Throttle to 30fps
+    if (
+      lastFrameTime.value === 0 ||
+      currentTime - lastFrameTime.value >= targetFrameInterval
+    ) {
+      const timeDelta = frameInfo.timeSincePreviousFrame ?? 1 / 60; // Use original timing logic
+      const newPhase = (phase.value + timeDelta / WAVE_LENGTH) % (2 * Math.PI);
+      phase.value = newPhase;
+      lastFrameTime.value = currentTime;
+    }
   });
 
   // SVG path string generation for useAnimatedProps
   const animatedProps = useAnimatedProps(() => {
-    ("worklet");
+    "worklet";
     if (layoutWidth.value === 0 || layoutHeight.value === 0) {
       return { d: "" }; // Return an empty path string for SVG
     }
@@ -100,63 +112,71 @@ export function WaterProgress(props: WaterProgressProps) {
     const clampedBaselineSpan = Math.max(0, availableBaselineSpan);
 
     // Final waveBaseline calculation
-    // When percentage is 100% (normalizedUserPercentage=1), baseline is highestPossibleWaveBaseline.
-    // When percentage is 0% (normalizedUserPercentage=0), baseline is lowestPossibleWaveBaseline (if span > 0).
     const waveBaseline =
       highestPossibleWaveBaseline +
       (1 - normalizedUserPercentage) * clampedBaselineSpan;
 
-    // New path generation using Quadratic Bézier curves:
     const p = phase.value;
     const wH = WAVE_HEIGHT;
     const cwl = currentWaveLength;
 
     const yAtX = (xPos: number) => {
       "worklet";
-      if (cwl === 0) return waveBaseline; // Avoid division by zero if width is 0
+      if (cwl === 0) return waveBaseline;
       return waveBaseline + (wH / 2) * Math.sin((xPos / cwl) * 2 * Math.PI + p);
     };
 
+    // Calculate derivative for Hermite splines
+    const dyAtX = (xPos: number) => {
+      "worklet";
+      if (cwl === 0) return 0;
+      return (
+        (wH / 2) *
+        Math.cos((xPos / cwl) * 2 * Math.PI + p) *
+        ((2 * Math.PI) / cwl)
+      );
+    };
+
+    // Use WAVE_RES to determine sampling frequency, but keep consistent segment behavior
+    const segmentLength = WAVE_RES;
     let d = [`M ${leftMostPoint} ${yAtX(leftMostPoint)}`];
     let currentX = leftMostPoint;
 
-    const step = WAVE_RES > 0 ? WAVE_RES : 1; // Use a safe step value
+    // Hermite spline implementation for ultra-smooth curves
     while (currentX < rightMostPoint) {
-      const controlPointXCandidate = currentX + step;
-      const endPointXCandidate = currentX + 2 * step;
+      const nextX = Math.min(currentX + segmentLength, rightMostPoint);
+      const segmentWidth = nextX - currentX;
 
-      if (endPointXCandidate <= rightMostPoint) {
-        // Full quadratic segment
-        const controlY = yAtX(controlPointXCandidate);
-        const endY = yAtX(endPointXCandidate);
-        d.push(
-          `Q ${controlPointXCandidate} ${controlY}, ${endPointXCandidate} ${endY}`
-        );
-        currentX = endPointXCandidate;
-      } else {
-        // Last segment: from currentX to rightMostPoint
-        if (rightMostPoint > currentX) {
-          // If there's any remaining length
-          const lastMidX = (currentX + rightMostPoint) / 2;
-          const lastMidY = yAtX(lastMidX);
-          const lastEndY = yAtX(rightMostPoint);
-          d.push(`Q ${lastMidX} ${lastMidY}, ${rightMostPoint} ${lastEndY}`);
-        }
-        currentX = rightMostPoint; // Terminate loop
+      if (segmentWidth > 0) {
+        const p0 = yAtX(currentX);
+        const p1 = yAtX(nextX);
+        // Scale tangents proportionally to segment width, but with a consistent multiplier
+        const tangentScale = segmentWidth * 0.3; // Proportional to segment, but consistent scaling
+        const m0 = dyAtX(currentX) * tangentScale;
+        const m1 = dyAtX(nextX) * tangentScale;
+
+        // Convert Hermite to cubic Bézier control points
+        const cp1X = currentX + segmentWidth / 3;
+        const cp1Y = p0 + m0;
+        const cp2X = nextX - segmentWidth / 3;
+        const cp2Y = p1 - m1;
+
+        d.push(`C ${cp1X} ${cp1Y}, ${cp2X} ${cp2Y}, ${nextX} ${p1}`);
       }
+
+      currentX = nextX;
     }
 
-    d.push(`L ${rightMostPoint} ${currentHeight}`); // Bottom-right corner of the component
-    d.push(`L ${leftMostPoint} ${currentHeight}`); // Bottom-left corner of the component
-    d.push(`Z`); // Close the path to fill it
+    d.push(`L ${rightMostPoint} ${currentHeight}`);
+    d.push(`L ${leftMostPoint} ${currentHeight}`);
+    d.push(`Z`);
 
     return { d: d.join(" ") };
-  }, [phase, animatedPercentageSV, layoutWidth, layoutHeight, animatedYPadSV]); // Ensure all dependencies are correct, including animatedYPadSV
+  }, [phase, animatedPercentageSV, layoutWidth, layoutHeight, animatedYPadSV]);
 
   return (
     <Animated.View
       style={{
-        // Transparent background because mask is based off alpha channel.
         backgroundColor: "transparent",
         width: "100%",
         height: "100%",
@@ -173,8 +193,8 @@ export function WaterProgress(props: WaterProgressProps) {
           layoutWidth.value > 0 && layoutHeight.value > 0
             ? `0 0 ${layoutWidth.value} ${layoutHeight.value}`
             : undefined
-        } // Set viewBox for proper scaling
-        style={{ width: "100%", height: "100%" }} // Ensure Svg fills the view
+        }
+        style={{ width: "100%", height: "100%" }}
       >
         <AnimatedSvgPath animatedProps={animatedProps} fill={fill} />
       </Svg>
