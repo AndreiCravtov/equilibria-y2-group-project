@@ -9,16 +9,14 @@ import Animated, {
 } from "react-native-reanimated";
 import { SpringConfig } from "react-native-reanimated/lib/typescript/animation/springUtils";
 import { ColorValue } from "react-native";
+import AppAnimated from "@/components/app-animated";
 
 const WAVE_HEIGHT = 30; // Amplitude of the wave - Made shallower
-const WAVE_LENGTH = 1_000; // Speed of the wave animation - Made slower
+const WAVE_LENGTH = 2_000; // Speed of the wave animation - Made slower
 const WATER_COLOR = "#0077FF"; // Blue color for the water
 const WIDTH_MARGIN = 0.1; // Draws wave wider than actual, to prevent weird artifacts around edges
 const WAVE_RES = 100; // Number of pixels between each wave-point
 const TARGET_FPS = 30; // Target frame rate for smoother performance
-
-// Create an Animated component for the SvgPath
-const AnimatedSvgPath = Animated.createAnimatedComponent(SvgPath);
 
 export interface WaterProgressProps {
   /// 0% to 100%, represents how full the water level is
@@ -42,7 +40,7 @@ export function WaterProgress(props: WaterProgressProps) {
   const layoutHeight = useSharedValue(0);
   const animatedPercentageSV = useSharedValue(percentage);
   const animatedYPadSV = useSharedValue(yPad);
-  const lastFrameTime = useSharedValue(0); // For 30fps throttling
+  const lastFrameTimestamp = useSharedValue(0); // For 30fps throttling
 
   useEffect(() => {
     // Spring configuration - adjusted for a slower, smoother, water-like feel
@@ -55,45 +53,43 @@ export function WaterProgress(props: WaterProgressProps) {
       restSpeedThreshold: 0.5, // How slow it needs to be moving to be considered settled
     };
 
-    animatedPercentageSV.value = withSpring(percentage, springConfig);
-    animatedYPadSV.value = withSpring(yPad, springConfig);
+    animatedPercentageSV.set((_) => withSpring(percentage, springConfig));
+    animatedYPadSV.set((_) => withSpring(yPad, springConfig));
   }, [percentage, animatedPercentageSV, yPad, animatedYPadSV]);
 
   useFrameCallback((frameInfo) => {
     "worklet";
-    const currentTime = frameInfo.timestamp;
-    const targetFrameInterval = 1000 / TARGET_FPS; // ~33.33ms for 30fps
 
-    // Throttle to 30fps
-    if (
-      lastFrameTime.value === 0 ||
-      currentTime - lastFrameTime.value >= targetFrameInterval
-    ) {
-      const timeDelta = frameInfo.timeSincePreviousFrame ?? 1 / 60; // Use original timing logic
-      const newPhase = (phase.value + timeDelta / WAVE_LENGTH) % (2 * Math.PI);
-      phase.value = newPhase;
-      lastFrameTime.value = currentTime;
-    }
+    // Compute time from last PROPER frame render
+    const lastFrameDelta = frameInfo.timestamp - lastFrameTimestamp.get();
+    const targetFrameDelta = 1000 / TARGET_FPS; // e.g. ~33.33ms for 30fps
+
+    // Don't do anything if the delta is too small
+    if (lastFrameDelta < targetFrameDelta) return;
+
+    // Otherwise set new lastFrameTimestamp, and draw frame
+    lastFrameTimestamp.set((_) => frameInfo.timestamp);
+    phase.set((v) => (v + lastFrameDelta / WAVE_LENGTH) % (2 * Math.PI));
   });
 
   // SVG path string generation for useAnimatedProps
-  const animatedProps = useAnimatedProps(() => {
+  const svgPathAnimatedProps = useAnimatedProps(() => {
     "worklet";
-    if (layoutWidth.value === 0 || layoutHeight.value === 0) {
+    if (layoutWidth.get() === 0 || layoutHeight.get() === 0) {
       return { d: "" }; // Return an empty path string for SVG
     }
 
-    const currentHeight = layoutHeight.value;
+    const currentHeight = layoutHeight.get();
 
     // Compute margin, left/right-most points, and wave-length
-    const currentWidthMargin = layoutWidth.value * WIDTH_MARGIN;
+    const currentWidthMargin = layoutWidth.get() * WIDTH_MARGIN;
     const leftMostPoint = -currentWidthMargin;
-    const rightMostPoint = layoutWidth.value + currentWidthMargin;
+    const rightMostPoint = layoutWidth.get() + currentWidthMargin;
     const currentWaveLength = rightMostPoint - leftMostPoint;
 
     const normalizedUserPercentage =
-      Math.max(0, Math.min(100, animatedPercentageSV.value)) / 100;
-    const normalizedYPad = Math.max(0, animatedYPadSV.value) / 100;
+      Math.max(0, Math.min(100, animatedPercentageSV.get())) / 100;
+    const normalizedYPad = Math.max(0, animatedYPadSV.get()) / 100;
 
     const pixelYPad = normalizedYPad * currentHeight;
 
@@ -116,7 +112,7 @@ export function WaterProgress(props: WaterProgressProps) {
       highestPossibleWaveBaseline +
       (1 - normalizedUserPercentage) * clampedBaselineSpan;
 
-    const p = phase.value;
+    const p = phase.get();
     const wH = WAVE_HEIGHT;
     const cwl = currentWaveLength;
 
@@ -174,6 +170,16 @@ export function WaterProgress(props: WaterProgressProps) {
     return { d: d.join(" ") };
   }, [phase, animatedPercentageSV, layoutWidth, layoutHeight, animatedYPadSV]);
 
+  // Any shared props need to be "animated"
+  const svgAnimatedProps = useAnimatedProps(() => {
+    return {
+      viewBox:
+        layoutWidth.get() > 0 && layoutHeight.get() > 0
+          ? `0 0 ${layoutWidth.get()} ${layoutHeight.get()}`
+          : undefined,
+    };
+  }, [layoutWidth, layoutHeight]);
+
   return (
     <Animated.View
       style={{
@@ -182,22 +188,26 @@ export function WaterProgress(props: WaterProgressProps) {
         height: "100%",
       }}
       onLayout={(event) => {
-        layoutWidth.value = event.nativeEvent.layout.width;
-        layoutHeight.value = event.nativeEvent.layout.height;
+        layoutWidth.set((_) => event.nativeEvent.layout.width);
+        layoutHeight.set((_) => event.nativeEvent.layout.height);
       }}
     >
-      <Svg
+      <AppAnimated.svg.Svg
         width="100%"
         height="100%"
-        viewBox={
-          layoutWidth.value > 0 && layoutHeight.value > 0
-            ? `0 0 ${layoutWidth.value} ${layoutHeight.value}`
-            : undefined
-        }
+        animatedProps={svgAnimatedProps}
+        // viewBox={
+        //   layoutWidth.get() > 0 && layoutHeight.get() > 0
+        //     ? `0 0 ${layoutWidth.get()} ${layoutHeight.get()}`
+        //     : undefined
+        // }
         style={{ width: "100%", height: "100%" }}
       >
-        <AnimatedSvgPath animatedProps={animatedProps} fill={fill} />
-      </Svg>
+        <AppAnimated.svg.Path
+          animatedProps={svgPathAnimatedProps}
+          fill={fill}
+        />
+      </AppAnimated.svg.Svg>
     </Animated.View>
   );
 }
