@@ -24,20 +24,5 @@ STACK:
 - Valibot => [Standard Schema](https://github.com/standard-schema/standard-schema)-compliant schema validator library of choice
 - t3-env => typesafe .env configurations
 - Convex => Fullstack backend, DB, Auth, etc.
-
----
-
-TO SORT:
-
-- Zustand (maybe)
-- T4 Stack
-- - Supabase Auth
-- - Drizzle
-- - tRPC
-- - Hono
-- - Million.js
-- - Virtualized Lists
-- - Pattycake + ts-pattern
-
-- Clerk + Convex for Auth
-- Drizzle maybe?? tRPC maybe?? Supabase Auth??
+- jotai => frontent state management
+- ts-belt, ts-pattern => FP-like utility

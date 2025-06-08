@@ -11,8 +11,9 @@ import {
 import { useFonts } from "expo-font";
 import { SplashScreen, Stack } from "expo-router";
 import { useTheme } from "tamagui";
-import { env } from "@/env";
+import { Provider as JotaiProvider } from "jotai/react";
 
+import { env } from "@/env";
 import { AppTamaguiProvider } from "./AppTamaguiProvider";
 import { AppConvexProvider } from "./AppConvexProvider";
 
@@ -47,9 +48,11 @@ export default function RootLayout() {
   }
 
   return (
-    <Providers>
-      <RootLayoutNav />
-    </Providers>
+    <>
+      <Providers>
+        <RootLayoutNav />
+      </Providers>
+    </>
   );
 }
 
