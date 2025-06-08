@@ -87,48 +87,15 @@ export function AppTamaguiProvider({
 
 // ----------------------------- LAYOUT SETUP START -----------------------------
 function RootLayoutNav() {
-  const colorScheme = useColorScheme();
-  const theme = useTheme();
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
-      <Stack>
-        <Stack.Screen
-          name="(tabs)"
-          options={{
-            headerShown: false,
-          }}
-        />
-
-        <Stack.Screen
-          name="add-water"
-          options={{
-            title: "Add Water",
-            presentation: "modal",
-            animation: "slide_from_right",
-            gestureEnabled: true,
-            gestureDirection: "horizontal",
-            contentStyle: {
-              backgroundColor: theme.background.val,
-            },
-          }}
-        />
-
-        <Stack.Screen
-          name="modal"
-          options={{
-            title: "Tamagui + Expo",
-            presentation: "modal",
-            animation: "slide_from_right",
-            gestureEnabled: true,
-            gestureDirection: "horizontal",
-            contentStyle: {
-              backgroundColor: theme.background.val,
-            },
-          }}
-        />
-      </Stack>
-    </ThemeProvider>
+    <Stack>
+      <Stack.Screen
+        name="(protected)"
+        options={{
+          headerShown: false,
+        }}
+      />
+    </Stack>
   );
 }
 
@@ -137,15 +104,11 @@ export {
   ErrorBoundary,
 } from "expo-router";
 
-export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: "(tabs)",
-};
-
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const colorScheme = useColorScheme();
   const [interLoaded, interError] = useFonts({
     Inter: require("@tamagui/font-inter/otf/Inter-Medium.otf"),
     InterBold: require("@tamagui/font-inter/otf/Inter-Bold.otf"),
@@ -165,7 +128,12 @@ export default function RootLayout() {
   return (
     <AppConvexProvider>
       <AppTamaguiProvider>
-        <RootLayoutNav />
+        <ThemeProvider
+          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+        >
+          <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
+          <RootLayoutNav />
+        </ThemeProvider>
       </AppTamaguiProvider>
     </AppConvexProvider>
   );
