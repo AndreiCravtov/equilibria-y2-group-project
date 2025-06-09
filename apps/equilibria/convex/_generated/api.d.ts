@@ -17,7 +17,6 @@ import type * as auth from "../auth.js";
 import type * as errors from "../errors.js";
 import type * as goals from "../goals.js";
 import type * as http from "../http.js";
-import type * as products from "../products.js";
 import type * as users from "../users.js";
 import type * as water from "../water.js";
 
@@ -34,7 +33,6 @@ declare const fullApi: ApiFromModules<{
   errors: typeof errors;
   goals: typeof goals;
   http: typeof http;
-  products: typeof products;
   users: typeof users;
   water: typeof water;
 }>;

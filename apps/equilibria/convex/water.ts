@@ -6,14 +6,14 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 
 export const getWaterByUserAndDate = query({
   args: {
-    uid: v.string(), // pass user ID from Convex auth
+    userId: v.string(), // pass user ID from Convex auth
     date: v.string(),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx, { userId, date }) => {
     const entries = await ctx.db
       .query("water")
       .filter((q) =>
-        q.and(q.eq(q.field("uid"), args.uid), q.eq(q.field("date"), args.date))
+        q.and(q.eq(q.field("userId"), userId), q.eq(q.field("date"), date))
       )
       .collect();
 
@@ -31,7 +31,7 @@ export const getWaterByDate = query({
     return await ctx.db
       .query("water")
       .filter((q) =>
-        q.and(q.eq(q.field("uid"), userId), q.eq(q.field("date"), date))
+        q.and(q.eq(q.field("userId"), userId), q.eq(q.field("date"), date))
       )
       .collect();
   },
@@ -46,9 +46,9 @@ export const addWaterEntry = mutation({
     const userId = await getUserId(ctx);
 
     await ctx.db.insert("water", {
-      uid: userId,
+      userId,
       date,
-      water_intake: waterIntake,
+      waterIntake: waterIntake,
     });
   },
 });

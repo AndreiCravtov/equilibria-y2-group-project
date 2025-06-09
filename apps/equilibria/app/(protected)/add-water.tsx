@@ -18,7 +18,12 @@ import {
   useTheme,
   Separator,
 } from "tamagui";
-import {AlarmClock, ActivitySquare, AirVent, Edit3} from "@tamagui/lucide-icons";
+import {
+  AlarmClock,
+  ActivitySquare,
+  AirVent,
+  Edit3,
+} from "@tamagui/lucide-icons";
 import { api } from "@/convex/_generated/api";
 import { useState } from "react";
 import { Result } from "@/util/result";
@@ -47,9 +52,9 @@ export default function AddWaterScreen() {
     value,
     bgColor,
   }: {
-    icon: any
-    value: number
-    bgColor: string
+    icon: any;
+    value: number;
+    bgColor: string;
   }) {
     return (
       <Group.Item key={value}>
@@ -61,22 +66,26 @@ export default function AddWaterScreen() {
           fontWeight="bold"
           bg={bgColor}
         >
-          <Text color="$blue8Dark" fontWeight="bold" fontSize="$5">{value}ml</Text>
+          <Text color="$blue8Dark" fontWeight="bold" fontSize="$5">
+            {value}ml
+          </Text>
         </Button>
       </Group.Item>
-    )
+    );
   }
 
   return (
     <ScrollView padding="$4" bounces={false} bg="#FFFFFF">
       <YStack space="$4">
-        <H3 fontWeight="bold" textAlign="center" color="$indigo8Dark">Add records</H3>
+        <H3 fontWeight="bold" textAlign="center" color="$indigo8Dark">
+          Add records
+        </H3>
         {/* Input to add water */}
         <Group orientation="horizontal" width="100%">
           {[
-            { value: 200, bgColor: '$blue12Dark' },
-            { value: 250, bgColor: '$indigo2' },
-            { value: 500, bgColor: '$blue12Dark' },
+            { value: 200, bgColor: "$blue12Dark" },
+            { value: 250, bgColor: "$indigo2" },
+            { value: 500, bgColor: "$blue12Dark" },
           ].map(({ value, bgColor }) =>
             createGroupButton({ icon: AlarmClock, value, bgColor })
           )}
@@ -91,15 +100,20 @@ export default function AddWaterScreen() {
             color="$indigo8Dark"
             bg="$indigo2"
           />
-          <Button onPress={() => handleAddEntry(Number(newAmount))}
-          color="$blue8Dark" bg="$indigo2">
+          <Button
+            onPress={() => handleAddEntry(Number(newAmount))}
+            color="$blue8Dark"
+            bg="$indigo2"
+          >
             Add Entry
           </Button>
         </YStack>
 
-        <Separator my={15} bg="$indigo8Dark"/>
+        <Separator my={15} bg="$indigo8Dark" />
 
-        <H3 fontWeight="bold" textAlign="center" color="$indigo8Dark">{date} entries</H3>
+        <H3 fontWeight="bold" textAlign="center" color="$indigo8Dark">
+          {date} entries
+        </H3>
 
         {/* Show entries */}
         {waterEntries.length === 0 ? (
@@ -109,14 +123,10 @@ export default function AddWaterScreen() {
             <Card key={item._id} padded bordered elevate>
               <XStack justifyContent="space-between" alignItems="center">
                 <Text fontWeight="bold" fontSize="$6" color="$indigo8Dark">
-                  {item.water_intake} mL
+                  {item.waterIntake} mL
                 </Text>
-                <Button
-                  size="$3"
-                  chromeless
-                  onPress={() => handleEdit(item)}
-                >
-                <Edit3 size={24} color="$indigo8Dark" />
+                <Button size="$3" chromeless onPress={() => handleEdit(item)}>
+                  <Edit3 size={24} color="$indigo8Dark" />
                 </Button>
               </XStack>
             </Card>

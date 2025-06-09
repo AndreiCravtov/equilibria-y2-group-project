@@ -36,9 +36,9 @@ export default function TabTwoScreen() {
   const date = "2025-04-06"; // placeholder value
   const waterEntries = useQuery(api.water.getWaterByDate, { date: date });
 
-  function getTotalWaterIntake(entries: { water_intake: number | bigint }[]) {
+  function getTotalWaterIntake(entries: { waterIntake: number | bigint }[]) {
     return entries.reduce(
-      (total, entry) => total + Number(entry.water_intake),
+      (total, entry) => total + Number(entry.waterIntake),
       0
     );
   }
