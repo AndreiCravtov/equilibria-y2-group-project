@@ -16,7 +16,9 @@
   "dependencies": {
     "@auth/core": "0.37.0",
     "@convex-dev/auth": "^0.0.86",
+    "@csark0812/zustand-expo-devtools": "^2.0.2",
     "@expo/vector-icons": "^14.1.0",
+    "@mobily/ts-belt": "^3.13.1",
     "@react-native-masked-view/masked-view": "0.3.2",
     "@react-navigation/bottom-tabs": "^7.3.10",
     "@react-navigation/elements": "^2.3.8",
@@ -61,7 +63,9 @@
     "react-native-webview": "13.13.5",
     "tamagui": "^1.126.13",
     "ts-node": "^10.9.2",
-    "valibot": "^1.1.0"
+    "ts-pattern": "^5.7.1",
+    "valibot": "^1.1.0",
+    "zustand": "^5.0.5"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

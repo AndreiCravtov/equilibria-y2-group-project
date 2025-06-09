@@ -1,7 +1,17 @@
-import "../tamagui-web.css";
+import "@/tamagui-web.css";
 
-import { useEffect } from "react";
+import { Platform } from "react-native";
+import { ConvexAuthProvider } from "@convex-dev/auth/react";
+import { ConvexReactClient, useConvexAuth } from "convex/react";
+import * as SecureStore from "expo-secure-store";
+import { env } from "@/env";
+import { ReactNode } from "react";
 import { useColorScheme } from "react-native";
+import { TamaguiProvider, useTheme, type TamaguiProviderProps } from "tamagui";
+import { ToastProvider, ToastViewport } from "@tamagui/toast";
+import { CurrentToast } from "./CurrentToast";
+import { tamaguiConfig } from "@/tamagui.config";
+import { useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
 import {
   DarkTheme,
@@ -10,26 +20,81 @@ import {
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { SplashScreen, Stack } from "expo-router";
-import { useTheme } from "tamagui";
-import { env } from "@/env";
+import { LoadingView } from "@/components/Loading";
 
-import { AppTamaguiProvider } from "./AppTamaguiProvider";
-import { AppConvexProvider } from "./AppConvexProvider";
+// ----------------------------- CONVEX SETUP START -----------------------------
+const convex = new ConvexReactClient(env.EXPO_PUBLIC_CONVEX_URL, {
+  unsavedChangesWarning: false,
+});
 
+const secureStorage = {
+  getItem: SecureStore.getItemAsync,
+  setItem: SecureStore.setItemAsync,
+  removeItem: SecureStore.deleteItemAsync,
+};
+
+function AppConvexProvider({ children }: { children: ReactNode }) {
+  return (
+    <ConvexAuthProvider
+      client={convex}
+      storage={(() => {
+        switch (Platform.OS) {
+          case "android":
+            return secureStorage;
+          case "ios":
+            throw new Error("IOS secure storage not configured yet");
+          default:
+            throw new Error(`Unsupported platform: ${Platform.OS}`);
+        }
+      })()}
+    >
+      {children}
+    </ConvexAuthProvider>
+  );
+}
+// ----------------------------- CONVEX SETUP END -----------------------------
+
+// ----------------------------- TAMAGUI SETUP START -----------------------------
+export function AppTamaguiProvider({
+  children,
+  ...rest
+}: Omit<TamaguiProviderProps, "config">) {
+  const colorScheme = useColorScheme();
+
+  return (
+    <TamaguiProvider
+      config={tamaguiConfig}
+      defaultTheme={colorScheme === "dark" ? "dark" : "light"}
+      {...rest}
+    >
+      <ToastProvider
+        swipeDirection="horizontal"
+        duration={6000}
+        native={[
+          // uncomment the next line to do native toasts on mobile. NOTE: it'll require you making a dev build and won't work with Expo Go
+          "mobile",
+        ]}
+      >
+        {children}
+        <CurrentToast />
+        <ToastViewport top="$8" left={0} right={0} />
+      </ToastProvider>
+    </TamaguiProvider>
+  );
+}
+// ----------------------------- TAMAGUI SETUP END -----------------------------
+
+// ----------------------------- LAYOUT SETUP START -----------------------------
 export {
   // Catch any errors thrown by the Layout component.
   ErrorBoundary,
 } from "expo-router";
 
-export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: "(tabs)",
-};
-
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const colorScheme = useColorScheme();
   const [interLoaded, interError] = useFonts({
     Inter: require("@tamagui/font-inter/otf/Inter-Medium.otf"),
     InterBold: require("@tamagui/font-inter/otf/Inter-Bold.otf"),
@@ -47,62 +112,50 @@ export default function RootLayout() {
   }
 
   return (
-    <Providers>
-      <RootLayoutNav />
-    </Providers>
+    <AppConvexProvider>
+      <AppTamaguiProvider>
+        <ThemeProvider
+          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+        >
+          <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
+          <RootLayoutNav />
+        </ThemeProvider>
+      </AppTamaguiProvider>
+    </AppConvexProvider>
   );
 }
 
-const Providers = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <AppConvexProvider>
-      <AppTamaguiProvider>{children}</AppTamaguiProvider>
-    </AppConvexProvider>
-  );
+export const unstable_settings = {
+  initialRouteName: "(protected)", // anchor
 };
 
 function RootLayoutNav() {
-  const colorScheme = useColorScheme();
-  const theme = useTheme();
+  // Ensure is authenticated
+  const auth = useConvexAuth();
+  if (auth.isLoading) return <LoadingView />;
+
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
-      <Stack>
+    <Stack>
+      {/* If not authenticated, take me to this section of the app */}
+      <Stack.Protected guard={!auth.isAuthenticated}>
         <Stack.Screen
-          name="(tabs)"
+          name="sign-in"
           options={{
             headerShown: false,
           }}
         />
+      </Stack.Protected>
 
+      {/* Otherwise proceed to the main app */}
+      <Stack.Protected guard={auth.isAuthenticated}>
         <Stack.Screen
-          name="add-water"
+          name="(protected)"
           options={{
-            title: "Add Water",
-            presentation: "modal",
-            animation: "slide_from_right",
-            gestureEnabled: true,
-            gestureDirection: "horizontal",
-            contentStyle: {
-              backgroundColor: theme.background.val,
-            },
+            headerShown: false,
           }}
         />
-
-        <Stack.Screen
-          name="modal"
-          options={{
-            title: "Tamagui + Expo",
-            presentation: "modal",
-            animation: "slide_from_right",
-            gestureEnabled: true,
-            gestureDirection: "horizontal",
-            contentStyle: {
-              backgroundColor: theme.background.val,
-            },
-          }}
-        />
-      </Stack>
-    </ThemeProvider>
+      </Stack.Protected>
+    </Stack>
   );
 }
+// ----------------------------- LAYOUT SETUP END -----------------------------

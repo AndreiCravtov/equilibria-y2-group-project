@@ -8,22 +8,19 @@ import { authTables } from "@convex-dev/auth/server";
 export default defineSchema({
   ...authTables,
 
-  // Test table => TODO: remove later
-  numbers: defineTable({
-    value: v.number(),
-  }),
-  // products table for friday meeting
-  products: defineTable({
-    name: v.string(),
-    calories: v.int64(),
-  }),
+  userProfiles: defineTable({
+    userId: v.id("users"),
+    age: v.int64(),
+    gender: v.union(v.literal("male"), v.literal("female")),
+  }).index("userId", ["userId"]),
+
   water: defineTable({
-    uid: v.string(),
+    userId: v.id("users"),
     date: v.string(), // or use "number" if you store timestamps
-    water_intake: v.int64(),
-  }),
+    waterIntake: v.int64(),
+  }).index("userId", ["userId"]),
   goals: defineTable({
-    uid: v.string(),
-    water_goal: v.int64(),
-  }),
+    userId: v.id("users"),
+    waterGoal: v.int64(),
+  }).index("userId", ["userId"]),
 });

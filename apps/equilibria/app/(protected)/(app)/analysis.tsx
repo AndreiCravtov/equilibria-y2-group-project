@@ -1,7 +1,7 @@
 import { ExternalLink } from "@tamagui/lucide-icons";
 import { Anchor, H2, Paragraph, XStack, YStack } from "tamagui";
 import { ToastControl } from "@/app/CurrentToast";
-import { SignIn } from "../SignIn";
+import SignIn from "@/app/SignIn";
 import { Authenticated, Unauthenticated } from "convex/react";
 
 export default function TabOneScreen() {

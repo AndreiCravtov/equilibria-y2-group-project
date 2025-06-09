@@ -1153,6 +1153,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@csark0812/zustand-expo-devtools@npm:^2.0.2":
+  version: 2.0.2
+  resolution: "@csark0812/zustand-expo-devtools@npm:2.0.2"
+  peerDependencies:
+    expo: "*"
+    zustand: ^5.0.5
+  checksum: 10c0/5d0c933aa006adead60e22384df2457df856b49456fbf6324b6c7ee7eefa2b5488b8dc983b396dbb7a70ab4a6a53830b96cb79ed1a78533ce2194fbb3f1081f3
+  languageName: node
+  linkType: hard
+
 "@cspotcode/source-map-support@npm:^0.8.0":
   version: 0.8.1
   resolution: "@cspotcode/source-map-support@npm:0.8.1"
@@ -2448,6 +2458,13 @@ __metadata:
   version: 1.1.4
   resolution: "@kamilkisiela/fast-url-parser@npm:1.1.4"
   checksum: 10c0/2c85202cb4924720ac812c8bc06967fd5df4db759a68aa3acc2962b8cf9e2b3bc131de863f00473c0b0602df13891b35140f667a87eea04c9b897b6c1ae89c4a
+  languageName: node
+  linkType: hard
+
+"@mobily/ts-belt@npm:^3.13.1":
+  version: 3.13.1
+  resolution: "@mobily/ts-belt@npm:3.13.1"
+  checksum: 10c0/f988afcf61299861105b52fa2abda62356d3f40ca19ad05667b990774e380dadafd758bacc02b075df9c4b8eab5b910078f28775780ebb137844121968035270
   languageName: node
   linkType: hard
 
@@ -7727,9 +7744,11 @@ __metadata:
     "@auth/core": "npm:0.37.0"
     "@babel/core": "npm:^7.25.2"
     "@convex-dev/auth": "npm:^0.0.86"
+    "@csark0812/zustand-expo-devtools": "npm:^2.0.2"
     "@expo/metro-config": "npm:^0.20.14"
     "@expo/metro-runtime": "npm:^5.0.4"
     "@expo/vector-icons": "npm:^14.1.0"
+    "@mobily/ts-belt": "npm:^3.13.1"
     "@react-native-masked-view/masked-view": "npm:0.3.2"
     "@react-navigation/bottom-tabs": "npm:^7.3.10"
     "@react-navigation/elements": "npm:^2.3.8"
@@ -7781,8 +7800,10 @@ __metadata:
     react-native-webview: "npm:13.13.5"
     tamagui: "npm:^1.126.13"
     ts-node: "npm:^10.9.2"
+    ts-pattern: "npm:^5.7.1"
     typescript: "npm:~5.8.3"
     valibot: "npm:^1.1.0"
+    zustand: "npm:^5.0.5"
   languageName: unknown
   linkType: soft
 
@@ -14501,6 +14522,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ts-pattern@npm:^5.7.1":
+  version: 5.7.1
+  resolution: "ts-pattern@npm:5.7.1"
+  checksum: 10c0/815592dcc8058c90f2329ca88ab4377eb89d794520055fb9a937424babeb87be29f60ad51505206e4ac130b7cbc70ae7c0b3c615469e7f379b7c749c0911265f
+  languageName: node
+  linkType: hard
+
 "tsconfig-paths@npm:^3.15.0":
   version: 3.15.0
   resolution: "tsconfig-paths@npm:3.15.0"
@@ -15397,5 +15425,26 @@ __metadata:
   version: 0.1.0
   resolution: "yocto-queue@npm:0.1.0"
   checksum: 10c0/dceb44c28578b31641e13695d200d34ec4ab3966a5729814d5445b194933c096b7ced71494ce53a0e8820685d1d010df8b2422e5bf2cdea7e469d97ffbea306f
+  languageName: node
+  linkType: hard
+
+"zustand@npm:^5.0.5":
+  version: 5.0.5
+  resolution: "zustand@npm:5.0.5"
+  peerDependencies:
+    "@types/react": ">=18.0.0"
+    immer: ">=9.0.6"
+    react: ">=18.0.0"
+    use-sync-external-store: ">=1.2.0"
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+    immer:
+      optional: true
+    react:
+      optional: true
+    use-sync-external-store:
+      optional: true
+  checksum: 10c0/76228022ad589c8ef29227f184d8852277509f88c80afd537de0506a6ded2e7ecc01d21bb79f426867560e4d59553c526e88d01abc46bd32b133d97ff337e19b
   languageName: node
   linkType: hard
