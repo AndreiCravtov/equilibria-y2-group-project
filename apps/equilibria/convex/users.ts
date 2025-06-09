@@ -22,8 +22,7 @@ export const getUserId = async (ctx: { auth: Auth }): Promise<Id<"users">> => {
 export const getCurrentUser = query({
   args: {},
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    // if (!userId) return "cant findUser";
+    const userId = await getUserId(ctx);
 
     return await ctx.db
       .query("users")
