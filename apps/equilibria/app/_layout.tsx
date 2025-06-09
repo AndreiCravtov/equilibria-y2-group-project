@@ -2,12 +2,12 @@ import "@/tamagui-web.css";
 
 import { Platform } from "react-native";
 import { ConvexAuthProvider } from "@convex-dev/auth/react";
-import { ConvexReactClient } from "convex/react";
+import { ConvexReactClient, useConvexAuth } from "convex/react";
 import * as SecureStore from "expo-secure-store";
 import { env } from "@/env";
 import { ReactNode } from "react";
 import { useColorScheme } from "react-native";
-import { TamaguiProvider, type TamaguiProviderProps } from "tamagui";
+import { TamaguiProvider, useTheme, type TamaguiProviderProps } from "tamagui";
 import { ToastProvider, ToastViewport } from "@tamagui/toast";
 import { CurrentToast } from "./CurrentToast";
 import { tamaguiConfig } from "@/tamagui.config";
@@ -20,6 +20,7 @@ import {
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { SplashScreen, Stack } from "expo-router";
+import { LoadingView } from "@/components/Loading";
 
 // ----------------------------- CONVEX SETUP START -----------------------------
 const convex = new ConvexReactClient(env.EXPO_PUBLIC_CONVEX_URL, {
@@ -84,26 +85,6 @@ export function AppTamaguiProvider({
 // ----------------------------- TAMAGUI SETUP END -----------------------------
 
 // ----------------------------- LAYOUT SETUP START -----------------------------
-function RootLayoutNav() {
-  return (
-    <Stack>
-      <Stack.Screen
-        name="(protected)"
-        options={{
-          headerShown: false,
-        }}
-      />
-
-      <Stack.Screen
-        name="login"
-        options={{
-          headerShown: false,
-        }}
-      />
-    </Stack>
-  );
-}
-
 export {
   // Catch any errors thrown by the Layout component.
   ErrorBoundary,
@@ -141,6 +122,70 @@ export default function RootLayout() {
         </ThemeProvider>
       </AppTamaguiProvider>
     </AppConvexProvider>
+  );
+}
+
+export const unstable_settings = {
+  initialRouteName: "(app)", // anchor
+};
+
+function RootLayoutNav() {
+  const theme = useTheme();
+
+  // Ensure is authenticated
+  const auth = useConvexAuth();
+  if (auth.isLoading) return <LoadingView />;
+
+  return (
+    <Stack>
+      {/* If not authenticated, take me to this section of the app */}
+      <Stack.Protected guard={!auth.isAuthenticated}>
+        <Stack.Screen
+          name="login"
+          options={{
+            headerShown: false,
+          }}
+        />
+      </Stack.Protected>
+
+      {/* Otherwise proceed to the main app */}
+      <Stack.Protected guard={auth.isAuthenticated}>
+        <Stack.Screen
+          name="(app)"
+          options={{
+            headerShown: false,
+          }}
+        />
+
+        <Stack.Screen
+          name="add-water"
+          options={{
+            title: "Add Water",
+            presentation: "modal",
+            animation: "slide_from_right",
+            gestureEnabled: true,
+            gestureDirection: "horizontal",
+            contentStyle: {
+              backgroundColor: theme.background.val,
+            },
+          }}
+        />
+
+        <Stack.Screen
+          name="modal"
+          options={{
+            title: "Tamagui + Expo",
+            presentation: "modal",
+            animation: "slide_from_right",
+            gestureEnabled: true,
+            gestureDirection: "horizontal",
+            contentStyle: {
+              backgroundColor: theme.background.val,
+            },
+          }}
+        />
+      </Stack.Protected>
+    </Stack>
   );
 }
 // ----------------------------- LAYOUT SETUP END -----------------------------

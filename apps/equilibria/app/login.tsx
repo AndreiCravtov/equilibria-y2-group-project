@@ -79,9 +79,6 @@ export default function LoginScreen() {
   const authState = useConvexAuth();
   if (authState.isLoading) return <LoadingView />;
 
-  // If authenticated, go to home page
-  if (authState.isAuthenticated) return <Redirect href={"/"} />;
-
   return (
     <YStack
       flex={1}
