@@ -10,7 +10,7 @@ import {
   ChartColumn,
 } from "@tamagui/lucide-icons";
 
-export default function TabLayout() {
+export default function TabsLayout() {
   const theme = useTheme();
 
   return (

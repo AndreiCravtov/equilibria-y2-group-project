@@ -20,8 +20,6 @@ import {
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { SplashScreen, Stack } from "expo-router";
-import { useTheme } from "tamagui";
-import { Provider as JotaiProvider } from "jotai/react";
 
 // ----------------------------- CONVEX SETUP START -----------------------------
 const convex = new ConvexReactClient(env.EXPO_PUBLIC_CONVEX_URL, {

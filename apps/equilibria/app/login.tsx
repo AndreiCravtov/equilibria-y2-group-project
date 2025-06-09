@@ -15,7 +15,6 @@ import {
   View,
   YStack,
 } from "tamagui";
-import { SignIn } from "./(protected)/SignIn";
 import { LoadingView } from "@/components/Loading";
 import { Link, Redirect } from "expo-router";
 import { useState } from "react";

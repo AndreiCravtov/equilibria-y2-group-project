@@ -9,7 +9,7 @@ import { useState } from "react";
 import { Button, Input, YStack, Text } from "tamagui";
 import { api } from "@/convex/_generated/api";
 
-export function SignIn() {
+export default function SignIn() {
   const foo = useQuery(api.users.getCurrentUser);
 
   const { signIn, signOut } = useAuthActions();
