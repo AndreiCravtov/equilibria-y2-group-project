@@ -126,12 +126,10 @@ export default function RootLayout() {
 }
 
 export const unstable_settings = {
-  initialRouteName: "(app)", // anchor
+  initialRouteName: "(protected)", // anchor
 };
 
 function RootLayoutNav() {
-  const theme = useTheme();
-
   // Ensure is authenticated
   const auth = useConvexAuth();
   if (auth.isLoading) return <LoadingView />;
@@ -141,7 +139,7 @@ function RootLayoutNav() {
       {/* If not authenticated, take me to this section of the app */}
       <Stack.Protected guard={!auth.isAuthenticated}>
         <Stack.Screen
-          name="login"
+          name="sign-in"
           options={{
             headerShown: false,
           }}
@@ -151,37 +149,9 @@ function RootLayoutNav() {
       {/* Otherwise proceed to the main app */}
       <Stack.Protected guard={auth.isAuthenticated}>
         <Stack.Screen
-          name="(app)"
+          name="(protected)"
           options={{
             headerShown: false,
-          }}
-        />
-
-        <Stack.Screen
-          name="add-water"
-          options={{
-            title: "Add Water",
-            presentation: "modal",
-            animation: "slide_from_right",
-            gestureEnabled: true,
-            gestureDirection: "horizontal",
-            contentStyle: {
-              backgroundColor: theme.background.val,
-            },
-          }}
-        />
-
-        <Stack.Screen
-          name="modal"
-          options={{
-            title: "Tamagui + Expo",
-            presentation: "modal",
-            animation: "slide_from_right",
-            gestureEnabled: true,
-            gestureDirection: "horizontal",
-            contentStyle: {
-              backgroundColor: theme.background.val,
-            },
           }}
         />
       </Stack.Protected>

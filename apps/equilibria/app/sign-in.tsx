@@ -40,7 +40,7 @@ const CONTENT = {
   },
 };
 
-export default function LoginScreen() {
+export default function SignInScreen() {
   // Configure form state
   const [status, setStatus] = useState<"off" | "submitting" | "submitted">(
     "off"
