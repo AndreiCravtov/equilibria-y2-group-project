@@ -1,12 +1,12 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { getUserId } from "./users";
 
 export const getUserGoal = query({
   args: {},
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) return;
+    const userId = await getUserId(ctx);
 
     const entry = await ctx.db
       .query("goals")
@@ -26,8 +26,8 @@ export const addGoal = mutation({
     waterGoal: v.int64(),
   },
   handler: async (ctx, { waterGoal }) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) return;
+    const userId = await getUserId(ctx);
+
     await ctx.db.insert("goals", { userId, waterGoal });
   },
 });

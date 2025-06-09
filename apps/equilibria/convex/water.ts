@@ -4,23 +4,6 @@ import { v } from "convex/values";
 import { getUserId, tryGetUserId } from "./users";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
-export const getWaterByUserAndDate = query({
-  args: {
-    userId: v.string(), // pass user ID from Convex auth
-    date: v.string(),
-  },
-  handler: async (ctx, { userId, date }) => {
-    const entries = await ctx.db
-      .query("water")
-      .filter((q) =>
-        q.and(q.eq(q.field("userId"), userId), q.eq(q.field("date"), date))
-      )
-      .collect();
-
-    return entries;
-  },
-});
-
 export const getWaterByDate = query({
   args: {
     date: v.string(),
