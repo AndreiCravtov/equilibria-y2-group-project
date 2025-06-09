@@ -1,5 +1,12 @@
-import { Stack } from "expo-router";
+import { Redirect, Stack } from "expo-router";
 import { useTheme } from "tamagui";
+import {
+  Authenticated,
+  Unauthenticated,
+  useQuery,
+  useConvexAuth,
+} from "convex/react";
+import { LoadingView } from "@/components/Loading";
 
 export const unstable_settings = {
   initialRouteName: "(tabs)", // anchor
@@ -7,6 +14,13 @@ export const unstable_settings = {
 
 export default function ProtectedLayout() {
   const theme = useTheme();
+
+  // Load authentication state
+  const authState = useConvexAuth();
+  if (authState.isLoading) return <LoadingView />;
+
+  // If not authenticated, go to login screen
+  if (!authState.isAuthenticated) return <Redirect href={"/login"} />;
 
   return (
     <Stack>

@@ -24,5 +24,5 @@ STACK:
 - Valibot => [Standard Schema](https://github.com/standard-schema/standard-schema)-compliant schema validator library of choice
 - t3-env => typesafe .env configurations
 - Convex => Fullstack backend, DB, Auth, etc.
-- jotai => frontent state management
+- zustand => frontent state management
 - ts-belt, ts-pattern => FP-like utility

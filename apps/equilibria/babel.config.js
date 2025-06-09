@@ -1,12 +1,7 @@
 module.exports = (api) => {
   api.cache(true);
   return {
-    presets: [
-      ["babel-preset-expo", { jsxRuntime: "automatic" }],
-
-      // NOTE: when custom Jotai atoms used, add them here
-      ["jotai/babel/preset", { customAtomNames: [] }],
-    ],
+    presets: [["babel-preset-expo", { jsxRuntime: "automatic" }]],
     plugins: [
       [
         "@tamagui/babel-plugin",

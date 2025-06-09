@@ -95,6 +95,13 @@ function RootLayoutNav() {
           headerShown: false,
         }}
       />
+
+      <Stack.Screen
+        name="login"
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }
