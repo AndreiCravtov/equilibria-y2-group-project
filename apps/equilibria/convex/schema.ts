@@ -19,6 +19,7 @@ export default defineSchema({
     date: v.string(), // or use "number" if you store timestamps
     waterIntake: v.int64(),
   }).index("userId", ["userId"]),
+
   goals: defineTable({
     userId: v.id("users"),
     waterGoal: v.int64(),
