@@ -116,6 +116,8 @@ export default function SignInScreen() {
               <Input
                 id="username"
                 placeholder="Enter username"
+                inputMode="text"
+                autoCapitalize="none"
                 onChangeText={setUsername}
                 value={username}
               />
