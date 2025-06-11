@@ -4,6 +4,10 @@ import { v } from "convex/values";
 import { getUserId, tryGetUserId } from "./users";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
+export function extractDate(d: String) {
+  return d.split("T")[0];
+}
+
 export const getWaterByDate = query({
   args: {
     date: v.string(),
@@ -11,12 +15,13 @@ export const getWaterByDate = query({
   handler: async (ctx, { date }) => {
     const userId = await getUserId(ctx);
 
-    return await ctx.db
+    const entries = await ctx.db
       .query("water")
-      .filter((q) =>
-        q.and(q.eq(q.field("userId"), userId), q.eq(q.field("date"), date))
-      )
+      .filter((q) => q.and(q.eq(q.field("userId"), userId)))
       .collect();
+
+    // filter the entries to return only those matching a condition
+    return entries.filter((entry) => extractDate(entry.date) === date);
   },
 });
 

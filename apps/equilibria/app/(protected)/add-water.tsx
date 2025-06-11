@@ -19,7 +19,7 @@ import {
   Separator,
 } from "tamagui";
 import {
-  AlarmClock,
+  GlassWater,
   ActivitySquare,
   AirVent,
   Edit3,
@@ -27,13 +27,15 @@ import {
 import { api } from "@/convex/_generated/api";
 import { useState } from "react";
 import { Result } from "@/util/result";
+import { extractDate } from "@/components/date-selector";
+import { date_to_string } from "@/components/date-selector";
 
 export default function AddWaterScreen() {
+  const date = new Date();
   const theme = useTheme();
-  const date = "2025-04-06"; // placeholder value
 
   const waterEntries = useQuery(api.water.getWaterByDate, {
-    date: date,
+    date: extractDate(date),
   });
 
   const addWater = useMutation(api.water.addWaterEntry);
@@ -43,7 +45,7 @@ export default function AddWaterScreen() {
 
   console.log(`waterEntries: ${waterEntries}`);
   const handleAddEntry = async (amount: number | bigint) => {
-    await addWater({ date, waterIntake: BigInt(amount) });
+    await addWater({ date: date.toISOString(), waterIntake: BigInt(amount) });
     setNewAmount("");
   };
 
@@ -87,7 +89,7 @@ export default function AddWaterScreen() {
             { value: 250, bgColor: "$indigo2" },
             { value: 500, bgColor: "$blue12Dark" },
           ].map(({ value, bgColor }) =>
-            createGroupButton({ icon: AlarmClock, value, bgColor })
+            createGroupButton({ icon: GlassWater, value, bgColor }),
           )}
         </Group>
         <YStack space="$2">
@@ -112,7 +114,7 @@ export default function AddWaterScreen() {
         <Separator my={15} bg="$indigo8Dark" />
 
         <H3 fontWeight="bold" textAlign="center" color="$indigo8Dark">
-          {date} entries
+          {date_to_string(date)} entries
         </H3>
 
         {/* Show entries */}
