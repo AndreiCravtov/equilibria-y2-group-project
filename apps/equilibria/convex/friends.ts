@@ -4,30 +4,49 @@ import {getUserId} from "@/convex/users";
 
 export const addFriend = mutation({
   args: {
-    friendId: v.id('users'),
+    username: v.string(),
   },
   handler: async (ctx, args) => {
     const userId = await getUserId(ctx);
-    const friendId = args.friendId; // Assuming friendId is valid
+    const username = args.username;
+
+    // Find the user by username
+    const matchingUsers = await ctx.db
+      .query('users')
+      .withIndex('username',
+        (q) => q.eq('username', username)
+      )
+      .collect();
+
+    if (matchingUsers.length === 0) {
+      throw new Error('User not found.');
+    }
+
+    const friend = matchingUsers[0];
+    const friendId = friend._id;
+
+    if (friendId === userId) {
+      throw new Error("You can't add yourself as a friend.");
+    }
 
     // Prevent duplicate friendships
     const existing = await ctx.db
       .query('friends')
       .withIndex('userId', (q) => q.eq('userId', userId))
-      .collect()
+      .collect();
 
-    const alreadyFriends = existing.some(f => f.friendId === friendId)
+    const alreadyFriends = existing.some((f) => f.friendId === friendId);
 
     if (alreadyFriends) {
-      throw new Error('You are already friends.')
+      throw new Error('You are already friends.');
     }
 
     await ctx.db.insert('friends', {
       userId,
       friendId,
-    })
+    });
   },
-})
+});
 
 export const getFriendList = query({
   args: {},

@@ -19,8 +19,7 @@ export default function SettingsScreen() {
       return
     }
     try {
-      const friendId = username as Id<"users">;
-      await addFriend({friendId})
+      await addFriend({username})
       setMessage(`Friend request sent to ${username}`)
       setUsername("")
     } catch (err) {
