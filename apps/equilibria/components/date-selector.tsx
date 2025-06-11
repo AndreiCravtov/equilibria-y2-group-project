@@ -80,8 +80,8 @@ export default function DateSelector() {
   const now = new Date();
   const canAdvance = !sameDay(now, day);
   return (
-    <YStack>
-      <XStack alignItems="center" justifyContent="space-between">
+    <YStack flex={1}>
+      <XStack items="center" justify="space-between">
         <Button
           style={{ zIndex: 1 }}
           onPress={() => {
@@ -128,7 +128,7 @@ export function DaysContent({ day }: { day: Date }) {
   function getTotalWaterIntake(entries: { waterIntake: number | bigint }[]) {
     return entries.reduce(
       (total, entry) => total + Number(entry.waterIntake),
-      0,
+      0
     );
   }
 
@@ -138,7 +138,7 @@ export function DaysContent({ day }: { day: Date }) {
   const waterPercentage = (totalWaterIntake / userGoal) * 100;
 
   return (
-    <ZStack width="100%" height="100%">
+    <ZStack flex={1} width="100%">
       {/* Render content that's NOT under water - normal styling */}
       <Content
         bg="$background"
