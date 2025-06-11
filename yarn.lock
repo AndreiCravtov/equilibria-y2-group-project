@@ -7210,6 +7210,33 @@ __metadata:
   languageName: node
   linkType: hard
 
+"convex-helpers@npm:^0.1.92":
+  version: 0.1.92
+  resolution: "convex-helpers@npm:0.1.92"
+  peerDependencies:
+    "@standard-schema/spec": ^1.0.0
+    convex: ^1.13.0
+    hono: ^4.0.5
+    react: ^17.0.2 || ^18.0.0 || ^19.0.0
+    typescript: ^5.5
+    zod: ^3.22.4
+  peerDependenciesMeta:
+    "@standard-schema/spec":
+      optional: true
+    hono:
+      optional: true
+    react:
+      optional: true
+    typescript:
+      optional: true
+    zod:
+      optional: true
+  bin:
+    convex-helpers: bin.cjs
+  checksum: 10c0/562eb55a255ce71d65f8cb8a04b5746d61d26030897db95b3ae2aabc19475fdf14647eca35ff8eca560a357397f5d8b6bd77510902d6bc93af75a75ecd6e8660
+  languageName: node
+  linkType: hard
+
 "convex@npm:^1.24.2":
   version: 1.24.2
   resolution: "convex@npm:1.24.2"
@@ -7768,6 +7795,7 @@ __metadata:
     babel-preset-expo: "npm:^13.1.11"
     burnt: "npm:^0.13.0"
     convex: "npm:^1.24.2"
+    convex-helpers: "npm:^0.1.92"
     dotenv: "npm:^16.5.0"
     eslint: "npm:^9.25.0"
     eslint-config-expo: "npm:~9.2.0"
