@@ -57,13 +57,39 @@ const months = [
   "November",
   "December",
 ];
+
+export function extractDate(d: Date) {
+  return d.toISOString().split("T")[0];
+}
+
+function sameDay(d1: Date, d2: Date) {
+  return (
+    d1.getFullYear() === d2.getFullYear() &&
+    d1.getMonth() === d2.getMonth() &&
+    d1.getDate() === d2.getDate()
+  );
+}
+
+export function date_to_string(d: Date): string {
+  return `${days[d.getDay()]} ${d.getDate()}`;
+}
+
 export default function DateSelector() {
   let [day, setDay] = useState(new Date());
-  let displayDate = `${days[day.getDay()]} ${day.getDate()}`;
+  let displayDate = date_to_string(day);
+  const now = new Date();
+  const canAdvance = !sameDay(now, day);
   return (
     <YStack>
       <XStack alignItems="center" justifyContent="space-between">
-        <Button>
+        <Button
+          style={{ zIndex: 1 }}
+          onPress={() => {
+            let d = new Date(day);
+            d.setDate(day.getDate() - 1);
+            setDay(d);
+          }}
+        >
           <ArrowLeft />
         </Button>
         <Text
@@ -78,7 +104,14 @@ export default function DateSelector() {
         >
           {displayDate}
         </Text>
-        <Button>
+        <Button
+          disabled={!canAdvance}
+          onPress={() => {
+            let d = new Date(day);
+            d.setDate(day.getDate() + 1);
+            setDay(d);
+          }}
+        >
           <ArrowRight />
         </Button>
       </XStack>
@@ -88,8 +121,9 @@ export default function DateSelector() {
 }
 
 export function DaysContent({ day }: { day: Date }) {
-  const date = "2025-04-06"; // placeholder value
-  const waterEntries = useQuery(api.water.getWaterByDate, { date: date });
+  const waterEntries = useQuery(api.water.getWaterByDate, {
+    date: extractDate(day),
+  });
 
   function getTotalWaterIntake(entries: { waterIntake: number | bigint }[]) {
     return entries.reduce(
@@ -112,7 +146,6 @@ export function DaysContent({ day }: { day: Date }) {
         totalWaterIntake={totalWaterIntake}
         userGoal={userGoal}
       />
-
       {/* Create masked view based on water progress */}
       <MaskedView
         style={{
@@ -129,7 +162,6 @@ export function DaysContent({ day }: { day: Date }) {
           userGoal={userGoal}
         />
       </MaskedView>
-
       {/* Create hidden clickable item to act as the button */}
       <Link href="/add-water" asChild>
         <Pressable
