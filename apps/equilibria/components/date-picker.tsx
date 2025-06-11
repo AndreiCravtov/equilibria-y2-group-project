@@ -1,5 +1,7 @@
 import { ArrowLeft, ArrowRight } from "@tamagui/lucide-icons";
+import { LinearGradientPoint } from "expo-linear-gradient";
 import { Button, SizableText, XStack, YStack, ZStack } from "tamagui";
+import { LinearGradient } from "tamagui/linear-gradient";
 import { match, P } from "ts-pattern";
 
 interface ArrowButtonProps {
@@ -52,6 +54,39 @@ function DateItem(props: DateItemProps) {
   );
 }
 
+interface GradientFadeProps {
+  direction: "left" | "right";
+}
+
+const GradientFade = LinearGradient.styleable<GradientFadeProps>(
+  // SEE: the `_ref` is a hack to suppress backwards compatibility issue https://github.com/tamagui/tamagui/issues/3132
+  (props, _ref?: never) => {
+    const { direction, ...otherProps } = props;
+    const { start, end } = match(direction)
+      .with("left", () => ({
+        start: [0, 0.5] satisfies LinearGradientPoint,
+        end: [1, 0.5] satisfies LinearGradientPoint,
+      }))
+      .with("right", () => ({
+        start: [1, 0.5] satisfies LinearGradientPoint,
+        end: [0, 0.5] satisfies LinearGradientPoint,
+      }))
+      .exhaustive();
+
+    return (
+      <LinearGradient
+        width="$10"
+        height="100%"
+        colors={["$gray5", "$colorTransparent"]}
+        locations={[0.1, 1]}
+        start={start}
+        end={end}
+        {...otherProps}
+      />
+    );
+  }
+);
+
 export default function DatePicker() {
   return (
     <XStack height="$7" width="100%" items="center" px="$2" gap="$2" bg="pink">
@@ -64,9 +99,24 @@ export default function DatePicker() {
         rounded="$radius.12"
         overflow="hidden"
       >
-        <YStack width="100%" height="100%" py="$1.5" px="$2">
+        <XStack
+          width="100%"
+          height="100%"
+          gap="$1.5"
+          justify="center"
+          py="$1.5"
+          px="$2"
+        >
+          <DateItem />
+          <DateItem />
           <DateItem selected />
-        </YStack>
+          <DateItem />
+          <DateItem />
+        </XStack>
+
+        {/* Fade styling */}
+        <GradientFade self="flex-start" direction="left" />
+        <GradientFade self="flex-end" direction="right" />
       </ZStack>
 
       <ArrowButton direction="right" />
