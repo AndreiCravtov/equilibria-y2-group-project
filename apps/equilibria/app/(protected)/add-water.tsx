@@ -19,7 +19,7 @@ import {
   Separator,
 } from "tamagui";
 import {
-  AlarmClock,
+  GlassWater,
   ActivitySquare,
   AirVent,
   Edit3,
@@ -89,7 +89,7 @@ export default function AddWaterScreen() {
             { value: 250, bgColor: "$indigo2" },
             { value: 500, bgColor: "$blue12Dark" },
           ].map(({ value, bgColor }) =>
-            createGroupButton({ icon: AlarmClock, value, bgColor }),
+            createGroupButton({ icon: GlassWater, value, bgColor }),
           )}
         </Group>
         <YStack space="$2">
