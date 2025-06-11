@@ -45,4 +45,9 @@ export default defineSchema({
     userId: v.id("users"),
     waterGoal: v.int64(),
   }).index("userId", ["userId"]),
+
+  friends: defineTable({
+    userId: v.id("users"),
+    friendId: v.id("users"),
+  }).index("userId", ["userId"]),
 });
