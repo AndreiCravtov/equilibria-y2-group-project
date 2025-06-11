@@ -1,19 +1,22 @@
 import {useQuery} from "convex/react";
 import {View, Text, H2, H3, YStack, XStack, Separator, ScrollView} from 'tamagui'
 import {api} from "@/convex/_generated/api";
-import {Id} from "@/convex/_generated/dataModel";
 import {BarChart} from "react-native-gifted-charts";
 
 
 export default function LeaderboardStaticView() {
 
   const leaderboardList = useQuery(api.friends.getLeaderboardList);
+  const user = useQuery(api.users.getCurrentUser);
   const weekData = useQuery(api.scores.getWeekData);
-  if (!leaderboardList || !weekData) {
+  if (!leaderboardList || !weekData || !user) {
     return <Text>Loading friends data...</Text>;
   }
 
   console.log("leaderboardList: ", leaderboardList);
+  const [first, second, third] = leaderboardList || [];
+  const yourIndex = leaderboardList.findIndex(item => (item?.id || 0)  === user._id);
+  const you = leaderboardList[yourIndex];
   console.log("weekData: ", weekData);
 
 
@@ -22,9 +25,18 @@ export default function LeaderboardStaticView() {
       <YStack gap="$3" alignItems="center">
         {/* Top 3 */}
         <YStack width="100%" gap="$2">
-          <LeaderboardRow place={1} name="Alice" score={420} color="#FBBF24"/>
-          <LeaderboardRow place={2} name="Bob" score={420} color="$gray11Dark"/>
-          <LeaderboardRow place={3} name="Charlie" score={420} color="#A18072"/>
+          <LeaderboardRow place={1}
+                          name={first?.username || "First placeholder"}
+                          score={String(first?.score || 0)}
+                          background="#FBBF24"/>
+          <LeaderboardRow place={2}
+                          name={second?.username || "Second placeholder"}
+                          score={String(second?.score || 0)}
+                          background="$gray11Dark"/>
+          <LeaderboardRow place={3}
+                          name={third?.username || "Third placeholder"}
+                          score={String(third?.score || 0)}
+                          background="#A18072"/>
         </YStack>
 
         {/* Separator */}
@@ -35,7 +47,7 @@ export default function LeaderboardStaticView() {
         </XStack>
 
         {/* User */}
-        <LeaderboardRow place={42} name="You" score={24.1} color="#3B82F6"/>
+        <LeaderboardRow place={yourIndex + 1} name="You" score={you.score} background="#0954A5" color={"#FFFFFF"}/>
         <View
           style={{
             alignSelf: 'stretch',
@@ -51,11 +63,12 @@ export default function LeaderboardStaticView() {
 }
 
 // Leaderboard Row Component
-function LeaderboardRow({place, name, score, color}: {
+function LeaderboardRow({place, name, score, color, background}: {
   place: number,
   name: string,
   score: number | string,
-  color: string
+  color: string,
+  background: string,
 }) {
   return (
     <XStack
@@ -64,11 +77,11 @@ function LeaderboardRow({place, name, score, color}: {
       alignItems="center"
       padding="$3"
       borderRadius="$4"
-      backgroundColor={color}
+      backgroundColor={background}
       width="100%"
     >
-      <Text fontWeight="bold">{place}. {name}</Text>
-      <Text>{score} score</Text>
+      <Text fontWeight="bold" color={color}>{place}. {name}</Text>
+      <Text color={color}>{score} score</Text>
     </XStack>
   )
 }
