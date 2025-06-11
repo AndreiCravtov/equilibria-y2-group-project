@@ -50,4 +50,10 @@ export default defineSchema({
     userId: v.id("users"),
     friendId: v.id("users"),
   }).index("userId", ["userId"]),
+
+  scores: defineTable({
+    userId: v.id("users"),
+    date: v.string(),
+    score: v.int64(),
+  }).index("userId", ["userId"]),
 });

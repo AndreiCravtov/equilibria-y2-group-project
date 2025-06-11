@@ -45,7 +45,7 @@ export const getFriendList = query({
 
 export const getLeaderboardList = query({
   args: {},
-  handler: async (ctx, args) => {
+  handler: async (ctx) => {
     const userId = await getUserId(ctx);
 
     const friendLinks = await ctx.db
@@ -53,11 +53,29 @@ export const getLeaderboardList = query({
       .withIndex("userId", (q) => q.eq("userId", userId))
       .collect();
 
-    const friendIds = friendLinks.map(link => link.friendId);
+    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    const userIds = [userId, ...friendLinks.map((f) => f.friendId)];
+    const leaderboard = await Promise.all(
+      userIds.map(async (uid) => {
+        const user = await ctx.db.get(uid);
+        if (!user) return null;
+        const scoreEntry = await ctx.db
+          .query("scores")
+          .filter((q) =>
+            q.and(
+              q.eq(q.field("userId"), uid),
+              q.eq(q.field("date"), today)
+            )
+          )
+          .first();
 
-    // Combine with current userId
-    const allIds = [...new Set([...friendIds, userId])];
-
-    return allIds; // array of userId strings
+        return {
+          id: uid,
+          username: user.username,
+          score: scoreEntry?.score ?? 0,
+        };
+      })
+    );
+    return leaderboard;
   },
 });

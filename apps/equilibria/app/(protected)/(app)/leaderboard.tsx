@@ -1,6 +1,7 @@
 import { useQuery } from "convex/react";
 import { View, Text, H2, H3, YStack, XStack, Spacer } from 'tamagui'
 import { api } from "@/convex/_generated/api";
+import {Id} from "@/convex/_generated/dataModel";
 
 export default function LeaderboardStaticView() {
 
@@ -11,15 +12,8 @@ export default function LeaderboardStaticView() {
 
   console.log("leaderboardList: ", leaderboardList);
 
-  const leaderboardItems = leaderboardList.map(
-    (id) => {return getLeaderboardData(id)}
-  )
-
-  console.log("leaderboardItems: ",  leaderboardItems);
-
   return (
-
-    <YStack gap="$3" padding="$4" backgroundColor="$background" alignItems="center">
+    <YStack gap="$3" p="$4" alignItems="center">
       {/* Top 3 */}
       <YStack width="100%" gap="$2">
         <LeaderboardRow place={1} name="Alice" score={420} color="#FBBF24" />
@@ -28,7 +22,7 @@ export default function LeaderboardStaticView() {
       </YStack>
 
       {/* Separator */}
-      <XStack gap="$2" marginVertical="$2">
+      <XStack gap="$2" my="$2">
         <Dot />
         <Dot />
         <Dot />
