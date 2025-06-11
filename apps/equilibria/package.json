@@ -33,6 +33,7 @@
     "babel-preset-expo": "^13.1.11",
     "burnt": "^0.13.0",
     "convex": "^1.24.2",
+    "convex-helpers": "^0.1.92",
     "dotenv": "^16.5.0",
     "expo": "^53.0.9",
     "expo-blur": "~14.1.4",

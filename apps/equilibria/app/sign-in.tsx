@@ -46,6 +46,7 @@ export default function SignInScreen() {
     "off"
   );
   const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [step, setStep] = useState<"signUp" | "signIn">("signIn");
 
@@ -54,7 +55,7 @@ export default function SignInScreen() {
   async function onSubmit() {
     setStatus("submitting");
     try {
-      await signIn("password", { email, password, flow: step });
+      await signIn("password", { flow: step, email, username, password });
       setStatus("submitted");
     } catch (e) {
       setStatus("off");
@@ -64,6 +65,7 @@ export default function SignInScreen() {
 
   function onChangeStep() {
     setEmail("");
+    setUsername("");
     setPassword("");
     setStep((step) => {
       switch (step) {
@@ -105,6 +107,20 @@ export default function SignInScreen() {
               value={email}
             />
           </View>
+
+          {step === "signUp" ? (
+            <View>
+              <Label htmlFor="username" lineHeight="$6">
+                Username
+              </Label>
+              <Input
+                id="username"
+                placeholder="Enter username"
+                onChangeText={setUsername}
+                value={username}
+              />
+            </View>
+          ) : undefined}
 
           <View>
             <Label htmlFor="password" lineHeight="$6">
