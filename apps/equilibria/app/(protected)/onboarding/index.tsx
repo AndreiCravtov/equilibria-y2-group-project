@@ -1,5 +1,5 @@
 import { api } from "@/convex/_generated/api";
-import { useConvex, useConvexAuth } from "convex/react";
+import { useConvex, useConvexAuth, useMutation } from "convex/react";
 import {
   Button,
   Form,
@@ -42,11 +42,19 @@ export default function OnboardingScreen() {
   const [weight, setWeight] = useState("");
   const [height, setHeight] = useState("");
 
+  const submitProfile = useMutation(api.userProfiles.createUserProfile);
+
   // Submitting logic
   async function onSubmit() {
     setStatus("submitting");
     try {
-      // await signIn("password", { email, password });
+      await submitProfile({
+        name,
+        age: BigInt(age),
+        gender,
+        weight: BigInt(weight),
+        height: BigInt(height),
+      });
       setStatus("submitted");
     } catch (e) {
       setStatus("off");

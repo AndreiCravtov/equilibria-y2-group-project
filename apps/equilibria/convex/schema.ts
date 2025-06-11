@@ -28,8 +28,11 @@ export default defineSchema({
 
   userProfiles: defineTable({
     userId: v.id("users"),
+    name: v.string(),
     age: v.int64(),
     gender: v.union(v.literal("male"), v.literal("female")),
+    weight: v.int64(),
+    height: v.int64(),
   }).index("userId", ["userId"]),
 
   water: defineTable({
