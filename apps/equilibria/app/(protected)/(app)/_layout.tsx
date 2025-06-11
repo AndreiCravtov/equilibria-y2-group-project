@@ -8,6 +8,7 @@ import {
   House,
   Settings,
   ChartColumn,
+  BarChart,
 } from "@tamagui/lucide-icons";
 
 export default function TabsLayout() {
@@ -55,6 +56,13 @@ export default function TabsLayout() {
         options={{
           title: "Settings",
           tabBarIcon: ({ color }) => <Settings color={color as any} />,
+        }}
+      />
+      <Tabs.Screen
+        name="leaderboard"
+        options={{
+          title: "Leaderboard",
+          tabBarIcon: ({ color }) => <BarChart color={color as any} />,
         }}
       />
     </Tabs>

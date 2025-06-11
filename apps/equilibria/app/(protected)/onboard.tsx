@@ -57,6 +57,7 @@ export default function SignInScreen() {
       await signIn("password", { email, password, flow: step });
       setStatus("submitted");
     } catch (e) {
+      console.log("could not sign in");
       setStatus("off");
       throw e;
     }
