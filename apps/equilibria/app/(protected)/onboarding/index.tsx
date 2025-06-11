@@ -20,9 +20,6 @@ import {
 import { LoadingView } from "@/components/Loading";
 import { Link, Redirect } from "expo-router";
 import { useState } from "react";
-import { useAuthActions } from "@convex-dev/auth/react";
-import { Pressable } from "react-native";
-import { AlignLeft } from "@tamagui/lucide-icons";
 
 const Item = styled(ToggleGroup.Item, {
   variants: {
@@ -42,9 +39,10 @@ export default function OnboardingScreen() {
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
   const [gender, setGender] = useState<"male" | "female">("male");
+  const [weight, setWeight] = useState("");
+  const [height, setHeight] = useState("");
 
-  // Configure authentication flow
-  const { signIn } = useAuthActions();
+  // Submitting logic
   async function onSubmit() {
     setStatus("submitting");
     try {
@@ -55,10 +53,6 @@ export default function OnboardingScreen() {
       throw e;
     }
   }
-
-  // Load authentication state
-  const authState = useConvexAuth();
-  if (authState.isLoading) return <LoadingView />;
 
   return (
     <YStack
@@ -127,15 +121,37 @@ export default function OnboardingScreen() {
                 <Text>Female</Text>
               </Item>
             </ToggleGroup>
-            {/* <Input
-              id="gender"
-              placeholder="Enter your age"
-              inputMode="numeric"
-              onChangeText={setAge}
-              value={age}
-            /> */}
           </View>
 
+          {/* Weight input */}
+          <View>
+            <Label htmlFor="weight" lineHeight="$6">
+              Weight (kg)
+            </Label>
+            <Input
+              id="weight"
+              placeholder="Enter your weight in kg"
+              inputMode="numeric"
+              onChangeText={setWeight}
+              value={weight}
+            />
+          </View>
+
+          {/* Height input */}
+          <View>
+            <Label htmlFor="height" lineHeight="$6">
+              Height (cm)
+            </Label>
+            <Input
+              id="height"
+              placeholder="Enter your height in cm"
+              inputMode="numeric"
+              onChangeText={setHeight}
+              value={height}
+            />
+          </View>
+
+          {/* Submit form */}
           <View height="min-content" items="center" mt="$4" gap="$2">
             <Form.Trigger asChild disabled={status !== "off"}>
               <Button
