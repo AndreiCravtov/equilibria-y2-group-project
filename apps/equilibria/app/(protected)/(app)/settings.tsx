@@ -11,6 +11,7 @@ import React from "react";
 import { LinearGradient } from "react-native-svg";
 import { tryGetUserProfile } from "@/convex/userProfiles";
 import { useQuery } from "convex/react";
+import { useAuthActions } from "@convex-dev/auth/react";
 
 function isNumber(v: string) {
   return /^\d*$/.test(v);
@@ -25,11 +26,11 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
   const [name, setName] = useState(profile_err ? "" : profile.name);
   const [age, setAge] = useState(profile_err ? "" : profile.age.toString());
   const [weight, setWeight] = useState(
-    profile_err ? "" : profile.weight.toString(),
+    profile_err ? "" : profile.weight.toString()
   );
   const [gender, setGender] = useState(profile_err ? "" : profile.gender);
   const [height, setHeight] = useState(
-    profile_err ? "" : profile.height.toString(),
+    profile_err ? "" : profile.height.toString()
   );
   const updateProfile = useMutation(api.userProfiles.updateUserProfile);
   if (profile_err) {
@@ -157,6 +158,7 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
 export default function SettingsScreen({ set }) {
   const [username, setUsername] = useState("");
   const [message, setMessage] = useState("");
+  const { signOut } = useAuthActions();
 
   const addFriend = useMutation(api.friends.addFriend);
 
@@ -198,12 +200,18 @@ export default function SettingsScreen({ set }) {
       <UserDetails setMessage={setMessage} />
 
       {message !== "" && <Text color="red">{message}</Text>}
+
+      <Separator borderColor={"black"} />
+
+      <Button theme="red" themeInverse onPress={() => void signOut()}>
+        Sign Out
+      </Button>
     </YStack>
   );
 }
 
 export function ChooseGender(
-  props: SelectProps & { trigger?: React.ReactNode },
+  props: SelectProps & { trigger?: React.ReactNode }
 ) {
   const [val, setVal] = useState("something");
 
