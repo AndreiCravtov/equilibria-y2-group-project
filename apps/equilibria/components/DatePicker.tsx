@@ -4,6 +4,7 @@ import {
   nextDayTimestamp,
   previousDayTimestamp,
   SECS_IN_DAY,
+  timestampToDate,
 } from "@/util/date";
 import { ArrowLeft, ArrowRight } from "@tamagui/lucide-icons";
 import { LinearGradientPoint } from "expo-linear-gradient";
@@ -13,9 +14,11 @@ import { Button, SizableText, XStack, YStack, ZStack } from "tamagui";
 import { LinearGradient } from "tamagui/linear-gradient";
 import { match, P } from "ts-pattern";
 import { create, createStore } from "zustand";
+import AppAnimated from "@/components/app-animated";
 
 const DAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
-const NUM_EXTRA_DATES = 1;
+const NUM_EXTRA_DATES = 4;
+const BG_COLOR = "$gray3";
 
 export interface DatePickerStore {
   selectedDayTimestamp: number;
@@ -52,7 +55,13 @@ const ArrowButton = Button.styleable<ArrowButtonProps>(
       .exhaustive();
 
     return (
-      <Button size="$5" icon={<Icon size="$1.5" />} {...otherProps} circular />
+      <Button
+        bg={BG_COLOR}
+        size="$5"
+        icon={<Icon size="$1.5" />}
+        {...otherProps}
+        circular
+      />
     );
   }
 );
@@ -62,37 +71,41 @@ interface DateItemProps {
   selected?: boolean;
 }
 
-function DateItem(props: DateItemProps) {
+const DateItem = YStack.styleable<DateItemProps>((props, _ref?: never) => {
   const { selected = false, unixTimestampSecs, ...otherProps } = props;
 
   // Compute day from timestamp: multiply by 1,000 to get in milliseconds
-  const date = new Date(unixTimestampSecs * MS_IN_SEC);
+  const date = timestampToDate(unixTimestampSecs);
   const dayText = DAYS[date.getUTCDay()];
   const monthDate = date.getUTCDate();
+  const textColor = selected ? "$color12" : "$color11";
 
   return (
     <YStack
-      width="$5"
+      width={44}
       height="100%"
       justify="center"
       items="center"
       rounded="$radius.12"
-      bg={selected ? "$indigo12" : undefined}
+      bg={selected ? "$background" : undefined}
+      elevation={selected ? "$0.5" : undefined}
+      borderColor={selected ? "$borderColorFocus" : undefined}
+      {...otherProps}
     >
       <SizableText
-        lineHeight={22}
-        fontSize="$5"
+        lineHeight={20}
+        fontSize="$4"
         fontWeight="bold"
-        themeInverse={selected}
+        color={textColor}
       >
         {dayText}
       </SizableText>
-      <SizableText lineHeight={16} fontSize="$7" themeInverse={selected}>
+      <SizableText lineHeight={14} fontSize="$6" color={textColor}>
         {monthDate}
       </SizableText>
     </YStack>
   );
-}
+});
 
 interface GradientFadeProps {
   direction: "left" | "right";
@@ -117,7 +130,7 @@ const GradientFade = LinearGradient.styleable<GradientFadeProps>(
       <LinearGradient
         width="$6"
         height="100%"
-        colors={["$gray5", "$colorTransparent"]}
+        colors={[BG_COLOR, "$colorTransparent"]}
         locations={[0.1, 1]}
         start={start}
         end={end}
@@ -133,49 +146,38 @@ export function DatePicker() {
     useDatePicker();
 
   // compute the timestamps of previous days and days after
-  const beforeDayTimestamps = [];
-  for (let i = -NUM_EXTRA_DATES; i < 0; i++) {
-    beforeDayTimestamps.push(selectedDayTimestamp + i * SECS_IN_DAY);
+  const dayTimestamps = [];
+  for (let i = -NUM_EXTRA_DATES; i <= NUM_EXTRA_DATES; i++) {
+    dayTimestamps.push(selectedDayTimestamp + i * SECS_IN_DAY);
   }
-  const afterDayTimestamps = [];
-  for (let i = 1; i <= NUM_EXTRA_DATES; i++) {
-    afterDayTimestamps.push(selectedDayTimestamp + i * SECS_IN_DAY);
-  }
-
-  // compute first and last days
-  const firstDayTimestamp =
-    selectedDayTimestamp - (NUM_EXTRA_DATES + 1) * SECS_IN_DAY;
-  const lastDayTimestamp =
-    selectedDayTimestamp + (NUM_EXTRA_DATES + 1) * SECS_IN_DAY;
 
   return (
     <XStack height="$6" width="100%" items="center" px="$2" gap="$2">
       <ArrowButton direction="left" onPress={selectPreviousDay} />
 
       <ZStack
+        animation="medium"
         flex={1}
         height="100%"
-        bg="$gray5"
+        bg={BG_COLOR}
         rounded="$radius.12"
         overflow="hidden"
       >
         <XStack
           width="100%"
           height="100%"
-          gap="$1.5"
+          gap="$2"
           justify="center"
           py="$1.5"
           px="$2"
         >
-          <DateItem unixTimestampSecs={firstDayTimestamp} />
-          {beforeDayTimestamps.map((dayTimestamp) => (
-            <DateItem unixTimestampSecs={dayTimestamp} key={dayTimestamp} />
+          {dayTimestamps.map((dayTimestamp) => (
+            <DateItem
+              unixTimestampSecs={dayTimestamp}
+              key={Math.random()}
+              selected={dayTimestamp === selectedDayTimestamp}
+            />
           ))}
-          <DateItem unixTimestampSecs={selectedDayTimestamp} selected />
-          {afterDayTimestamps.map((dayTimestamp) => (
-            <DateItem unixTimestampSecs={dayTimestamp} key={dayTimestamp} />
-          ))}
-          <DateItem unixTimestampSecs={lastDayTimestamp} />
         </XStack>
 
         {/* Fade styling */}

@@ -29,7 +29,7 @@ import { useState } from "react";
 import { Result } from "@/util/result";
 import { extractDate } from "@/components/date-selector";
 import { date_to_string } from "@/components/date-selector";
-import { useDatePicker } from "@/components/date-picker";
+import { useDatePicker } from "@/components/DatePicker";
 import { MS_IN_SEC, timestampToDate } from "@/util/date";
 
 export default function AddWaterScreen() {

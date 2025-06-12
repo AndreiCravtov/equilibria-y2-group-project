@@ -12,13 +12,10 @@ import {
 } from "@tamagui/lucide-icons";
 import StatusBarView from "@/components/StatusBarView";
 import { useRef, useState } from "react";
-import { DatePicker } from "@/components/date-picker";
+import { DatePicker } from "@/components/DatePicker";
 
 export default function TabsLayout() {
   const theme = useTheme();
-
-  // Event-listeners from children
-  const datePickerBlurRef = useRef<VoidFunction>(() => {});
 
   return (
     <Tabs
@@ -58,14 +55,9 @@ export default function TabsLayout() {
           tabBarIcon: ({ color }) => <House color={color as any} />,
           header: () => (
             <StatusBarView bg="$background">
-              <DatePicker datePickerBlurRef={datePickerBlurRef} />
+              <DatePicker />
             </StatusBarView>
           ),
-        }}
-        listeners={{
-          blur: () => {
-            datePickerBlurRef.current();
-          },
         }}
       />
 
