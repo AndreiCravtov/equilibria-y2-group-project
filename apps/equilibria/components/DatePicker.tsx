@@ -43,12 +43,13 @@ export const useDatePicker = create<DatePickerStore>((set) => ({
 
 interface ArrowButtonProps {
   direction: "left" | "right";
+  disabled?: boolean;
 }
 
 const ArrowButton = Button.styleable<ArrowButtonProps>(
   // SEE: the `_ref` is a hack to suppress backwards compatibility issue https://github.com/tamagui/tamagui/issues/3132
   (props, _ref?: never) => {
-    const { direction, ...otherProps } = props;
+    const { direction, disabled, ...otherProps } = props;
     const Icon = match(direction)
       .with("left", () => ArrowLeft)
       .with("right", () => ArrowRight)
@@ -58,9 +59,10 @@ const ArrowButton = Button.styleable<ArrowButtonProps>(
       <Button
         bg={BG_COLOR}
         size="$5"
-        icon={<Icon size="$1.5" />}
-        {...otherProps}
+        icon={<Icon size="$1.5" color={disabled ? "$color10" : undefined} />}
         circular
+        disabled={disabled}
+        {...otherProps}
       />
     );
   }
@@ -142,6 +144,7 @@ const GradientFade = LinearGradient.styleable<GradientFadeProps>(
 
 export function DatePicker() {
   // Compute current day and register for resetting on blur
+  const todayTimestamp = getCurrentDayTimestamp();
   const { selectedDayTimestamp, selectPreviousDay, selectNextDay } =
     useDatePicker();
 
@@ -185,7 +188,11 @@ export function DatePicker() {
         <GradientFade self="flex-end" direction="right" />
       </ZStack>
 
-      <ArrowButton direction="right" onPress={selectNextDay} />
+      <ArrowButton
+        direction="right"
+        onPress={selectNextDay}
+        disabled={selectedDayTimestamp >= todayTimestamp}
+      />
     </XStack>
   );
 }
