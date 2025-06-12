@@ -38,7 +38,7 @@ export default function TabTwoScreen() {
   const { selectedDayTimestamp } = useDatePicker();
 
   const waterEntries = useQuery(api.water.getWaterByDate, {
-    date: selectedDayTimestamp.toString(), // TODO: this is incorrect logic
+    dateUnixTimestamp: BigInt(selectedDayTimestamp),
   });
 
   function getTotalWaterIntake(entries: { waterIntake: number | bigint }[]) {

@@ -29,13 +29,16 @@ import { useState } from "react";
 import { Result } from "@/util/result";
 import { extractDate } from "@/components/date-selector";
 import { date_to_string } from "@/components/date-selector";
+import { useDatePicker } from "@/components/date-picker";
+import { MS_IN_SEC, timestampToDate } from "@/util/date";
 
 export default function AddWaterScreen() {
-  const date = new Date();
   const theme = useTheme();
+  const { selectedDayTimestamp } = useDatePicker();
+  const selectedDate = timestampToDate(selectedDayTimestamp);
 
   const waterEntries = useQuery(api.water.getWaterByDate, {
-    date: extractDate(date),
+    dateUnixTimestamp: BigInt(selectedDayTimestamp),
   });
 
   const addWater = useMutation(api.water.addWaterEntry);
@@ -45,7 +48,10 @@ export default function AddWaterScreen() {
 
   console.log(`waterEntries: ${waterEntries}`);
   const handleAddEntry = async (amount: number | bigint) => {
-    await addWater({ date: date.toISOString(), waterIntake: BigInt(amount) });
+    await addWater({
+      dateUnixTimestamp: BigInt(selectedDayTimestamp),
+      waterIntake: BigInt(amount),
+    });
     setNewAmount("");
   };
 
@@ -89,7 +95,7 @@ export default function AddWaterScreen() {
             { value: 250, bgColor: "$indigo2" },
             { value: 500, bgColor: "$blue12Dark" },
           ].map(({ value, bgColor }) =>
-            createGroupButton({ icon: GlassWater, value, bgColor }),
+            createGroupButton({ icon: GlassWater, value, bgColor })
           )}
         </Group>
         <YStack space="$2">
@@ -114,7 +120,7 @@ export default function AddWaterScreen() {
         <Separator my={15} bg="$indigo8Dark" />
 
         <H3 fontWeight="bold" textAlign="center" color="$indigo8Dark">
-          {date_to_string(date)} entries
+          {date_to_string(selectedDate)} entries
         </H3>
 
         {/* Show entries */}

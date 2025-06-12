@@ -1,3 +1,10 @@
+import {
+  getCurrentDayTimestamp,
+  MS_IN_SEC,
+  nextDayTimestamp,
+  previousDayTimestamp,
+  SECS_IN_DAY,
+} from "@/util/date";
 import { ArrowLeft, ArrowRight } from "@tamagui/lucide-icons";
 import { LinearGradientPoint } from "expo-linear-gradient";
 import { Dispatch, RefObject, SetStateAction, useContext } from "react";
@@ -7,24 +14,8 @@ import { LinearGradient } from "tamagui/linear-gradient";
 import { match, P } from "ts-pattern";
 import { create, createStore } from "zustand";
 
-const MS_IN_SEC = 1_000;
-const SECS_IN_DAY = 86_400;
 const DAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 const NUM_EXTRA_DATES = 1;
-
-function getCurrentDayTimestamp() {
-  // Compute the date of today, since midnight
-  const todayDate = new Date(Date.now());
-  todayDate.setUTCHours(0);
-  todayDate.setUTCMinutes(0);
-  todayDate.setUTCSeconds(0);
-  todayDate.setUTCMilliseconds(0);
-
-  // Compute timestamp from date: divide by 1,000 to get in seconds
-  const todayTimestamp = todayDate.getTime() / MS_IN_SEC;
-
-  return todayTimestamp;
-}
 
 export interface DatePickerStore {
   selectedDayTimestamp: number;
@@ -39,11 +30,11 @@ export const useDatePicker = create<DatePickerStore>((set) => ({
     set(() => ({ selectedDayTimestamp: getCurrentDayTimestamp() })),
   selectPreviousDay: () =>
     set((state) => ({
-      selectedDayTimestamp: state.selectedDayTimestamp - SECS_IN_DAY,
+      selectedDayTimestamp: previousDayTimestamp(state.selectedDayTimestamp),
     })),
   selectNextDay: () =>
     set((state) => ({
-      selectedDayTimestamp: state.selectedDayTimestamp + SECS_IN_DAY,
+      selectedDayTimestamp: nextDayTimestamp(state.selectedDayTimestamp),
     })),
 }));
 
@@ -136,19 +127,10 @@ const GradientFade = LinearGradient.styleable<GradientFadeProps>(
   }
 );
 
-export function DatePicker({
-  datePickerBlurRef,
-}: {
-  datePickerBlurRef: RefObject<VoidFunction>;
-}) {
+export function DatePicker() {
   // Compute current day and register for resetting on blur
-  const {
-    selectedDayTimestamp,
-    selectCurrentDay,
-    selectPreviousDay,
-    selectNextDay,
-  } = useDatePicker();
-  datePickerBlurRef.current = () => selectCurrentDay();
+  const { selectedDayTimestamp, selectPreviousDay, selectNextDay } =
+    useDatePicker();
 
   // compute the timestamps of previous days and days after
   const beforeDayTimestamps = [];
