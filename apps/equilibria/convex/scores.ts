@@ -47,6 +47,7 @@ export const getWeekData = query({
       return {
         value: scoreMap.get(isoDate) ?? 0,
         label: formatLabel(date),
+        frontColor: (scoreMap.get(isoDate) ?? 0) > 15 ? "#FBBF24" : "#0954A5",
       };
     });
 

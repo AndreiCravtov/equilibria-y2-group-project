@@ -18,6 +18,7 @@
     "@babel/runtime": "^7.27.6",
     "@convex-dev/auth": "^0.0.86",
     "@csark0812/zustand-expo-devtools": "^2.0.2",
+    "@expo-google-fonts/inter": "^0.4.1",
     "@expo/vector-icons": "^14.1.0",
     "@mobily/ts-belt": "^3.13.1",
     "@react-native-masked-view/masked-view": "0.3.2",

@@ -24,6 +24,7 @@ export default function LeaderboardStaticView() {
     <ScrollView p="$4" bounces={false} bg="#FFFFFF">
       <YStack gap="$3" alignItems="center">
         {/* Top 3 */}
+        <H2 fontWeight="bold" color="$indigo8Dark" bg="#FFFFFF">Daily scores</H2>
         <YStack width="100%" gap="$2">
           <LeaderboardRow place={1}
                           name={first?.username || "First placeholder"}

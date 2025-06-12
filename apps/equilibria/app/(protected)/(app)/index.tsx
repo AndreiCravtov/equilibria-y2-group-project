@@ -58,7 +58,7 @@ export default function TabTwoScreen() {
       {/* Render content that's NOT under water - normal styling */}
       <Content
         bg="$background"
-        color="$blue10"
+        color="$indigo8Dark"
         totalWaterIntake={totalWaterIntake}
         userGoal={userGoal}
       />
@@ -72,7 +72,7 @@ export default function TabTwoScreen() {
       >
         {/* Render content that IS under water - inverted styling */}
         <Content
-          bg="$blue10"
+          bg="$indigo8Dark"
           color="$background"
           totalWaterIntake={totalWaterIntake}
           userGoal={userGoal}
@@ -109,10 +109,9 @@ interface ContentProps {
 function Content({ bg, color, totalWaterIntake, userGoal }: ContentProps) {
   return (
     <YStack flex={1} items="center" bg={bg}>
-      <H1 color={color} fontWeight={"bold"}>
-        {totalWaterIntake}/{userGoal}ml
-      </H1>
-
+      <H2 color={color} fontWeight={"bold"} pt={"$10"} fontSize={50}>
+        {totalWaterIntake}/{userGoal} ml
+      </H2>
       {/* Relative button */}
       <View
         style={{
