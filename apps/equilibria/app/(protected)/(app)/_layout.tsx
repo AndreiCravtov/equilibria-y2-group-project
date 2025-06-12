@@ -50,17 +50,16 @@ export default function TabsLayout() {
         }}
       />
 
-      {/* Home page: it has no header, and provides date-picker context */}
+      {/* Home page: it has no header, and resets the date-picker state on blur */}
       <Tabs.Screen
         name="index"
         options={{
           title: "Home",
           tabBarIcon: ({ color }) => <House color={color as any} />,
           header: () => (
-            <>
-              <StatusBarView />
+            <StatusBarView bg="$background">
               <DatePicker datePickerBlurRef={datePickerBlurRef} />
-            </>
+            </StatusBarView>
           ),
         }}
         listeners={{

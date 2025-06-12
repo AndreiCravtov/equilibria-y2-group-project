@@ -2,11 +2,11 @@ import { StatusBar } from "react-native";
 import { View } from "tamagui";
 
 /**
- * View which is the height of the status bar.
+ * View which is offset from the top, the height of the status bar.
  */
 const StatusBarView = View.styleable((props, _ref?: never) => {
   const { ...otherProps } = props;
-  return <View height={StatusBar.currentHeight} width="100%" {...otherProps} />;
+  return <View pt={StatusBar.currentHeight} {...otherProps} />;
 });
 
 StatusBarView.displayName = "StatusBarView";

@@ -5,11 +5,47 @@ import { createContext, useState } from "react";
 import { Button, SizableText, XStack, YStack, ZStack } from "tamagui";
 import { LinearGradient } from "tamagui/linear-gradient";
 import { match, P } from "ts-pattern";
+import { create, createStore } from "zustand";
 
 const MS_IN_SEC = 1_000;
 const SECS_IN_DAY = 86_400;
 const DAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 const NUM_EXTRA_DATES = 1;
+
+function getCurrentDayTimestamp() {
+  // Compute the date of today, since midnight
+  const todayDate = new Date(Date.now());
+  todayDate.setUTCHours(0);
+  todayDate.setUTCMinutes(0);
+  todayDate.setUTCSeconds(0);
+  todayDate.setUTCMilliseconds(0);
+
+  // Compute timestamp from date: divide by 1,000 to get in seconds
+  const todayTimestamp = todayDate.getTime() / MS_IN_SEC;
+
+  return todayTimestamp;
+}
+
+export interface DatePickerStore {
+  selectedDayTimestamp: number;
+  selectCurrentDay: () => void;
+  selectPreviousDay: () => void;
+  selectNextDay: () => void;
+}
+
+export const useDatePicker = create<DatePickerStore>((set) => ({
+  selectedDayTimestamp: getCurrentDayTimestamp(),
+  selectCurrentDay: () =>
+    set(() => ({ selectedDayTimestamp: getCurrentDayTimestamp() })),
+  selectPreviousDay: () =>
+    set((state) => ({
+      selectedDayTimestamp: state.selectedDayTimestamp - SECS_IN_DAY,
+    })),
+  selectNextDay: () =>
+    set((state) => ({
+      selectedDayTimestamp: state.selectedDayTimestamp + SECS_IN_DAY,
+    })),
+}));
 
 interface ArrowButtonProps {
   direction: "left" | "right";
@@ -100,31 +136,19 @@ const GradientFade = LinearGradient.styleable<GradientFadeProps>(
   }
 );
 
-function getCurrentDayTimestamp() {
-  // Compute the date of today, since midnight
-  const todayDate = new Date(Date.now());
-  todayDate.setUTCHours(0);
-  todayDate.setUTCMinutes(0);
-  todayDate.setUTCSeconds(0);
-  todayDate.setUTCMilliseconds(0);
-
-  // Compute timestamp from date: divide by 1,000 to get in seconds
-  const todayTimestamp = todayDate.getTime() / MS_IN_SEC;
-
-  return todayTimestamp;
-}
-
 export function DatePicker({
   datePickerBlurRef,
 }: {
   datePickerBlurRef: RefObject<VoidFunction>;
 }) {
   // Compute current day and register for resetting on blur
-  const [selectedDayTimestamp, setSelectedDayTimestamp] = useState(
-    getCurrentDayTimestamp
-  );
-  datePickerBlurRef.current = () =>
-    setSelectedDayTimestamp(getCurrentDayTimestamp);
+  const {
+    selectedDayTimestamp,
+    selectCurrentDay,
+    selectPreviousDay,
+    selectNextDay,
+  } = useDatePicker();
+  datePickerBlurRef.current = () => selectCurrentDay();
 
   // compute the timestamps of previous days and days after
   const beforeDayTimestamps = [];
@@ -142,13 +166,9 @@ export function DatePicker({
   const lastDayTimestamp =
     selectedDayTimestamp + (NUM_EXTRA_DATES + 1) * SECS_IN_DAY;
 
-  // Button actions
-  const pickPreviousDay = () => setSelectedDayTimestamp((v) => v + SECS_IN_DAY);
-  const pickNextDay = () => setSelectedDayTimestamp((v) => v + SECS_IN_DAY);
-
   return (
     <XStack height="$6" width="100%" items="center" px="$2" gap="$2">
-      <ArrowButton direction="left" onPress={pickPreviousDay} />
+      <ArrowButton direction="left" onPress={selectPreviousDay} />
 
       <ZStack
         flex={1}
@@ -181,7 +201,7 @@ export function DatePicker({
         <GradientFade self="flex-end" direction="right" />
       </ZStack>
 
-      <ArrowButton direction="right" onPress={pickNextDay} />
+      <ArrowButton direction="right" onPress={selectNextDay} />
     </XStack>
   );
 }
