@@ -11,6 +11,7 @@ import React from "react";
 import { LinearGradient } from "react-native-svg";
 import { tryGetUserProfile } from "@/convex/userProfiles";
 import { useQuery } from "convex/react";
+import { ScrollView } from "tamagui";
 
 function isNumber(v: string) {
   return /^\d*$/.test(v);
@@ -67,9 +68,9 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
     });
   }
   return (
-    <YStack>
+    <YStack space="$4">
       {/* User's name: */}
-      <Text fontSize="$6" fontWeight="bold">
+      <Text fontSize="$8" fontWeight="bold" pb="$1" color="$indigo4Dark">
         Name
       </Text>
       <Input
@@ -78,10 +79,12 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
           setName(newName);
           setUpdated(true);
         }}
+        color="$indigo8Dark"
+        bg="$indigo2"
       />
 
       {/* User's age */}
-      <Text fontSize="$6" fontWeight="bold">
+      <Text fontSize="$8" fontWeight="bold" pb="$1" color="$indigo4Dark">
         Age
       </Text>
       <Input
@@ -93,10 +96,12 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
             setUpdated(true);
           }
         }}
+        color="$indigo8Dark"
+        bg="$indigo2"
       />
 
       {/* User's gender */}
-      <Text fontSize="$6" fontWeight="bold">
+      <Text fontSize="$8" fontWeight="bold" pb="$1" color="$indigo4Dark">
         Gender
       </Text>
       <ChooseGender
@@ -108,41 +113,50 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
       />
 
       {/* User's weight */}
-      <Text fontSize="$6" fontWeight="bold">
+      <Text fontSize="$8" fontWeight="bold" pb="$1" color="$indigo4Dark">
         Weight
       </Text>
       <XStack alignItems="center">
         <Input
           value={weight}
           flex={1}
+          keyboardType="numeric"
           onChangeText={(newWeight) => {
             if (isNumber(newWeight)) {
               setWeight(newWeight);
               setUpdated(true);
             }
           }}
+          color="$indigo8Dark"
+          bg="$indigo2"
         />
-        <Text marginLeft="$2">kg</Text>
+        <Text ml="$2" alignSelf="center">
+          kg
+        </Text>
       </XStack>
 
       {/* User's height */}
-      <Text fontSize="$6" fontWeight="bold">
+      <Text fontSize="$8" fontWeight="bold" pb="$1" color="$indigo4Dark">
         Height
       </Text>
       <XStack alignItems="center">
         <Input
           value={height}
           flex={1}
+          keyboardType="numeric"
           onChangeText={(newHeight) => {
             if (isNumber(newHeight)) {
               setHeight(newHeight);
               setUpdated(true);
             }
           }}
+          color="$indigo8Dark"
+          bg="$indigo2"
         />
-        <Text marginLeft="$2">cm</Text>
+        <Text ml="$2" alignSelf="center">
+          cm
+        </Text>
       </XStack>
-
       <Button
         disabled={!updated}
         {...(updated ? { color: "red", backgroundColor: "lightgrey" } : {})}
@@ -179,27 +193,31 @@ export default function SettingsScreen({ set }) {
   };
 
   return (
-    <YStack space="$4" padding="$4">
-      <Text fontSize="$6" fontWeight="bold">
-        Add a Friend
-      </Text>
+    <ScrollView>
+      <YStack space="$4" padding="$4">
+        <Text fontSize="$8" fontWeight="bold" color="$indigo4Dark">
+          Add a Friend
+        </Text>
 
-      <XStack space="$2" alignItems="center">
-        <Input
-          flex={1}
-          placeholder="Enter username"
-          value={username}
-          onChangeText={setUsername}
-        />
-        <Button onPress={handleAddFriend}>Add</Button>
-      </XStack>
+        <XStack space="$2" alignItems="center">
+          <Input
+            flex={1}
+            placeholder="Enter username"
+            value={username}
+            onChangeText={setUsername}
+            color="$indigo8Dark"
+            bg="$indigo2"
+          />
+          <Button onPress={handleAddFriend}>Add</Button>
+        </XStack>
 
-      <Separator borderColor={"black"} />
+        <Separator borderColor={"black"} />
 
-      <UserDetails setMessage={setMessage} />
+        <UserDetails setMessage={setMessage} />
 
-      {message !== "" && <Text color="red">{message}</Text>}
-    </YStack>
+        {message !== "" && <Text color="red">{message}</Text>}
+      </YStack>
+    </ScrollView>
   );
 }
 
