@@ -16,7 +16,7 @@ import {
   Group,
   H3,
   useTheme,
-  Separator,
+  Separator, H2,
 } from "tamagui";
 import {
   GlassWater,
@@ -31,6 +31,7 @@ import { extractDate } from "@/components/date-selector";
 import { date_to_string } from "@/components/date-selector";
 import { useDatePicker } from "@/components/DatePicker";
 import { MS_IN_SEC, timestampToDate } from "@/util/date";
+import {EquilibriaH2} from "@/app/custom-components";
 
 export default function AddWaterScreen() {
   const theme = useTheme();
@@ -85,9 +86,7 @@ export default function AddWaterScreen() {
   return (
     <ScrollView padding="$4" bounces={false} bg="#FFFFFF">
       <YStack space="$4">
-        <H3 fontWeight="bold" textAlign="center" color="$indigo8Dark">
-          Add records
-        </H3>
+        <EquilibriaH2>Add entries</EquilibriaH2>
         {/* Input to add water */}
         <Group orientation="horizontal" width="100%">
           {[
@@ -111,7 +110,8 @@ export default function AddWaterScreen() {
           <Button
             onPress={() => handleAddEntry(Number(newAmount))}
             color="$blue8Dark"
-            bg="$indigo2"
+            bg="$indigo4"
+            fontWeight={"bold"}
           >
             Add Entry
           </Button>
@@ -119,22 +119,22 @@ export default function AddWaterScreen() {
 
         <Separator my={15} bg="$indigo8Dark" />
 
-        <H3 fontWeight="bold" textAlign="center" color="$indigo8Dark">
+        <EquilibriaH2>
           {date_to_string(selectedDate)} entries
-        </H3>
+        </EquilibriaH2>
 
         {/* Show entries */}
         {waterEntries.length === 0 ? (
           <Text>No water entries yet.</Text>
         ) : (
           waterEntries.map((item) => (
-            <Card key={item._id} padded bordered elevate>
+            <Card key={item._id} p={"$3"} mb={"$3"} bg={"$indigo4"} radiused>
               <XStack justifyContent="space-between" alignItems="center">
-                <Text fontWeight="bold" fontSize="$6" color="$indigo8Dark">
+                <Text fontWeight="bold" fontSize="$6" color="$indigo11">
                   {item.waterIntake} mL
                 </Text>
                 <Button size="$3" chromeless onPress={() => handleEdit(item)}>
-                  <Edit3 size={24} color="$indigo8Dark" />
+                  <Edit3 size={24} color="$indigo11" />
                 </Button>
               </XStack>
             </Card>
