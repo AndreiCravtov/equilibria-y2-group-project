@@ -131,7 +131,7 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
           color="$indigo8Dark"
           bg="$indigo2"
         />
-        <Text ml="$2" alignSelf="center">
+        <Text ml="$2" alignSelf="center" color="$indigo8Dark">
           kg
         </Text>
       </XStack>
@@ -154,13 +154,15 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
           color="$indigo8Dark"
           bg="$indigo2"
         />
-        <Text ml="$2" alignSelf="center">
+        <Text ml="$2" alignSelf="center" color="$indigo8Dark">
           cm
         </Text>
       </XStack>
       <Button
         disabled={!updated}
-        {...(updated ? { color: "red", backgroundColor: "lightgrey" } : {})}
+        {...(updated
+          ? { color: "$indigo8Dark", backgroundColor: "lightgrey" }
+          : {})}
         onPress={update}
       >
         Update
@@ -202,12 +204,12 @@ export default function SettingsScreen({ set }) {
 
         <XStack space="$2" alignItems="center">
           <Input
+            color="$indigo8Dark"
+            bg="$indigo2"
             flex={1}
             placeholder="Enter username"
             value={username}
             onChangeText={setUsername}
-            color="$indigo8Dark"
-            bg="$indigo2"
           />
           <Button onPress={handleAddFriend}>Add</Button>
         </XStack>
@@ -242,8 +244,12 @@ export function ChooseGender(
       {...props}
     >
       {props?.trigger || (
-        <Select.Trigger maxWidth={220} iconAfter={ChevronDown}>
-          <Select.Value placeholder="Something" />
+        <Select.Trigger
+          maxWidth={220}
+          iconAfter={ChevronDown}
+          backgroundColor="white"
+        >
+          <Select.Value placeholder=" " color="$indigo8Dark" />
         </Select.Trigger>
       )}
 
