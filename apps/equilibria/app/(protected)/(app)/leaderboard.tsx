@@ -24,7 +24,7 @@ export default function LeaderboardStaticView() {
     <ScrollView p="$4" bounces={false} bg="#FFFFFF">
       <YStack gap="$3" alignItems="center">
         {/* Top 3 */}
-        <H2 fontWeight="bold" color="$indigo8Dark" bg="#FFFFFF">Daily scores</H2>
+        <H2 fontWeight="bold" color="$indigo8Dark" bg="#FFFFFF" fontSize={32}>Daily scores</H2>
         <YStack width="100%" gap="$2">
           <LeaderboardRow place={1}
                           name={first?.username || "First placeholder"}
@@ -96,7 +96,7 @@ function Dot() {
 function ProgressChart({data}) {
   return (
     <YStack pb="$4" alignItems="center" width="100%">
-      <H2 fontWeight="bold" color="$indigo8Dark" bg="#FFFFFF" pb={"$5"}>Your progress</H2>
+      <H2 fontWeight="bold" color="$indigo8Dark" bg="#FFFFFF" pb={"$5"} fontSize={32}>Weekly progress</H2>
         <BarChart
           data={data}
           frontColor="#0954A5"
