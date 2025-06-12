@@ -28,7 +28,7 @@ import { api } from "@/convex/_generated/api";
 import { useState, useMemo } from "react";
 import { Result } from "@/util/result";
 import { extractDate, date_to_string } from "@/components/date-selector";
-import { computeDailyScore } from "@/utils/hydrationScore"; // <── NEW
+import { computeDailyScore } from "@/util/hydrationScore"; // <── NEW
 
 export default function AddWaterScreen() {
   const date = new Date();
