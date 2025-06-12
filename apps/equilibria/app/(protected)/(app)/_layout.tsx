@@ -1,5 +1,5 @@
 import { Link, Tabs } from "expo-router";
-import { Button, useTheme } from "tamagui";
+import { Button, useTheme, View } from "tamagui";
 import {
   Atom,
   AudioWaveform,
@@ -8,7 +8,11 @@ import {
   House,
   Settings,
   ChartColumn,
+  BarChart,
 } from "@tamagui/lucide-icons";
+import StatusBarView from "@/components/StatusBarView";
+import { useRef, useState } from "react";
+import { DatePicker } from "@/components/DatePicker";
 
 export default function TabsLayout() {
   const theme = useTheme();
@@ -42,11 +46,18 @@ export default function TabsLayout() {
           ),
         }}
       />
+
+      {/* Home page: it has no header, and resets the date-picker state on blur */}
       <Tabs.Screen
         name="index"
         options={{
           title: "Home",
           tabBarIcon: ({ color }) => <House color={color as any} />,
+          header: () => (
+            <StatusBarView bg="$background">
+              <DatePicker />
+            </StatusBarView>
+          ),
         }}
       />
 
@@ -55,6 +66,13 @@ export default function TabsLayout() {
         options={{
           title: "Settings",
           tabBarIcon: ({ color }) => <Settings color={color as any} />,
+        }}
+      />
+      <Tabs.Screen
+        name="leaderboard"
+        options={{
+          title: "Leaderboard",
+          tabBarIcon: ({ color }) => <BarChart color={color as any} />,
         }}
       />
     </Tabs>

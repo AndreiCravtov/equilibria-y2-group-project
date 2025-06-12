@@ -27,7 +27,7 @@ export default function ProtectedLayout() {
       {/* If user profile does not exist, perform onboarding flow */}
       <Stack.Protected guard={!userOnboarded}>
         <Stack.Screen
-          name="onboard"
+          name="onboarding"
           options={{
             headerShown: false,
           }}

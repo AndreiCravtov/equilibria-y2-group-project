@@ -20,9 +20,9 @@ STACK:
 - Yarn => Package manager
 - Expo Router => React Native wrapper
 - Tamagui => UI Components
+- Convex => Fullstack backend, DB, Auth, etc.
 - FlashList => Better performance lists
 - Valibot => [Standard Schema](https://github.com/standard-schema/standard-schema)-compliant schema validator library of choice
 - t3-env => typesafe .env configurations
-- Convex => Fullstack backend, DB, Auth, etc.
 - zustand => frontent state management
 - ts-belt, ts-pattern => FP-like utility

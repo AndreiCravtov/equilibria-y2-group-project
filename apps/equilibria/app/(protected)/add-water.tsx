@@ -19,7 +19,7 @@ import {
   Separator,
 } from "tamagui";
 import {
-  AlarmClock,
+  GlassWater,
   ActivitySquare,
   AirVent,
   Edit3,
@@ -27,13 +27,18 @@ import {
 import { api } from "@/convex/_generated/api";
 import { useState } from "react";
 import { Result } from "@/util/result";
+import { extractDate } from "@/components/date-selector";
+import { date_to_string } from "@/components/date-selector";
+import { useDatePicker } from "@/components/DatePicker";
+import { MS_IN_SEC, timestampToDate } from "@/util/date";
 
 export default function AddWaterScreen() {
   const theme = useTheme();
-  const date = "2025-04-06"; // placeholder value
+  const { selectedDayTimestamp } = useDatePicker();
+  const selectedDate = timestampToDate(selectedDayTimestamp);
 
   const waterEntries = useQuery(api.water.getWaterByDate, {
-    date: date,
+    dateUnixTimestamp: BigInt(selectedDayTimestamp),
   });
 
   const addWater = useMutation(api.water.addWaterEntry);
@@ -43,7 +48,10 @@ export default function AddWaterScreen() {
 
   console.log(`waterEntries: ${waterEntries}`);
   const handleAddEntry = async (amount: number | bigint) => {
-    await addWater({ date, waterIntake: BigInt(amount) });
+    await addWater({
+      dateUnixTimestamp: BigInt(selectedDayTimestamp),
+      waterIntake: BigInt(amount),
+    });
     setNewAmount("");
   };
 
@@ -87,7 +95,7 @@ export default function AddWaterScreen() {
             { value: 250, bgColor: "$indigo2" },
             { value: 500, bgColor: "$blue12Dark" },
           ].map(({ value, bgColor }) =>
-            createGroupButton({ icon: AlarmClock, value, bgColor })
+            createGroupButton({ icon: GlassWater, value, bgColor })
           )}
         </Group>
         <YStack space="$2">
@@ -112,7 +120,7 @@ export default function AddWaterScreen() {
         <Separator my={15} bg="$indigo8Dark" />
 
         <H3 fontWeight="bold" textAlign="center" color="$indigo8Dark">
-          {date} entries
+          {date_to_string(selectedDate)} entries
         </H3>
 
         {/* Show entries */}

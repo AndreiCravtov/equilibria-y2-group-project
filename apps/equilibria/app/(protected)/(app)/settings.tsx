@@ -1,126 +1,58 @@
-import { ExternalLink } from "@tamagui/lucide-icons";
-import {
-  Anchor,
-  H2,
-  Paragraph,
-  XStack,
-  YStack,
-  useTheme,
-  Text,
-  ZStack,
-  H1,
-  GetThemeValueForKey,
-  Button,
-  View,
-} from "tamagui";
-import { ToastControl } from "@/app/CurrentToast";
-import { Authenticated, Unauthenticated, useQuery } from "convex/react";
-import Animated, {
-  useSharedValue,
-  useFrameCallback,
-  Easing as ReanimatedEasing,
-  useDerivedValue as useReanimatedDerivedValue,
-  useAnimatedStyle,
-  withSpring,
-} from "react-native-reanimated";
-import AppAnimated from "@/components/app-animated";
-import { useEffect, useMemo } from "react";
-import { DropletPlusFill } from "@/components/DropletPlusFill";
-import { OpaqueColorValue, Pressable } from "react-native";
-import MaskedView from "@react-native-masked-view/masked-view";
-import { WaterProgress } from "@/components/WaterProgress";
-import { Link } from "expo-router";
-import { api } from "@/convex/_generated/api";
+import {useState} from "react"
+import {View, XStack, Input, Button, Text, YStack, H2, ScrollView} from "tamagui"
+import {useMutation} from "convex/react";
+import {api} from "@/convex/_generated/api";
+import {Id} from "@/convex/_generated/dataModel";
 
-export default function TabTwoScreen() {
-  const waterPercentage = 22;
+export default function SettingsScreen() {
+  const [username, setUsername] = useState("")
+  const [message, setMessage] = useState("")
 
-  const date = "2025-04-06"; // placeholder value
-  const waterEntries = useQuery(api.water.getWaterByDate, { date: date });
+  const addFriend = useMutation(api.friends.addFriend)
 
-  function getTotalWaterIntake(entries: { waterIntake: number | bigint }[]) {
-    return entries.reduce(
-      (total, entry) => total + Number(entry.waterIntake),
-      0
-    );
+  const handleAddFriend = async () => {
+
+    console.log("adding Friend")
+
+    if (!username.trim()) {
+      setMessage("Please enter a username")
+      return
+    }
+    try {
+      await addFriend({username})
+      setMessage(`Friend request sent to ${username}`)
+      setUsername("")
+    } catch (err) {
+      console.error(err)
+      setMessage("Failed to send friend request")
+    }
   }
 
-  const totalWaterIntake = getTotalWaterIntake(waterEntries ?? []);
-
   return (
-    <ZStack width="100%" height="100%">
-      {/* Render content that's NOT under water - normal styling */}
-      <Content
-        bg="$background"
-        color="$blue10"
-        totalWaterIntake={totalWaterIntake}
-      />
+    <ScrollView p="$4" bounces={false} bg="#FFFFFF">
+      <YStack space="$4" padding="$4" alignItems="center">
+        <H2 fontWeight="bold" color="$indigo8Dark" bg="#FFFFFF" fontSize={32}>Add a friend</H2>
 
-      {/* Create masked view based on water progress */}
-      <MaskedView
-        style={{
-          height: "100%",
-          width: "100%",
-        }}
-        maskElement={<WaterProgress percentage={waterPercentage} />}
-      >
-        {/* Render content that IS under water - inverted styling */}
-        <Content
-          bg="$blue10"
-          color="$background"
-          totalWaterIntake={totalWaterIntake}
-        />
-      </MaskedView>
+        <XStack space="$2" alignItems="center">
+          <Input
+            placeholder="Enter friend's username"
+            flex={1}
+            placeholder="Enter username"
+            value={username}
+            onChangeText={setUsername}
+            placeholderTextColor="$indigo8Dark"
+            color="$indigo8Dark"
+            bg="$indigo2"
+          />
+          <Button onPress={handleAddFriend}
+                  color="$blue8Dark"
+                  bg="$indigo2">
+            Add
+          </Button>
+        </XStack>
 
-      {/* Create hidden clickable item to act as the button */}
-      <Link href="/add-water" asChild>
-        <Pressable
-          style={{
-            width: 100,
-            height: 100,
-            position: "absolute",
-            bottom: "20%", // This puts it 75% down from the top (25% from bottom)
-            left: "50%",
-            transform: [{ translateX: -50 }],
-          }}
-        />
-      </Link>
-    </ZStack>
-  );
-}
-
-interface ContentProps {
-  bg?:
-    | OpaqueColorValue
-    | GetThemeValueForKey<"backgroundColor">
-    | null
-    | undefined;
-  color?: OpaqueColorValue | GetThemeValueForKey<"color"> | undefined;
-  totalWaterIntake: number;
-}
-
-function Content({ bg, color, totalWaterIntake }: ContentProps) {
-  return (
-    <YStack flex={1} items="center" bg={bg}>
-      <H1 color={color} fontWeight={"bold"}>
-        {totalWaterIntake}/2000ml
-      </H1>
-
-      {/* Relative button */}
-      <View
-        style={{
-          position: "absolute",
-          bottom: "20%", // This puts it 75% down from the top (25% from bottom)
-          left: "50%",
-          transform: [{ translateX: -50 }],
-        }}
-      >
-        <DropletPlusFill
-          size={100}
-          // @ts-ignore
-          color={color}
-        />
-      </View>
-    </YStack>
-  );
+        {message !== "" && <Text>{message}</Text>}
+      </YStack>
+    </ScrollView>
+  )
 }

@@ -13,37 +13,104 @@ import {
   Button,
   View,
 } from "tamagui";
-import { ToastControl } from "@/app/CurrentToast";
-import { Authenticated, Unauthenticated, useQuery } from "convex/react";
-import Animated, {
-  useSharedValue,
-  useFrameCallback,
-  Easing as ReanimatedEasing,
-  useDerivedValue as useReanimatedDerivedValue,
-  useAnimatedStyle,
-  withSpring,
-} from "react-native-reanimated";
-import AppAnimated from "@/components/app-animated";
-import { useEffect, useMemo } from "react";
 import { DropletPlusFill } from "@/components/DropletPlusFill";
 import { OpaqueColorValue, Pressable } from "react-native";
 import MaskedView from "@react-native-masked-view/masked-view";
 import { WaterProgress } from "@/components/WaterProgress";
 import { Link } from "expo-router";
 import { api } from "@/convex/_generated/api";
-import DateSelector from "@/components/date-selector";
-import { DatePicker, useDatePicker } from "@/components/DatePicker";
-import { scheduleWaterReminders } from '@/hooks/useNotifications';
+import { useState } from "react";
+import { ArrowLeft, ArrowRight } from "@tamagui/lucide-icons";
 
+const days = [
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+];
+const months = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
 
-export default function TabTwoScreen() {
-  const { selectedDayTimestamp } = useDatePicker();
-  useEffect(() => {
-    scheduleWaterReminders();
-  }, []);
+export function extractDate(d: Date) {
+  return d.toISOString().split("T")[0];
+}
 
+function sameDay(d1: Date, d2: Date) {
+  return (
+    d1.getFullYear() === d2.getFullYear() &&
+    d1.getMonth() === d2.getMonth() &&
+    d1.getDate() === d2.getDate()
+  );
+}
+
+export function date_to_string(d: Date): string {
+  return `${days[d.getDay()]} ${d.getDate()}`;
+}
+
+export default function DateSelector() {
+  let [day, setDay] = useState(new Date());
+  let displayDate = date_to_string(day);
+  const now = new Date();
+  const canAdvance = !sameDay(now, day);
+  return (
+    <YStack flex={1}>
+      <XStack items="center" justify="space-between">
+        <Button
+          style={{ zIndex: 1 }}
+          onPress={() => {
+            let d = new Date(day);
+            d.setDate(day.getDate() - 1);
+            setDay(d);
+          }}
+        >
+          <ArrowLeft />
+        </Button>
+        <Text
+          fontSize={30}
+          style={{
+            position: "absolute",
+            left: 0,
+            right: 0,
+            textAlign: "center",
+            width: "100%",
+          }}
+        >
+          {displayDate}
+        </Text>
+        <Button
+          disabled={!canAdvance}
+          onPress={() => {
+            let d = new Date(day);
+            d.setDate(day.getDate() + 1);
+            setDay(d);
+          }}
+        >
+          <ArrowRight />
+        </Button>
+      </XStack>
+      <DaysContent day={day} />
+    </YStack>
+  );
+}
+
+export function DaysContent({ day }: { day: Date }) {
   const waterEntries = useQuery(api.water.getWaterByDate, {
-    dateUnixTimestamp: BigInt(selectedDayTimestamp),
+    date: extractDate(day),
   });
 
   function getTotalWaterIntake(entries: { waterIntake: number | bigint }[]) {
@@ -63,7 +130,7 @@ export default function TabTwoScreen() {
       {/* Render content that's NOT under water - normal styling */}
       <Content
         bg="$background"
-        color="$indigo8Dark"
+        color="$blue10"
         totalWaterIntake={totalWaterIntake}
         userGoal={userGoal}
       />
@@ -77,7 +144,7 @@ export default function TabTwoScreen() {
       >
         {/* Render content that IS under water - inverted styling */}
         <Content
-          bg="$indigo8Dark"
+          bg="$blue10"
           color="$background"
           totalWaterIntake={totalWaterIntake}
           userGoal={userGoal}
@@ -114,9 +181,10 @@ interface ContentProps {
 function Content({ bg, color, totalWaterIntake, userGoal }: ContentProps) {
   return (
     <YStack flex={1} items="center" bg={bg}>
-      <H2 color={color} fontWeight={"bold"} pt={"$10"} fontSize={50}>
-        {totalWaterIntake}/{userGoal} ml
-      </H2>
+      <H1 color={color} fontWeight={"bold"}>
+        {totalWaterIntake}/{userGoal}ml
+      </H1>
+
       {/* Relative button */}
       <View
         style={{

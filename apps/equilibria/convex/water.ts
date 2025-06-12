@@ -3,35 +3,59 @@ import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { getUserId, tryGetUserId } from "./users";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import {
+  MS_IN_SEC,
+  nextDayTimestamp,
+  roundDownToDayDate,
+  roundDownToDayTimestamp,
+  SECS_IN_DAY,
+} from "@/util/date";
+
+export function extractDate(d: String) {
+  return d.split("T")[0];
+}
 
 export const getWaterByDate = query({
   args: {
-    date: v.string(),
+    dateUnixTimestamp: v.int64(),
   },
-  handler: async (ctx, { date }) => {
+  handler: async (ctx, { dateUnixTimestamp }) => {
     const userId = await getUserId(ctx);
 
-    return await ctx.db
+    // compute current day and next day
+    const currentDay = roundDownToDayTimestamp(Number(dateUnixTimestamp));
+    const nextDay = nextDayTimestamp(currentDay);
+
+    const entries = await ctx.db
       .query("water")
+      .withIndex("userId", (q) => q.eq("userId", userId))
+      // filter the entries to return only those matching a condition
       .filter((q) =>
-        q.and(q.eq(q.field("userId"), userId), q.eq(q.field("date"), date))
+        q.and(
+          q.gte(q.field("dateUnixTimestamp"), BigInt(currentDay)),
+          q.lt(q.field("dateUnixTimestamp"), BigInt(nextDay))
+        )
       )
       .collect();
+    return entries;
   },
 });
 
 export const addWaterEntry = mutation({
   args: {
-    date: v.string(),
+    dateUnixTimestamp: v.int64(),
     waterIntake: v.int64(),
   },
-  handler: async (ctx, { date, waterIntake }) => {
+  handler: async (ctx, { dateUnixTimestamp, waterIntake }) => {
     const userId = await getUserId(ctx);
+
+    // TODO: if backdating, ignore hour
+    const currentDay = roundDownToDayTimestamp(Number(dateUnixTimestamp));
 
     await ctx.db.insert("water", {
       userId,
-      date,
-      waterIntake: waterIntake,
+      dateUnixTimestamp,
+      waterIntake,
     });
   },
 });
