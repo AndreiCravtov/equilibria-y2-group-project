@@ -9,8 +9,151 @@ import { ChevronUp, ChevronDown, Check } from "@tamagui/lucide-icons";
 import { Sheet, Adapt } from "tamagui";
 import React from "react";
 import { LinearGradient } from "react-native-svg";
+import { tryGetUserProfile } from "@/convex/userProfiles";
+import { useQuery } from "convex/react";
 
-export default function SettingsScreen() {
+function isNumber(v: string) {
+  return /^\d*$/.test(v);
+}
+
+type SetMessage = (msg: string) => void;
+
+function UserDetails({ setMessage }: { setMessage: SetMessage }) {
+  const [updated, setUpdated] = useState(false);
+  const [name, setName] = useState("");
+  const [age, setAge] = useState("");
+  const [weight, setWeight] = useState("");
+  const [gender, setGender] = useState("");
+  const [height, setHeight] = useState("");
+  const profile = useQuery(api.userProfiles.tryGetUserProfile);
+  const updateProfile = useMutation(api.userProfiles.updateUserProfile);
+  if (profile === "USER_PROFILE_MISSING" || !profile) {
+    setMessage("Could not find user profile");
+    return;
+  }
+  setName(profile.name);
+  setAge(profile.age.toString());
+  setWeight(profile.weight.toString());
+  setGender(profile.gender);
+  setHeight(profile.height.toString());
+
+  function update() {
+    setMessage("");
+    if (!updated) return;
+    if (!name) {
+      setMessage("Please enter your name");
+      return;
+    }
+    if (!age) {
+      setMessage("Please enter your age");
+      return;
+    }
+    if (!weight) {
+      setMessage("Please enter your weight");
+      return;
+    }
+    if (!height) {
+      setMessage("Please enter your height");
+      return;
+    }
+    // do the update
+    updateProfile({
+      name,
+      age: BigInt(age),
+      gender: gender as "male" | "female",
+      weight: BigInt(weight),
+      height: BigInt(10),
+    });
+  }
+  return (
+    <YStack>
+      {/* User's name: */}
+      <Text fontSize="$6" fontWeight="bold">
+        Name
+      </Text>
+      <Input
+        value={name}
+        onChangeText={(newName) => {
+          setName(newName);
+          setUpdated(true);
+        }}
+      />
+
+      {/* User's age */}
+      <Text fontSize="$6" fontWeight="bold">
+        Age
+      </Text>
+      <Input
+        keyboardType="numeric"
+        value={age}
+        onChangeText={(newAge) => {
+          if (isNumber(newAge)) {
+            setAge(newAge);
+            setUpdated(true);
+          }
+        }}
+      />
+
+      {/* User's gender */}
+      <Text fontSize="$6" fontWeight="bold">
+        Gender
+      </Text>
+      <ChooseGender
+        value={gender}
+        onValueChange={(newGender) => {
+          setGender(newGender);
+          setUpdated(true);
+        }}
+      />
+
+      {/* User's weight */}
+      <Text fontSize="$6" fontWeight="bold">
+        Weight
+      </Text>
+      <XStack alignItems="center">
+        <Input
+          value={weight}
+          flex={1}
+          onChangeText={(newWeight) => {
+            if (isNumber(newWeight)) {
+              setWeight(newWeight);
+              setUpdated(true);
+            }
+          }}
+        />
+        <Text marginLeft="$2">kg</Text>
+      </XStack>
+
+      {/* User's height */}
+      <Text fontSize="$6" fontWeight="bold">
+        Height
+      </Text>
+      <XStack alignItems="center">
+        <Input
+          value={height}
+          flex={1}
+          onChangeText={(newHeight) => {
+            if (isNumber(newHeight)) {
+              setHeight(newHeight);
+              setUpdated(true);
+            }
+          }}
+        />
+        <Text marginLeft="$2">cm</Text>
+      </XStack>
+
+      <Button
+        disabled={!updated}
+        {...(updated ? { color: "red", backgroundColor: "lightgrey" } : {})}
+        onPress={update}
+      >
+        Update
+      </Button>
+    </YStack>
+  );
+}
+
+export default function SettingsScreen({ set }) {
   const [username, setUsername] = useState("");
   const [message, setMessage] = useState("");
 
@@ -34,33 +177,6 @@ export default function SettingsScreen() {
     }
   };
 
-  function UserDetails() {
-    return (
-      <YStack>
-        <Text fontSize="$6" fontWeight="bold">
-          Name
-        </Text>
-        <Input value={"John Doe"} />
-        <Text fontSize="$6" fontWeight="bold">
-          Age
-        </Text>
-        <Input keyboardType="numeric" value={"20"} />
-        <Text fontSize="$6" fontWeight="bold">
-          Gender
-        </Text>
-        <ChooseGender />
-        <Text fontSize="$6" fontWeight="bold">
-          Weight
-        </Text>
-        <XStack alignItems="center">
-          <Input value={"70"} flex={1} />
-          <Text marginLeft="$2">kg</Text>
-        </XStack>
-        <Button>Update</Button>
-      </YStack>
-    );
-  }
-
   return (
     <YStack space="$4" padding="$4">
       <Text fontSize="$6" fontWeight="bold">
@@ -79,7 +195,7 @@ export default function SettingsScreen() {
 
       <Separator borderColor={"black"} />
 
-      <UserDetails />
+      <UserDetails setMessage={setMessage} />
 
       {message !== "" && <Text color="red">{message}</Text>}
     </YStack>
@@ -89,7 +205,7 @@ export default function SettingsScreen() {
 export function ChooseGender(
   props: SelectProps & { trigger?: React.ReactNode },
 ) {
-  const [val, setVal] = useState("male");
+  const [val, setVal] = useState("something");
 
   return (
     <Select
@@ -145,14 +261,7 @@ export function ChooseGender(
           />
         </Select.ScrollUpButton>
 
-        <Select.Viewport
-          // to do animations:
-          // animation="quick"
-          // animateOnly={['transform', 'opacity']}
-          // enterStyle={{ o: 0, y: -10 }}
-          // exitStyle={{ o: 0, y: 10 }}
-          minWidth={200}
-        >
+        <Select.Viewport minWidth={200}>
           <Select.Group>
             <Select.Label>Gender</Select.Label>
             <Select.Item index={0} key="Male" value="male">
@@ -167,25 +276,6 @@ export function ChooseGender(
                 <Check size={16} />
               </Select.ItemIndicator>
             </Select.Item>
-            {/* for longer lists memoizing these is useful */}
-            {/* {React.useMemo(
-              () =>
-                items.map((item, i) => {
-                  return (
-                    <Select.Item
-                      index={i}
-                      key={item.name}
-                      value={item.name.toLowerCase()}
-                    >
-                      <Select.ItemText>{item.name}</Select.ItemText>
-                      <Select.ItemIndicator marginLeft="auto">
-                        <Check size={16} />
-                      </Select.ItemIndicator>
-                    </Select.Item>
-                  );
-                }),
-              [items],
-            )} */}
           </Select.Group>
         </Select.Viewport>
 

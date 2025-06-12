@@ -18,6 +18,31 @@ export const tryGetUserProfile = query({
   },
 });
 
+export const updateUserProfile = mutation({
+  args: {
+    name: v.string(),
+    age: v.int64(),
+    gender: v.union(v.literal("male"), v.literal("female")),
+    weight: v.int64(),
+    height: v.int64(),
+  },
+  handler: async (ctx, { name, age, gender, weight, height }) => {
+    const userId = await getUserId(ctx);
+    const profile = await ctx.runQuery(api.userProfiles.tryGetUserProfile);
+    // user profile must already exist
+    if (profile === USER_PROFILE_MISSING)
+      throw new Error("Tried to update non-existent user profile");
+
+    await ctx.db.patch(profile._id, {
+      name,
+      age,
+      gender,
+      weight,
+      height,
+    });
+  },
+});
+
 export const createUserProfile = mutation({
   args: {
     name: v.string(),
