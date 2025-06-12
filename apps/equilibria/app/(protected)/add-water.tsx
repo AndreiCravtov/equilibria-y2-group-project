@@ -22,7 +22,7 @@ import {
   GlassWater,
   ActivitySquare,
   AirVent,
-  Edit3,
+  Trash,
 } from "@tamagui/lucide-icons";
 import { api } from "@/convex/_generated/api";
 import { useState } from "react";
@@ -56,7 +56,7 @@ export default function AddWaterScreen() {
     setNewAmount("");
   };
 
-  function createGroupButton({
+  function GroupButton({
     icon,
     value,
     bgColor,
@@ -89,13 +89,19 @@ export default function AddWaterScreen() {
         <EquilibriaH2>Add entries</EquilibriaH2>
         {/* Input to add water */}
         <Group orientation="horizontal" width="100%">
-          {[
-            { value: 200, bgColor: "$blue12Dark" },
-            { value: 250, bgColor: "$indigo2" },
-            { value: 500, bgColor: "$blue12Dark" },
-          ].map(({ value, bgColor }) =>
-            createGroupButton({ icon: GlassWater, value, bgColor })
-          )}
+          <GroupButton icon={GlassWater} value={200} bgColor={"$blue12Dark"}></GroupButton>
+          <Separator
+            alignSelf="stretch"
+            vertical
+            borderColor="$indigo10"
+          />
+          <GroupButton icon={GlassWater} value={250} bgColor={"$indigo2"}></GroupButton>
+          <Separator
+            alignSelf="stretch"
+            vertical
+            borderColor="$indigo10"
+          />
+          <GroupButton icon={GlassWater} value={250} bgColor={"$blue12Dark"}></GroupButton>
         </Group>
         <YStack space="$2">
           <Input
@@ -109,9 +115,10 @@ export default function AddWaterScreen() {
           />
           <Button
             onPress={() => handleAddEntry(Number(newAmount))}
-            color="$blue8Dark"
-            bg="$indigo4"
+            color="$indigo4"
+            bg="$blue8Dark"
             fontWeight={"bold"}
+            fontSize={17}
           >
             Add Entry
           </Button>
@@ -134,7 +141,7 @@ export default function AddWaterScreen() {
                   {item.waterIntake} mL
                 </Text>
                 <Button size="$3" chromeless onPress={() => handleEdit(item)}>
-                  <Edit3 size={24} color="$indigo11" />
+                  <Trash size={24} color="$red10" />
                 </Button>
               </XStack>
             </Card>
