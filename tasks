@@ -1,32 +1,29 @@
-* Onboarding:
-    * Name
-    * Age
-    * Sex
-    * Weight
-    * Height
-    -- thin slicing: --
-    * custom water quantum (thin slicing)
+- Onboarding:
+  -- thin slicing: --
+  - custom water quantum (thin slicing)
 
-- settings page: same as above
-    * notification frequency & on/off
-    * profile picture
+* settings page: same as above
 
-- daily score out of 10 or 100
+  - notification frequency & on/off
+  - profile picture
 
-- date selector on home page
+* daily score out of 10 or 100
 
-- notifications
+* date selector on home page
 
-- daily water goal calculation (in ml), can set in settings
+* notifications
 
-- adding friends
+* daily water goal calculation (in ml), can set in settings
 
-- analysis:
-  * leaderboard
-  * history/graph of water consumption
+* adding friends
 
-- daily streak
+* analysis:
 
-- visual changes:
-    * changing environment - maybe fish/desert/whatever
-    * scale of how far complete in daily goal
+  - leaderboard
+  - history/graph of water consumption
+
+* daily streak
+
+* visual changes:
+  - changing environment - maybe fish/desert/whatever
+  - scale of how far complete in daily goal

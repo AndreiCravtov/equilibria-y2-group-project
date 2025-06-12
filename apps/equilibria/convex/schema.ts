@@ -37,7 +37,7 @@ export default defineSchema({
 
   water: defineTable({
     userId: v.id("users"),
-    date: v.string(), // or use "number" if you store timestamps
+    dateUnixTimestamp: v.int64(),
     waterIntake: v.int64(),
   }).index("userId", ["userId"]),
 

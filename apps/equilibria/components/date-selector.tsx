@@ -13,18 +13,6 @@ import {
   Button,
   View,
 } from "tamagui";
-import { ToastControl } from "@/app/CurrentToast";
-import { Authenticated, Unauthenticated, useQuery } from "convex/react";
-import Animated, {
-  useSharedValue,
-  useFrameCallback,
-  Easing as ReanimatedEasing,
-  useDerivedValue as useReanimatedDerivedValue,
-  useAnimatedStyle,
-  withSpring,
-} from "react-native-reanimated";
-import AppAnimated from "@/components/app-animated";
-import { useEffect, useMemo } from "react";
 import { DropletPlusFill } from "@/components/DropletPlusFill";
 import { OpaqueColorValue, Pressable } from "react-native";
 import MaskedView from "@react-native-masked-view/masked-view";
@@ -80,8 +68,8 @@ export default function DateSelector() {
   const now = new Date();
   const canAdvance = !sameDay(now, day);
   return (
-    <YStack>
-      <XStack alignItems="center" justifyContent="space-between">
+    <YStack flex={1}>
+      <XStack items="center" justify="space-between">
         <Button
           style={{ zIndex: 1 }}
           onPress={() => {
@@ -128,7 +116,7 @@ export function DaysContent({ day }: { day: Date }) {
   function getTotalWaterIntake(entries: { waterIntake: number | bigint }[]) {
     return entries.reduce(
       (total, entry) => total + Number(entry.waterIntake),
-      0,
+      0
     );
   }
 
@@ -138,7 +126,7 @@ export function DaysContent({ day }: { day: Date }) {
   const waterPercentage = (totalWaterIntake / userGoal) * 100;
 
   return (
-    <ZStack width="100%" height="100%">
+    <ZStack flex={1} width="100%">
       {/* Render content that's NOT under water - normal styling */}
       <Content
         bg="$background"
