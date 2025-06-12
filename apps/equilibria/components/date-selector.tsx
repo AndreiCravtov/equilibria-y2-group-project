@@ -13,18 +13,6 @@ import {
   Button,
   View,
 } from "tamagui";
-import { ToastControl } from "@/app/CurrentToast";
-import { Authenticated, Unauthenticated, useQuery } from "convex/react";
-import Animated, {
-  useSharedValue,
-  useFrameCallback,
-  Easing as ReanimatedEasing,
-  useDerivedValue as useReanimatedDerivedValue,
-  useAnimatedStyle,
-  withSpring,
-} from "react-native-reanimated";
-import AppAnimated from "@/components/app-animated";
-import { useEffect, useMemo } from "react";
 import { DropletPlusFill } from "@/components/DropletPlusFill";
 import { OpaqueColorValue, Pressable } from "react-native";
 import MaskedView from "@react-native-masked-view/masked-view";

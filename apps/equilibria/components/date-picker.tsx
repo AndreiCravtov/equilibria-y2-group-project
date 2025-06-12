@@ -1,8 +1,15 @@
 import { ArrowLeft, ArrowRight } from "@tamagui/lucide-icons";
 import { LinearGradientPoint } from "expo-linear-gradient";
+import { Dispatch, RefObject, SetStateAction, useContext } from "react";
+import { createContext, useState } from "react";
 import { Button, SizableText, XStack, YStack, ZStack } from "tamagui";
 import { LinearGradient } from "tamagui/linear-gradient";
 import { match, P } from "ts-pattern";
+
+const MS_IN_SEC = 1_000;
+const SECS_IN_DAY = 86_400;
+const DAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+const NUM_EXTRA_DATES = 1;
 
 interface ArrowButtonProps {
   direction: "left" | "right";
@@ -24,11 +31,17 @@ const ArrowButton = Button.styleable<ArrowButtonProps>(
 );
 
 interface DateItemProps {
+  unixTimestampSecs: number;
   selected?: boolean;
 }
 
 function DateItem(props: DateItemProps) {
-  const { selected = false, ...otherProps } = props;
+  const { selected = false, unixTimestampSecs, ...otherProps } = props;
+
+  // Compute day from timestamp: multiply by 1,000 to get in milliseconds
+  const date = new Date(unixTimestampSecs * MS_IN_SEC);
+  const dayText = DAYS[date.getUTCDay()];
+  const monthDate = date.getUTCDate();
 
   return (
     <YStack
@@ -45,10 +58,10 @@ function DateItem(props: DateItemProps) {
         fontWeight="bold"
         themeInverse={selected}
       >
-        MON
+        {dayText}
       </SizableText>
       <SizableText lineHeight={16} fontSize="$7" themeInverse={selected}>
-        3
+        {monthDate}
       </SizableText>
     </YStack>
   );
@@ -75,7 +88,7 @@ const GradientFade = LinearGradient.styleable<GradientFadeProps>(
 
     return (
       <LinearGradient
-        width="$10"
+        width="$6"
         height="100%"
         colors={["$gray5", "$colorTransparent"]}
         locations={[0.1, 1]}
@@ -87,10 +100,55 @@ const GradientFade = LinearGradient.styleable<GradientFadeProps>(
   }
 );
 
-export default function DatePicker() {
+function getCurrentDayTimestamp() {
+  // Compute the date of today, since midnight
+  const todayDate = new Date(Date.now());
+  todayDate.setUTCHours(0);
+  todayDate.setUTCMinutes(0);
+  todayDate.setUTCSeconds(0);
+  todayDate.setUTCMilliseconds(0);
+
+  // Compute timestamp from date: divide by 1,000 to get in seconds
+  const todayTimestamp = todayDate.getTime() / MS_IN_SEC;
+
+  return todayTimestamp;
+}
+
+export function DatePicker({
+  datePickerBlurRef,
+}: {
+  datePickerBlurRef: RefObject<VoidFunction>;
+}) {
+  // Compute current day and register for resetting on blur
+  const [selectedDayTimestamp, setSelectedDayTimestamp] = useState(
+    getCurrentDayTimestamp
+  );
+  datePickerBlurRef.current = () =>
+    setSelectedDayTimestamp(getCurrentDayTimestamp);
+
+  // compute the timestamps of previous days and days after
+  const beforeDayTimestamps = [];
+  for (let i = -NUM_EXTRA_DATES; i < 0; i++) {
+    beforeDayTimestamps.push(selectedDayTimestamp + i * SECS_IN_DAY);
+  }
+  const afterDayTimestamps = [];
+  for (let i = 1; i <= NUM_EXTRA_DATES; i++) {
+    afterDayTimestamps.push(selectedDayTimestamp + i * SECS_IN_DAY);
+  }
+
+  // compute first and last days
+  const firstDayTimestamp =
+    selectedDayTimestamp - (NUM_EXTRA_DATES + 1) * SECS_IN_DAY;
+  const lastDayTimestamp =
+    selectedDayTimestamp + (NUM_EXTRA_DATES + 1) * SECS_IN_DAY;
+
+  // Button actions
+  const pickPreviousDay = () => setSelectedDayTimestamp((v) => v + SECS_IN_DAY);
+  const pickNextDay = () => setSelectedDayTimestamp((v) => v + SECS_IN_DAY);
+
   return (
-    <XStack height="$7" width="100%" items="center" px="$2" gap="$2" bg="pink">
-      <ArrowButton direction="left" />
+    <XStack height="$6" width="100%" items="center" px="$2" gap="$2">
+      <ArrowButton direction="left" onPress={pickPreviousDay} />
 
       <ZStack
         flex={1}
@@ -107,11 +165,15 @@ export default function DatePicker() {
           py="$1.5"
           px="$2"
         >
-          <DateItem />
-          <DateItem />
-          <DateItem selected />
-          <DateItem />
-          <DateItem />
+          <DateItem unixTimestampSecs={firstDayTimestamp} />
+          {beforeDayTimestamps.map((dayTimestamp) => (
+            <DateItem unixTimestampSecs={dayTimestamp} key={dayTimestamp} />
+          ))}
+          <DateItem unixTimestampSecs={selectedDayTimestamp} selected />
+          {afterDayTimestamps.map((dayTimestamp) => (
+            <DateItem unixTimestampSecs={dayTimestamp} key={dayTimestamp} />
+          ))}
+          <DateItem unixTimestampSecs={lastDayTimestamp} />
         </XStack>
 
         {/* Fade styling */}
@@ -119,7 +181,7 @@ export default function DatePicker() {
         <GradientFade self="flex-end" direction="right" />
       </ZStack>
 
-      <ArrowButton direction="right" />
+      <ArrowButton direction="right" onPress={pickNextDay} />
     </XStack>
   );
 }

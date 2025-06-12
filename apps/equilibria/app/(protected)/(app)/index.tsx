@@ -32,8 +32,8 @@ import { WaterProgress } from "@/components/WaterProgress";
 import { Link } from "expo-router";
 import { api } from "@/convex/_generated/api";
 import DateSelector from "@/components/date-selector";
-import DatePicker from "@/components/date-picker";
+import { DatePicker } from "@/components/date-picker";
 
 export default function TabTwoScreen() {
-  return <DatePicker />;
+  return <View />;
 }
