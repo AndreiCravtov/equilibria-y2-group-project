@@ -25,20 +25,18 @@ import {
   Edit3,
 } from "@tamagui/lucide-icons";
 import { api } from "@/convex/_generated/api";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Result } from "@/util/result";
-import { extractDate } from "@/components/date-selector";
-import { date_to_string } from "@/components/date-selector";
-import { useDatePicker } from "@/components/DatePicker";
-import { MS_IN_SEC, timestampToDate } from "@/util/date";
+import { extractDate, date_to_string } from "@/components/date-selector";
+import { computeDailyScore } from "@/utils/hydrationScore"; // <── NEW
 
 export default function AddWaterScreen() {
+  const date = new Date();
   const theme = useTheme();
-  const { selectedDayTimestamp } = useDatePicker();
-  const selectedDate = timestampToDate(selectedDayTimestamp);
+
 
   const waterEntries = useQuery(api.water.getWaterByDate, {
-    dateUnixTimestamp: BigInt(selectedDayTimestamp),
+    date: extractDate(date),
   });
 
   const addWater = useMutation(api.water.addWaterEntry);
@@ -46,12 +44,23 @@ export default function AddWaterScreen() {
 
   if (!waterEntries) return <Text>Loading water entries...</Text>;
 
-  console.log(`waterEntries: ${waterEntries}`);
+
+  // SCORE CALCULATION
+
+  const DAILY_GOAL_ML = 2000;
+
+  const todayScore = useMemo(() => {
+    const events = waterEntries.map((item) => ({
+      timestamp: new Date(item.date || item._creationTime), // adjust field name
+      volumeMl: Number(item.waterIntake),
+    }));
+
+    return computeDailyScore(events, DAILY_GOAL_ML);
+  }, [waterEntries]);
+
+
   const handleAddEntry = async (amount: number | bigint) => {
-    await addWater({
-      dateUnixTimestamp: BigInt(selectedDayTimestamp),
-      waterIntake: BigInt(amount),
-    });
+    await addWater({ date: date.toISOString(), waterIntake: BigInt(amount) });
     setNewAmount("");
   };
 
@@ -82,22 +91,26 @@ export default function AddWaterScreen() {
     );
   }
 
+
   return (
     <ScrollView padding="$4" bounces={false} bg="#FFFFFF">
       <YStack space="$4">
         <H3 fontWeight="bold" textAlign="center" color="$indigo8Dark">
           Add records
         </H3>
-        {/* Input to add water */}
+
+        {/* Quick‑add buttons */}
         <Group orientation="horizontal" width="100%">
           {[
             { value: 200, bgColor: "$blue12Dark" },
             { value: 250, bgColor: "$indigo2" },
             { value: 500, bgColor: "$blue12Dark" },
           ].map(({ value, bgColor }) =>
-            createGroupButton({ icon: GlassWater, value, bgColor })
+            createGroupButton({ icon: GlassWater, value, bgColor }),
           )}
         </Group>
+
+        {/* Custom input */}
         <YStack space="$2">
           <Input
             placeholder="Enter water in mL"
@@ -117,13 +130,24 @@ export default function AddWaterScreen() {
           </Button>
         </YStack>
 
+        {/* Daily score */}
+        <YStack alignItems="center" space="$1">
+          <H3 fontWeight="bold" color="$indigo8Dark">
+            Today\'s Score
+          </H3>
+          <Text fontSize="$9" fontWeight="bold" color="$blue8Dark">
+            {todayScore}
+          </Text>
+          <Text color="$indigo8Dark">out of 100</Text>
+        </YStack>
+
         <Separator my={15} bg="$indigo8Dark" />
 
         <H3 fontWeight="bold" textAlign="center" color="$indigo8Dark">
-          {date_to_string(selectedDate)} entries
+          {date_to_string(date)} entries
         </H3>
 
-        {/* Show entries */}
+        {/* Entries list */}
         {waterEntries.length === 0 ? (
           <Text>No water entries yet.</Text>
         ) : (
