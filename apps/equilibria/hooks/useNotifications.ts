@@ -32,7 +32,7 @@ export async function scheduleWaterReminders() {
       sound: "default",
     },
     trigger: {
-      seconds: 4 * 60 * 60, // 4 hours
+      seconds: 60, // 4 hours
       repeats: true,
     },
   });
