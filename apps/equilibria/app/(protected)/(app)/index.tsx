@@ -13,7 +13,6 @@ import {
   Button,
   View,
 } from "tamagui";
-import { ToastControl } from "@/app/CurrentToast";
 import { Authenticated, Unauthenticated, useQuery } from "convex/react";
 import Animated, {
   useSharedValue,
@@ -33,8 +32,7 @@ import { Link } from "expo-router";
 import { api } from "@/convex/_generated/api";
 import DateSelector from "@/components/date-selector";
 import { DatePicker, useDatePicker } from "@/components/DatePicker";
-import { scheduleWaterReminders } from '@/hooks/useNotifications';
-
+import { scheduleWaterReminders } from "@/hooks/useNotifications";
 
 export default function TabTwoScreen() {
   const { selectedDayTimestamp } = useDatePicker();
