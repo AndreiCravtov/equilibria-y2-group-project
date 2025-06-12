@@ -32,6 +32,7 @@ import { date_to_string } from "@/components/date-selector";
 import { useDatePicker } from "@/components/DatePicker";
 import { MS_IN_SEC, timestampToDate } from "@/util/date";
 import {EquilibriaH2} from "@/app/custom-components";
+import { Id } from "./_generated/dataModel";
 
 export default function AddWaterScreen() {
   const theme = useTheme();
@@ -54,6 +55,12 @@ export default function AddWaterScreen() {
       waterIntake: BigInt(amount),
     });
     setNewAmount("");
+  };
+
+  const removeEntry = useMutation(api.water.removeWaterEntry);
+
+  const handleRemove = async (id: number | bigint) => {
+    await removeEntry({ waterEntryId: id as Id<"water"> });
   };
 
   function GroupButton({
@@ -140,7 +147,7 @@ export default function AddWaterScreen() {
                 <Text fontWeight="bold" fontSize="$6" color="$indigo11">
                   {item.waterIntake} mL
                 </Text>
-                <Button size="$3" chromeless onPress={() => handleEdit(item)}>
+                <Button size="$3" chromeless onPress={() => handleRemove(item._id)}>
                   <Trash size={24} color="$red10" />
                 </Button>
               </XStack>

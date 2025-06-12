@@ -59,3 +59,19 @@ export const addWaterEntry = mutation({
     });
   },
 });
+
+export const removeWaterEntry = mutation({
+  args: {
+    waterEntryId: v.id("water"),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getUserId(ctx);
+
+    const entry = await ctx.db.get(args.waterEntryId);
+    if (!entry || entry.userId !== userId) {
+      throw new Error("Unauthorized or entry not found");
+    }
+
+    await ctx.db.delete(args.waterEntryId);
+  },
+});
