@@ -33,6 +33,9 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
   const [height, setHeight] = useState(
     profile_err ? "" : profile.height.toString(),
   );
+  const [target, setTarget] = useState(
+    profile_err ? "" : profile.dailyTarget.toString(),
+  );
   const updateProfile = useMutation(api.userProfiles.updateUserProfile);
   if (profile_err) {
     setMessage("Could not find user profile");
@@ -58,6 +61,10 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
       setMessage("Please enter your height");
       return;
     }
+    if (!target) {
+      setMessage("Please enter your daily intake target");
+      return;
+    }
     // do the update
     setUpdated(false);
     updateProfile({
@@ -65,7 +72,8 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
       age: BigInt(age),
       gender: gender as "male" | "female",
       weight: BigInt(weight),
-      height: BigInt(10),
+      height: BigInt(height),
+      target: BigInt(target),
     });
   }
   return (
@@ -158,6 +166,30 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
           cm
         </Text>
       </XStack>
+
+      {/* User's height */}
+      <Text fontSize="$8" fontWeight="bold" pb="$1" color="$indigo4Dark">
+        Daily Intake Target
+      </Text>
+      <XStack alignItems="center">
+        <Input
+          value={target}
+          flex={1}
+          keyboardType="numeric"
+          onChangeText={(newTarget) => {
+            if (isNumber(newTarget)) {
+              setTarget(newTarget);
+              setUpdated(true);
+            }
+          }}
+          color="$indigo8Dark"
+          bg="$indigo2"
+        />
+        <Text ml="$2" alignSelf="center" color="$indigo8Dark">
+          ml
+        </Text>
+      </XStack>
+
       <Button
         disabled={!updated}
         {...(updated

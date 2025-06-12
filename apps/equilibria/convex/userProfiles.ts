@@ -25,8 +25,9 @@ export const updateUserProfile = mutation({
     gender: v.union(v.literal("male"), v.literal("female")),
     weight: v.int64(),
     height: v.int64(),
+    target: v.int64(),
   },
-  handler: async (ctx, { name, age, gender, weight, height }) => {
+  handler: async (ctx, { name, age, gender, weight, height, target }) => {
     const userId = await getUserId(ctx);
     const profile = await ctx.runQuery(api.userProfiles.tryGetUserProfile);
     // user profile must already exist
@@ -39,6 +40,7 @@ export const updateUserProfile = mutation({
       gender,
       weight,
       height,
+      dailyTarget: target,
     });
   },
 });
@@ -60,6 +62,8 @@ export const createUserProfile = mutation({
       throw new Error("User profile already exists");
 
     // Add new profile
+    // Do default water intake calculation
+    const target = BigInt(Math.round(waterTarget(Number(weight))));
     await ctx.db.insert("userProfiles", {
       userId,
       name,
@@ -67,6 +71,12 @@ export const createUserProfile = mutation({
       gender,
       weight,
       height,
+      dailyTarget: target,
     });
   },
 });
+
+// ml per day
+function waterTarget(weight: number): number {
+  return weight * 2.20462 * 0.5 * 29.5735;
+}
