@@ -33,9 +33,14 @@ import { Link } from "expo-router";
 import { api } from "@/convex/_generated/api";
 import DateSelector from "@/components/date-selector";
 import { DatePicker, useDatePicker } from "@/components/DatePicker";
+import { scheduleWaterReminders } from '@/hooks/useNotifications';
+
 
 export default function TabTwoScreen() {
   const { selectedDayTimestamp } = useDatePicker();
+  useEffect(() => {
+    scheduleWaterReminders();
+  }, []);
 
   const waterEntries = useQuery(api.water.getWaterByDate, {
     dateUnixTimestamp: BigInt(selectedDayTimestamp),
