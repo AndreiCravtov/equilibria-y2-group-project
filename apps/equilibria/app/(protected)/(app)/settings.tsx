@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { View, XStack, Input, Button, Text, YStack, Separator } from "tamagui";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -19,23 +19,23 @@ function isNumber(v: string) {
 type SetMessage = (msg: string) => void;
 
 function UserDetails({ setMessage }: { setMessage: SetMessage }) {
+  let profile = useQuery(api.userProfiles.tryGetUserProfile);
+  const profile_err = profile === "USER_PROFILE_MISSING" || !profile;
   const [updated, setUpdated] = useState(false);
-  const [name, setName] = useState("");
-  const [age, setAge] = useState("");
-  const [weight, setWeight] = useState("");
-  const [gender, setGender] = useState("");
-  const [height, setHeight] = useState("");
-  const profile = useQuery(api.userProfiles.tryGetUserProfile);
+  const [name, setName] = useState(profile_err ? "" : profile.name);
+  const [age, setAge] = useState(profile_err ? "" : profile.age.toString());
+  const [weight, setWeight] = useState(
+    profile_err ? "" : profile.weight.toString(),
+  );
+  const [gender, setGender] = useState(profile_err ? "" : profile.gender);
+  const [height, setHeight] = useState(
+    profile_err ? "" : profile.height.toString(),
+  );
   const updateProfile = useMutation(api.userProfiles.updateUserProfile);
-  if (profile === "USER_PROFILE_MISSING" || !profile) {
+  if (profile_err) {
     setMessage("Could not find user profile");
     return;
   }
-  setName(profile.name);
-  setAge(profile.age.toString());
-  setWeight(profile.weight.toString());
-  setGender(profile.gender);
-  setHeight(profile.height.toString());
 
   function update() {
     setMessage("");
@@ -57,6 +57,7 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
       return;
     }
     // do the update
+    setUpdated(false);
     updateProfile({
       name,
       age: BigInt(age),
