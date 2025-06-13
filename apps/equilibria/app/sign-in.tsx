@@ -91,7 +91,7 @@ export default function SignInScreen() {
       px="$9"
       bg="$background"
     >
-      <H4 fontWeight="bold" color={"$$indigo12"}>{CONTENT[step].header}</H4>
+      <H4 fontWeight="bold" color={"$indigo12"}>{CONTENT[step].header}</H4>
 
       <Form onSubmit={onSubmit} asChild>
         <YStack width="100%" gap="$4" mb="$10">   q

@@ -178,7 +178,7 @@ function BottleButton(props: { onPress: (amount: bigint) => void }) {
         <View bg="$blue8Dark" style={{ borderRadius: 10, padding: 8, flex: 1 }}>
           <YStack alignItems="center">
             <FontAwesome6 name="bottle-water" size={64} color="white" />
-            <Text color="white">{bottleSize}ml</Text>
+            <Text color="white" fontWeight="bold" fontSize="$5">{bottleSize}ml</Text>
           </YStack>
         </View>
       </XStack>
