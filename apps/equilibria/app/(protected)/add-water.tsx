@@ -16,7 +16,8 @@ import {
   Group,
   H3,
   useTheme,
-  Separator, H2,
+  Separator,
+  H2,
 } from "tamagui";
 import {
   GlassWater,
@@ -31,8 +32,8 @@ import { extractDate } from "@/components/date-selector";
 import { date_to_string } from "@/components/date-selector";
 import { useDatePicker } from "@/components/DatePicker";
 import { MS_IN_SEC, timestampToDate } from "@/util/date";
-import {EquilibriaH2} from "@/app/custom-components";
-import { Id } from "./_generated/dataModel";
+import { EquilibriaH2 } from "@/app/custom-components";
+import { Id } from "@/convex/_generated/dataModel";
 
 export default function AddWaterScreen() {
   const theme = useTheme();
@@ -43,7 +44,7 @@ export default function AddWaterScreen() {
     dateUnixTimestamp: BigInt(selectedDayTimestamp),
   });
 
-  const addWater = useMutation(api.water.addWaterEntry);
+  const addWater = useMutation(api.water.addWaterEntryDebug);
   const [newAmount, setNewAmount] = useState("");
 
   if (!waterEntries) return <Text>Loading water entries...</Text>;
@@ -96,19 +97,23 @@ export default function AddWaterScreen() {
         <EquilibriaH2>Add entries</EquilibriaH2>
         {/* Input to add water */}
         <Group orientation="horizontal" width="100%">
-          <GroupButton icon={GlassWater} value={200} bgColor={"$blue12Dark"}></GroupButton>
-          <Separator
-            alignSelf="stretch"
-            vertical
-            borderColor="$indigo10"
-          />
-          <GroupButton icon={GlassWater} value={250} bgColor={"$indigo2"}></GroupButton>
-          <Separator
-            alignSelf="stretch"
-            vertical
-            borderColor="$indigo10"
-          />
-          <GroupButton icon={GlassWater} value={250} bgColor={"$blue12Dark"}></GroupButton>
+          <GroupButton
+            icon={GlassWater}
+            value={200}
+            bgColor={"$blue12Dark"}
+          ></GroupButton>
+          <Separator alignSelf="stretch" vertical borderColor="$indigo10" />
+          <GroupButton
+            icon={GlassWater}
+            value={250}
+            bgColor={"$indigo2"}
+          ></GroupButton>
+          <Separator alignSelf="stretch" vertical borderColor="$indigo10" />
+          <GroupButton
+            icon={GlassWater}
+            value={250}
+            bgColor={"$blue12Dark"}
+          ></GroupButton>
         </Group>
         <YStack space="$2">
           <Input
@@ -133,9 +138,7 @@ export default function AddWaterScreen() {
 
         <Separator my={15} bg="$indigo8Dark" />
 
-        <EquilibriaH2>
-          {date_to_string(selectedDate)} entries
-        </EquilibriaH2>
+        <EquilibriaH2>{date_to_string(selectedDate)} entries</EquilibriaH2>
 
         {/* Show entries */}
         {waterEntries.length === 0 ? (
@@ -147,7 +150,11 @@ export default function AddWaterScreen() {
                 <Text fontWeight="bold" fontSize="$6" color="$indigo11">
                   {item.waterIntake} mL
                 </Text>
-                <Button size="$3" chromeless onPress={() => handleRemove(item._id)}>
+                <Button
+                  size="$3"
+                  chromeless
+                  onPress={() => handleRemove(item._id)}
+                >
                   <Trash size={24} color="$red10" />
                 </Button>
               </XStack>
