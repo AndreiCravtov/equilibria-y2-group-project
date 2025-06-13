@@ -31,7 +31,7 @@ import { extractDate } from "@/components/date-selector";
 import { date_to_string } from "@/components/date-selector";
 import { useDatePicker } from "@/components/DatePicker";
 import { MS_IN_SEC, timestampToDate } from "@/util/date";
-import {EquilibriaH2} from "@/app/custom-components";
+import {EquilibriaH2, EquilibriaButton} from "@/app/custom-components";
 import { Id } from "./_generated/dataModel";
 
 export default function AddWaterScreen() {
@@ -119,16 +119,9 @@ export default function AddWaterScreen() {
             placeholderTextColor="$indigo8Dark"
             color="$indigo8Dark"
             bg="$indigo2"
+            borderColor={"$indigo8"}
           />
-          <Button
-            onPress={() => handleAddEntry(Number(newAmount))}
-            color="$indigo4"
-            bg="$blue8Dark"
-            fontWeight={"bold"}
-            fontSize={17}
-          >
-            Add Entry
-          </Button>
+          <EquilibriaButton pressFunc={() => handleAddEntry(Number(newAmount))}>Add Entry</EquilibriaButton>
         </YStack>
 
         <Separator my={15} bg="$indigo8Dark" />
