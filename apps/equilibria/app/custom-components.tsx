@@ -20,12 +20,12 @@ type EquilibriaButtonProps = {
 }
 
 
-export function EquilibriaButton({ children, pressFunc }: EquilibriaButtonProps) {
+export function EquilibriaButton({ children, bg = "$blue8Dark", pressFunc }: EquilibriaButtonProps) {
   return (
     <Button
       onPress={pressFunc}
       color="$indigo4"
-      bg="$blue8Dark"
+      bg={bg}
       fontWeight={"bold"}
       fontSize="$6"
       pressStyle={{

@@ -271,9 +271,9 @@ export default function SettingsScreen() {
 
         <Separator my={"$1"} borderColor="$indigo8Dark" />
 
-        <Button theme="red" themeInverse onPress={() => void signOut()}>
+        <EquilibriaButton bg={"$red10"} pressFunc={() => void signOut()}>
           Sign Out
-        </Button>
+        </EquilibriaButton>
       </YStack>
     </ScrollView>
   );
