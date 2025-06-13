@@ -2,6 +2,7 @@ import {useQuery} from "convex/react";
 import {View, Text, H2, H3, YStack, XStack, Separator, ScrollView} from 'tamagui'
 import {api} from "@/convex/_generated/api";
 import {BarChart} from "react-native-gifted-charts";
+import {EquilibriaH2} from "@/app/custom-components";
 
 
 export default function LeaderboardStaticView() {
@@ -24,7 +25,7 @@ export default function LeaderboardStaticView() {
     <ScrollView p="$4" bounces={false} bg="#FFFFFF">
       <YStack gap="$3" alignItems="center">
         {/* Top 3 */}
-        <H2 fontWeight="bold" color="$indigo8Dark" bg="#FFFFFF" fontSize={32}>Daily scores</H2>
+        <EquilibriaH2>Daily scores</EquilibriaH2>
         <YStack width="100%" gap="$2">
           <LeaderboardRow place={1}
                           name={first?.username || "First placeholder"}
@@ -96,16 +97,18 @@ function Dot() {
 function ProgressChart({data}) {
   return (
     <YStack pb="$4" alignItems="center" width="100%">
-      <H2 fontWeight="bold" color="$indigo8Dark" bg="#FFFFFF" pb={"$5"} fontSize={32}>Weekly progress</H2>
+      <EquilibriaH2>Weekly progress</EquilibriaH2>
         <BarChart
           data={data}
           frontColor="#0954A5"
-          barBorderRadius={7.5}
+          barBorderRadius={5}
           noOfSections={3}
           spacing={15}
           initialSpacing={10}
           endSpacing={10}
           barWidth={28}
+          yAxisThickness={0}
+          xAxisThickness={2}
         />
     </YStack>
   )
