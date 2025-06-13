@@ -4,11 +4,6 @@ import { Platform } from "react-native";
 import { SchedulableTriggerInputTypes } from "expo-notifications";
 
 export async function scheduleWaterReminders() {
-  if (!Device.isDevice) {
-    console.log("Must use physical device");
-    return;
-  }
-
   const { status: existingStatus } = await Notifications.getPermissionsAsync();
   let finalStatus = existingStatus;
 
@@ -35,7 +30,7 @@ export async function scheduleWaterReminders() {
 
     trigger: {
       type: SchedulableTriggerInputTypes.TIME_INTERVAL,
-      seconds: 4 * 60 * 60, // 4 hours
+      seconds: 4 * 60 * 60, // 4 hours //TODO: uncomment
       repeats: true,
     },
   });

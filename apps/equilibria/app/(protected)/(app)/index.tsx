@@ -36,9 +36,6 @@ import { scheduleWaterReminders } from "@/hooks/useNotifications";
 
 export default function TabTwoScreen() {
   const { selectedDayTimestamp } = useDatePicker();
-  useEffect(() => {
-    scheduleWaterReminders();
-  }, []);
 
   const waterEntries = useQuery(api.water.getWaterByDate, {
     dateUnixTimestamp: BigInt(selectedDayTimestamp),

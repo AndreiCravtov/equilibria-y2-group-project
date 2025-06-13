@@ -6,7 +6,7 @@ import { use, useEffect } from "react";
 import { useTheme } from "tamagui";
 
 export const unstable_settings = {
-  initialRouteName: "(app)", // anchor
+  initialRouteName: "(app)/index", // anchor
 };
 
 export default function ProtectedLayout() {

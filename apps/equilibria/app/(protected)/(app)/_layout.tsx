@@ -11,11 +11,21 @@ import {
   BarChart,
 } from "@tamagui/lucide-icons";
 import StatusBarView from "@/components/StatusBarView";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DatePicker } from "@/components/DatePicker";
+import { scheduleWaterReminders } from "@/hooks/useNotifications";
+
+export const unstable_settings = {
+  initialRouteName: "(app)", // anchor
+};
 
 export default function TabsLayout() {
   const theme = useTheme();
+
+  // Start water reminders
+  useEffect(() => {
+    scheduleWaterReminders();
+  }, []);
 
   return (
     <Tabs
