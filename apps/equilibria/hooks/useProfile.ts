@@ -8,6 +8,7 @@ interface Profile {
   weight: bigint;
   height: bigint;
   dailyTarget: bigint;
+  bottleSize: bigint;
 }
 
 interface ProfileStore {

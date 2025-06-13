@@ -24,6 +24,7 @@ import {
   ActivitySquare,
   AirVent,
   Trash,
+  Tv,
 } from "@tamagui/lucide-icons";
 import { api } from "@/convex/_generated/api";
 import { useState } from "react";
@@ -32,8 +33,10 @@ import { extractDate } from "@/components/date-selector";
 import { date_to_string } from "@/components/date-selector";
 import { useDatePicker } from "@/components/DatePicker";
 import { MS_IN_SEC, timestampToDate } from "@/util/date";
-import { EquilibriaH2 } from "@/app/custom-components";
-import { Id } from "@/convex/_generated/dataModel";
+import { EquilibriaH2, EquilibriaButton } from "@/app/custom-components";
+import { Id } from "./_generated/dataModel";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import { Pressable } from "react-native";
 
 export default function AddWaterScreen() {
   const theme = useTheme();
@@ -44,8 +47,10 @@ export default function AddWaterScreen() {
     dateUnixTimestamp: BigInt(selectedDayTimestamp),
   });
 
-  const addWater = useMutation(api.water.addWaterEntryDebug);
+  const addWater = useMutation(api.water.addWaterEntry);
   const [newAmount, setNewAmount] = useState("");
+
+  const removeEntry = useMutation(api.water.removeWaterEntry);
 
   if (!waterEntries) return <Text>Loading water entries...</Text>;
 
@@ -57,8 +62,6 @@ export default function AddWaterScreen() {
     });
     setNewAmount("");
   };
-
-  const removeEntry = useMutation(api.water.removeWaterEntry);
 
   const handleRemove = async (id: number | bigint) => {
     await removeEntry({ waterEntryId: id as Id<"water"> });
@@ -111,10 +114,11 @@ export default function AddWaterScreen() {
           <Separator alignSelf="stretch" vertical borderColor="$indigo10" />
           <GroupButton
             icon={GlassWater}
-            value={250}
+            value={500}
             bgColor={"$blue12Dark"}
           ></GroupButton>
         </Group>
+        <BottleButton onPress={handleAddEntry} />
         <YStack space="$2">
           <Input
             placeholder="Enter water in mL"
@@ -124,19 +128,14 @@ export default function AddWaterScreen() {
             placeholderTextColor="$indigo8Dark"
             color="$indigo8Dark"
             bg="$indigo2"
+            borderColor={"$indigo8"}
           />
-          <Button
-            onPress={() => handleAddEntry(Number(newAmount))}
-            color="$indigo4"
-            bg="$blue8Dark"
-            fontWeight={"bold"}
-            fontSize={17}
-          >
+          <EquilibriaButton pressFunc={() => handleAddEntry(Number(newAmount))}>
             Add Entry
-          </Button>
+          </EquilibriaButton>
         </YStack>
 
-        <Separator my={15} bg="$indigo8Dark" />
+        <Separator my={15} borderColor="$indigo8Dark" />
 
         <EquilibriaH2>{date_to_string(selectedDate)} entries</EquilibriaH2>
 
@@ -163,5 +162,30 @@ export default function AddWaterScreen() {
         )}
       </YStack>
     </ScrollView>
+  );
+}
+
+function BottleButton(props: { onPress: (amount: bigint) => void }) {
+  const profile = useQuery(api.userProfiles.tryGetUserProfile);
+  if (!profile || profile === "USER_PROFILE_MISSING") return;
+  const bottleSize = profile.bottleSize;
+  return (
+    <Pressable
+      onPress={() => {
+        props.onPress(bottleSize);
+      }}
+      style={{ width: "100%" }}
+    >
+      <XStack width="100%">
+        <View bg="$blue8Dark" style={{ borderRadius: 10, padding: 8, flex: 1 }}>
+          <YStack alignItems="center">
+            <FontAwesome6 name="bottle-water" size={64} color="white" />
+            <Text color="white" fontWeight="bold" fontSize="$5">
+              {bottleSize}ml
+            </Text>
+          </YStack>
+        </View>
+      </XStack>
+    </Pressable>
   );
 }

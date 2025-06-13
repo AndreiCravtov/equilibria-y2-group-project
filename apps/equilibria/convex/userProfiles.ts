@@ -42,8 +42,9 @@ export const updateUserProfile = mutation({
     weight: v.int64(),
     height: v.int64(),
     target: v.int64(),
+    bottleSize: v.int64(),
   },
-  handler: async (ctx, { name, age, gender, weight, height, target }) => {
+  handler: async (ctx, { name, age, gender, weight, height, target, bottleSize }) => {
     const profile = await ctx.runQuery(api.userProfiles.tryGetUserProfile);
     // user profile must already exist
     if (profile === USER_PROFILE_MISSING)
@@ -56,6 +57,7 @@ export const updateUserProfile = mutation({
       weight,
       height,
       dailyTarget: target,
+      bottleSize,
     });
   },
 });
@@ -87,6 +89,8 @@ export const createUserProfile = mutation({
       weight,
       height,
       dailyTarget: target,
+      // default bottle size
+      bottleSize: BigInt(500),
     });
   },
 });

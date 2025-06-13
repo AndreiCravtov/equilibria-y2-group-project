@@ -34,6 +34,7 @@ export default defineSchema({
     weight: v.int64(),
     height: v.int64(),
     dailyTarget: v.int64(),
+    bottleSize: v.int64(),
   }).index("userId", ["userId"]),
 
   water: defineTable({

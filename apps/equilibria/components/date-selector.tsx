@@ -21,6 +21,7 @@ import { Link } from "expo-router";
 import { api } from "@/convex/_generated/api";
 import { useState } from "react";
 import { ArrowLeft, ArrowRight } from "@tamagui/lucide-icons";
+import { useQuery } from "convex/react";
 
 const days = [
   "Sunday",

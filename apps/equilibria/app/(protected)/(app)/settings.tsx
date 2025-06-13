@@ -22,6 +22,7 @@ import { tryGetUserProfile } from "@/convex/userProfiles";
 import { useQuery } from "convex/react";
 import { ScrollView } from "tamagui";
 import { useAuthActions } from "@convex-dev/auth/react";
+import { EquilibriaButton } from "@/app/custom-components";
 import { LoadingView } from "@/components/Loading";
 
 function isNumber(v: string) {
@@ -45,6 +46,9 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
   );
   const [target, setTarget] = useState(
     profileLoading ? "" : profile.dailyTarget.toString()
+  );
+  const [bottleSize, setBottleSize] = useState(
+    profileLoading ? "" : profile.bottleSize.toString()
   );
   const updateProfile = useMutation(api.userProfiles.updateUserProfile);
   if (profileLoading) {
@@ -74,6 +78,10 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
       setMessage("Please enter your daily intake target");
       return;
     }
+    if (!bottleSize) {
+      setMessage("Please enter your bottle size");
+      return;
+    }
     // do the update
     setUpdated(false);
     updateProfile({
@@ -83,6 +91,7 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
       weight: BigInt(weight),
       height: BigInt(height),
       target: BigInt(target),
+      bottleSize: BigInt(bottleSize),
     });
   }
   return (
@@ -134,7 +143,7 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
       <Text fontSize="$8" fontWeight="bold" pb="$1" color="$indigo4Dark">
         Weight
       </Text>
-      <XStack items="center">
+      <XStack alignItems="center">
         <Input
           value={weight}
           flex={1}
@@ -148,7 +157,7 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
           color="$indigo8Dark"
           bg="$indigo2"
         />
-        <Text ml="$2" self="center" color="$indigo8Dark">
+        <Text ml="$2" alignSelf="center" color="$indigo8Dark">
           kg
         </Text>
       </XStack>
@@ -157,7 +166,7 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
       <Text fontSize="$8" fontWeight="bold" pb="$1" color="$indigo4Dark">
         Height
       </Text>
-      <XStack items="center">
+      <XStack alignItems="center">
         <Input
           value={height}
           flex={1}
@@ -171,16 +180,16 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
           color="$indigo8Dark"
           bg="$indigo2"
         />
-        <Text ml="$2" self="center" color="$indigo8Dark">
+        <Text ml="$2" alignSelf="center" color="$indigo8Dark">
           cm
         </Text>
       </XStack>
 
-      {/* User's height */}
+      {/* User's daily intake goal */}
       <Text fontSize="$8" fontWeight="bold" pb="$1" color="$indigo4Dark">
         Daily Intake Target
       </Text>
-      <XStack items="center">
+      <XStack alignItems="center">
         <Input
           value={target}
           flex={1}
@@ -194,16 +203,42 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
           color="$indigo8Dark"
           bg="$indigo2"
         />
-        <Text ml="$2" self="center" color="$indigo8Dark">
+        <Text ml="$2" alignSelf="center" color="$indigo8Dark">
           ml
         </Text>
       </XStack>
 
+      {/* User's water bottle size */}
+      <Text fontSize="$8" fontWeight="bold" pb="$1" color="$indigo4Dark">
+        Water Bottle Size
+      </Text>
+      <Input
+        keyboardType="numeric"
+        value={bottleSize}
+        onChangeText={(newbs) => {
+          if (isNumber(newbs)) {
+            setBottleSize(newbs);
+            setUpdated(true);
+          }
+        }}
+        color="$indigo8Dark"
+        bg="$indigo2"
+      />
+
       <Button
         disabled={!updated}
         {...(updated
-          ? { color: "$indigo8Dark", backgroundColor: "lightgrey" }
-          : {})}
+          ? {
+              color: "$indigo4",
+              backgroundColor: "$blue8Dark",
+              fontWeight: "bold",
+              fontSize: "$6",
+              pressStyle: {
+                backgroundColor: "$blue10",
+                scale: 0.96,
+              },
+            }
+          : { color: "gray" })}
         onPress={update}
       >
         Update
@@ -215,6 +250,7 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
 export default function SettingsScreen() {
   const [username, setUsername] = useState("");
   const [message, setMessage] = useState("");
+  const [friendMessage, setFriendMessage] = useState("");
   const { signOut } = useAuthActions();
 
   const addFriend = useMutation(api.friends.addFriend);
@@ -228,22 +264,22 @@ export default function SettingsScreen() {
     }
     try {
       await addFriend({ username });
-      setMessage(`Friend request sent to ${username}`);
+      setFriendMessage(`Friend request sent to ${username}`);
       setUsername("");
     } catch (err) {
       console.error(err);
-      setMessage("Failed to send friend request");
+      setFriendMessage("Failed to send friend request");
     }
   };
 
   return (
     <ScrollView bg="$background">
-      <YStack gap="$4" p="$4">
+      <YStack gap="$4" padding="$4">
         <Text fontSize="$8" fontWeight="bold" color="$indigo4Dark">
           Add a Friend
         </Text>
 
-        <XStack gap="$2" items="center">
+        <XStack gap="$2" alignItems="center">
           <Input
             color="$indigo8Dark"
             bg="$indigo2"
@@ -252,21 +288,21 @@ export default function SettingsScreen() {
             value={username}
             onChangeText={setUsername}
           />
-          <Button onPress={handleAddFriend}>Add</Button>
+          <EquilibriaButton pressFunc={handleAddFriend}>Add</EquilibriaButton>
         </XStack>
+        {friendMessage !== "" && <Text color="red">{friendMessage}</Text>}
 
-        <Separator borderColor={"black"} />
+        <Separator my={"$1"} borderColor="$indigo8Dark" />
 
         <UserDetails setMessage={setMessage} />
 
         {message !== "" && <Text color="red">{message}</Text>}
-        {message !== "" && <Text color="red">{message}</Text>}
 
-        <Separator borderColor={"black"} />
+        <Separator my={"$1"} borderColor="$indigo8Dark" />
 
-        <Button theme="red" themeInverse onPress={() => void signOut()}>
+        <EquilibriaButton bg={"$red10"} pressFunc={() => void signOut()}>
           Sign Out
-        </Button>
+        </EquilibriaButton>
       </YStack>
     </ScrollView>
   );
@@ -307,7 +343,7 @@ export function ChooseGender(
             </Sheet.ScrollView>
           </Sheet.Frame>
           <Sheet.Overlay
-            bg="$shadowColor"
+            backgroundColor="$shadowColor"
             animation="lazy"
             enterStyle={{ opacity: 0 }}
             exitStyle={{ opacity: 0 }}
@@ -317,13 +353,13 @@ export function ChooseGender(
 
       <Select.Content zIndex={200000}>
         <Select.ScrollUpButton
-          items="center"
-          justify="center"
+          alignItems="center"
+          justifyContent="center"
           position="relative"
           width="100%"
           height="$3"
         >
-          <YStack z={10}>
+          <YStack zIndex={10}>
             <ChevronUp size={20} />
           </YStack>
           <LinearGradient
@@ -335,7 +371,7 @@ export function ChooseGender(
           />
         </Select.ScrollUpButton>
 
-        <Select.Viewport minW={200}>
+        <Select.Viewport minWidth={200}>
           <Select.Group>
             <Select.Label>Gender</Select.Label>
             <Select.Item index={0} key="Male" value="male">
@@ -354,13 +390,13 @@ export function ChooseGender(
         </Select.Viewport>
 
         <Select.ScrollDownButton
-          items="center"
-          content="center"
+          alignItems="center"
+          justifyContent="center"
           position="relative"
           width="100%"
           height="$3"
         >
-          <YStack z={10}>
+          <YStack zIndex={10}>
             <ChevronDown size={20} />
           </YStack>
           <LinearGradient

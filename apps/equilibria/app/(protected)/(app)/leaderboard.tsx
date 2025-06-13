@@ -63,46 +63,34 @@ export default function LeaderboardStaticView() {
         {/* Top 3 */}
         <EquilibriaH2>Daily scores</EquilibriaH2>
         <YStack width="100%" gap="$2">
-          <LeaderboardRow
-            place={1}
-            name={first?.username || "First placeholder"}
-            score={String(first?.score || 0)}
-            background="#FBBF24"
-          />
-          <LeaderboardRow
-            place={2}
-            name={second?.username || "Second placeholder"}
-            score={String(second?.score || 0)}
-            background="$gray11Dark"
-          />
-          <LeaderboardRow
-            place={3}
-            name={third?.username || "Third placeholder"}
-            score={String(third?.score || 0)}
-            background="#A18072"
-          />
+          <LeaderboardRow place={1}
+                          name={first?.username || "First placeholder"}
+                          score={String(first?.score || 0)}
+                          background="#FBBF24"/>
+          <LeaderboardRow place={2}
+                          name={second?.username || "Second placeholder"}
+                          score={String(second?.score || 0)}
+                          background="$gray11Dark"/>
+          <LeaderboardRow place={3}
+                          name={third?.username || "Third placeholder"}
+                          score={String(third?.score || 0)}
+                          background="#A18072"/>
         </YStack>
 
         {/* Separator */}
         <XStack gap="$2" my="$2">
-          <Dot />
-          <Dot />
-          <Dot />
+          <Dot/>
+          <Dot/>
+          <Dot/>
         </XStack>
 
         {/* User */}
-        <LeaderboardRow
-          place={yourIndex + 1}
-          name="You"
-          score={you.score}
-          background="#0954A5"
-          color={"#FFFFFF"}
-        />
+        <LeaderboardRow place={yourIndex + 1} name="You" score={you.score} background="#0954A5" color={"#FFFFFF"}/>
         <View
           style={{
-            alignSelf: "stretch",
+            alignSelf: 'stretch',
             height: 2,
-            backgroundColor: "#0954A5",
+            backgroundColor: '#0954A5',
             marginVertical: 10,
           }}
         />
@@ -113,18 +101,12 @@ export default function LeaderboardStaticView() {
 }
 
 // Leaderboard Row Component
-function LeaderboardRow({
-  place,
-  name,
-  score,
-  color,
-  background,
-}: {
-  place: number;
-  name: string;
-  score: number | string;
-  color: string;
-  background: string;
+function LeaderboardRow({place, name, score, color, background}: {
+  place: number,
+  name: string,
+  score: number | string,
+  color: string,
+  background: string,
 }) {
   return (
     <XStack
@@ -136,36 +118,34 @@ function LeaderboardRow({
       backgroundColor={background}
       width="100%"
     >
-      <Text fontWeight="bold" color={color}>
-        {place}. {name}
-      </Text>
+      <Text fontWeight="bold" color={color}>{place}. {name}</Text>
       <Text color={color}>{score} score</Text>
     </XStack>
-  );
+  )
 }
 
 // Dot separator
 function Dot() {
   // @ts-ignore
-  return <View width={8} height={8} borderRadius={4} backgroundColor="#AAA" />;
+  return <View width={8} height={8} borderRadius={4} backgroundColor="#AAA"/>
 }
 
-function ProgressChart({ data }) {
+function ProgressChart({data}) {
   return (
     <YStack pb="$4" alignItems="center" width="100%">
       <EquilibriaH2>Weekly progress</EquilibriaH2>
-      <BarChart
-        data={data}
-        frontColor="#0954A5"
-        barBorderRadius={5}
-        noOfSections={3}
-        spacing={15}
-        initialSpacing={10}
-        endSpacing={10}
-        barWidth={28}
-        yAxisThickness={0}
-        xAxisThickness={2}
-      />
+        <BarChart
+          data={data}
+          frontColor="#0954A5"
+          barBorderRadius={5}
+          noOfSections={3}
+          spacing={15}
+          initialSpacing={10}
+          endSpacing={10}
+          barWidth={28}
+          yAxisThickness={0}
+          xAxisThickness={2}
+        />
     </YStack>
   );
 }
