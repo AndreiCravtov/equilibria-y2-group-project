@@ -33,6 +33,7 @@ import { api } from "@/convex/_generated/api";
 import DateSelector from "@/components/date-selector";
 import { DatePicker, useDatePicker } from "@/components/DatePicker";
 import { scheduleWaterReminders } from "@/hooks/useNotifications";
+import { LoadingView } from "@/components/Loading";
 
 export default function TabTwoScreen() {
   const { selectedDayTimestamp } = useDatePicker();
@@ -40,6 +41,7 @@ export default function TabTwoScreen() {
   const waterEntries = useQuery(api.water.getWaterByDate, {
     dateUnixTimestamp: BigInt(selectedDayTimestamp),
   });
+  const profile = useQuery(api.userProfiles.getUserProfile);
 
   function getTotalWaterIntake(entries: { waterIntake: number | bigint }[]) {
     return entries.reduce(
@@ -48,8 +50,13 @@ export default function TabTwoScreen() {
     );
   }
 
-  const totalWaterIntake = getTotalWaterIntake(waterEntries ?? []);
-  const userGoal = 2000;
+  // Loading screen
+  if (waterEntries === undefined || profile === undefined) {
+    return <LoadingView />;
+  }
+
+  const totalWaterIntake = getTotalWaterIntake(waterEntries);
+  const userGoal = Number(profile.dailyTarget);
 
   const waterPercentage = (totalWaterIntake / userGoal) * 100;
 
