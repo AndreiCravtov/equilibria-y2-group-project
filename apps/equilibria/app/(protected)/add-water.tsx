@@ -108,7 +108,7 @@ export default function AddWaterScreen() {
             vertical
             borderColor="$indigo10"
           />
-          <GroupButton icon={GlassWater} value={250} bgColor={"$blue12Dark"}></GroupButton>
+          <GroupButton icon={GlassWater} value={500} bgColor={"$blue12Dark"}></GroupButton>
         </Group>
         <YStack space="$2">
           <Input

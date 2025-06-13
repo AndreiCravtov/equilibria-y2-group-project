@@ -95,6 +95,8 @@ export const getLeaderboardList = query({
         };
       })
     );
-    return leaderboard;
+    return leaderboard
+      .filter((u): u is NonNullable<typeof u> => u !== null)
+      .sort((a, b) => Number(b.score) - Number(a.score));
   },
 });
