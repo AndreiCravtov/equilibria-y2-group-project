@@ -16,13 +16,15 @@ import {
   Group,
   H3,
   useTheme,
-  Separator, H2,
+  Separator,
+  H2,
 } from "tamagui";
 import {
   GlassWater,
   ActivitySquare,
   AirVent,
   Trash,
+  Tv,
 } from "@tamagui/lucide-icons";
 import { api } from "@/convex/_generated/api";
 import { useState } from "react";
@@ -31,8 +33,10 @@ import { extractDate } from "@/components/date-selector";
 import { date_to_string } from "@/components/date-selector";
 import { useDatePicker } from "@/components/DatePicker";
 import { MS_IN_SEC, timestampToDate } from "@/util/date";
-import {EquilibriaH2} from "@/app/custom-components";
+import { EquilibriaH2 } from "@/app/custom-components";
 import { Id } from "./_generated/dataModel";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import { Pressable } from "react-native";
 
 export default function AddWaterScreen() {
   const theme = useTheme();
@@ -96,20 +100,25 @@ export default function AddWaterScreen() {
         <EquilibriaH2>Add entries</EquilibriaH2>
         {/* Input to add water */}
         <Group orientation="horizontal" width="100%">
-          <GroupButton icon={GlassWater} value={200} bgColor={"$blue12Dark"}></GroupButton>
-          <Separator
-            alignSelf="stretch"
-            vertical
-            borderColor="$indigo10"
-          />
-          <GroupButton icon={GlassWater} value={250} bgColor={"$indigo2"}></GroupButton>
-          <Separator
-            alignSelf="stretch"
-            vertical
-            borderColor="$indigo10"
-          />
-          <GroupButton icon={GlassWater} value={250} bgColor={"$blue12Dark"}></GroupButton>
+          <GroupButton
+            icon={GlassWater}
+            value={200}
+            bgColor={"$blue12Dark"}
+          ></GroupButton>
+          <Separator alignSelf="stretch" vertical borderColor="$indigo10" />
+          <GroupButton
+            icon={GlassWater}
+            value={250}
+            bgColor={"$indigo2"}
+          ></GroupButton>
+          <Separator alignSelf="stretch" vertical borderColor="$indigo10" />
+          <GroupButton
+            icon={GlassWater}
+            value={500}
+            bgColor={"$blue12Dark"}
+          ></GroupButton>
         </Group>
+        <BottleButton onPress={handleAddEntry} />
         <YStack space="$2">
           <Input
             placeholder="Enter water in mL"
@@ -133,9 +142,7 @@ export default function AddWaterScreen() {
 
         <Separator my={15} bg="$indigo8Dark" />
 
-        <EquilibriaH2>
-          {date_to_string(selectedDate)} entries
-        </EquilibriaH2>
+        <EquilibriaH2>{date_to_string(selectedDate)} entries</EquilibriaH2>
 
         {/* Show entries */}
         {waterEntries.length === 0 ? (
@@ -147,7 +154,11 @@ export default function AddWaterScreen() {
                 <Text fontWeight="bold" fontSize="$6" color="$indigo11">
                   {item.waterIntake} mL
                 </Text>
-                <Button size="$3" chromeless onPress={() => handleRemove(item._id)}>
+                <Button
+                  size="$3"
+                  chromeless
+                  onPress={() => handleRemove(item._id)}
+                >
                   <Trash size={24} color="$red10" />
                 </Button>
               </XStack>
@@ -156,5 +167,27 @@ export default function AddWaterScreen() {
         )}
       </YStack>
     </ScrollView>
+  );
+}
+
+function BottleButton(props: { onPress: (amount: bigint) => void }) {
+  const profile = useQuery(api.userProfiles.tryGetUserProfile);
+  if (!profile || profile === "USER_PROFILE_MISSING") return;
+  const bottleSize = profile.bottleSize;
+  return (
+    <Pressable
+      onPress={() => {
+        props.onPress(bottleSize);
+      }}
+    >
+      <XStack justifyContent="center">
+        <View bg="$blue8Dark" style={{ borderRadius: 10, padding: 8 }}>
+          <YStack alignItems="center">
+            <FontAwesome6 name="bottle-water" size={64} color="white" />
+            <Text color="white">{bottleSize}ml</Text>
+          </YStack>
+        </View>
+      </XStack>
+    </Pressable>
   );
 }

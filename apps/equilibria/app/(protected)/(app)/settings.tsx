@@ -36,6 +36,9 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
   const [target, setTarget] = useState(
     profile_err ? "" : profile.dailyTarget.toString(),
   );
+  const [bottleSize, setBottleSize] = useState(
+    profile_err ? "" : profile.bottleSize.toString(),
+  );
   const updateProfile = useMutation(api.userProfiles.updateUserProfile);
   if (profile_err) {
     setMessage("Could not find user profile");
@@ -65,6 +68,10 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
       setMessage("Please enter your daily intake target");
       return;
     }
+    if (!bottleSize) {
+      setMessage("Please enter your bottle size");
+      return;
+    }
     // do the update
     setUpdated(false);
     updateProfile({
@@ -74,6 +81,7 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
       weight: BigInt(weight),
       height: BigInt(height),
       target: BigInt(target),
+      bottleSize: BigInt(bottleSize),
     });
   }
   return (
@@ -167,7 +175,7 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
         </Text>
       </XStack>
 
-      {/* User's height */}
+      {/* User's daily intake goal */}
       <Text fontSize="$8" fontWeight="bold" pb="$1" color="$indigo4Dark">
         Daily Intake Target
       </Text>
@@ -189,6 +197,23 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
           ml
         </Text>
       </XStack>
+
+      {/* User's water bottle size */}
+      <Text fontSize="$8" fontWeight="bold" pb="$1" color="$indigo4Dark">
+        Water Bottle Size
+      </Text>
+      <Input
+        keyboardType="numeric"
+        value={bottleSize}
+        onChangeText={(newbs) => {
+          if (isNumber(newbs)) {
+            setBottleSize(newbs);
+            setUpdated(true);
+          }
+        }}
+        color="$indigo8Dark"
+        bg="$indigo2"
+      />
 
       <Button
         disabled={!updated}
