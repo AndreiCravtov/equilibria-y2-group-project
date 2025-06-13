@@ -1,3 +1,9 @@
+/*  Hydration scoring utilities
+    ------------------------------------------
+    • computeDrinkPoints → points for *one* drink
+    • computeDailyScore  → running-total helper (unchanged)
+*/
+
 export interface DrinkEvent {
   timestamp: Date | number;
   volumeMl: number;
@@ -10,8 +16,37 @@ export interface ScoreConfig {
   sigmaHours?: number;         // default 1 h
 }
 
+
 function gaussian(dtSec: number, muSec: number, sigmaSec: number): number {
   return Math.exp(-((dtSec - muSec) ** 2) / (2 * sigmaSec ** 2));
+}
+
+export function computeDrinkPoints(
+  volumeMl: number,
+  now: Date,
+  lastTimestamp: Date | null,
+  dailyGoalMl: number,
+  cfg: ScoreConfig = {}
+): number {
+  const {
+    referenceServingMl = 250,
+    capVolumeMl        = 400,
+    muHours            = 2,
+    sigmaHours         = 1,
+  } = cfg;
+
+  const P_OPT = 100 * referenceServingMl / dailyGoalMl;
+  const fVol  = Math.min(volumeMl, capVolumeMl) / referenceServingMl;
+
+  let fTime = 1;                         
+  if (lastTimestamp) {
+    const dtSec = (now.getTime() - lastTimestamp.getTime()) / 1000;
+    const MU    = muHours * 3600;
+    const SIG   = sigmaHours * 3600;
+    fTime = gaussian(dtSec, MU, SIG);
+  }
+
+  return Math.round(P_OPT * fVol * fTime * 100) / 100;  
 }
 
 export function computeDailyScore(
@@ -21,9 +56,9 @@ export function computeDailyScore(
 ): number {
   const {
     referenceServingMl = 250,
-    capVolumeMl = 400,
-    muHours = 2,
-    sigmaHours = 1,
+    capVolumeMl        = 400,
+    muHours            = 2,
+    sigmaHours         = 1,
   } = cfg;
 
   const MU = muHours * 3600;
@@ -43,7 +78,7 @@ export function computeDailyScore(
     const ts = timestamp instanceof Date ? timestamp.getTime() : timestamp;
     const dtSec = lastTs === null ? MU : (ts - lastTs) / 1000;
     const fTime = gaussian(dtSec, MU, SIG);
-    const fVol = Math.min(volumeMl, capVolumeMl) / referenceServingMl;
+    const fVol  = Math.min(volumeMl, capVolumeMl) / referenceServingMl;
 
     score = Math.min(score + P_OPT * fVol * fTime, 100);
     lastTs = ts;
