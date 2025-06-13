@@ -49,7 +49,6 @@ export default defineSchema({
 
   scores: defineTable({
     userId: v.id("users"),
-    date: v.string(),
     score: v.int64(),
   }).index("userId", ["userId"]),
 });

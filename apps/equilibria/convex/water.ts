@@ -10,6 +10,7 @@ import {
   roundDownToDayTimestamp,
   SECS_IN_DAY,
 } from "@/util/date";
+import { api, internal } from "./_generated/api";
 
 export function extractDate(d: String) {
   return d.split("T")[0];
@@ -52,10 +53,17 @@ export const addWaterEntry = mutation({
     // TODO: if backdating, ignore hour
     const currentDay = roundDownToDayTimestamp(Number(dateUnixTimestamp));
 
+    // Add water
     await ctx.db.insert("water", {
       userId,
       dateUnixTimestamp,
       waterIntake,
+    });
+
+    // Add score to go along with it
+    ctx.runMutation(internal.scores.addScoreFromWaterIntake, {
+      userId,
+      score: BigInt(100),
     });
   },
 });

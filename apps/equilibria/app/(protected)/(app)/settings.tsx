@@ -323,7 +323,7 @@ export function ChooseGender(
           width="100%"
           height="$3"
         >
-          <YStack zIndex={10}>
+          <YStack z={10}>
             <ChevronUp size={20} />
           </YStack>
           <LinearGradient
