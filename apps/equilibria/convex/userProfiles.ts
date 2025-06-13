@@ -3,6 +3,7 @@ import { getUserId } from "./users";
 import { USER_PROFILE_MISSING } from "./errors";
 import { v } from "convex/values";
 import { api } from "./_generated/api";
+import { Auth } from "convex/server";
 
 export const tryGetUserProfile = query({
   args: {},
@@ -15,6 +16,21 @@ export const tryGetUserProfile = query({
         .withIndex("userId", (q) => q.eq("userId", userId))
         .unique()) ?? USER_PROFILE_MISSING
     );
+  },
+});
+
+export const getUserProfile = query({
+  args: {},
+  handler: async (ctx, args) => {
+    const userId = await getUserId(ctx);
+    const profile = await ctx.db
+      .query("userProfiles")
+      .withIndex("userId", (q) => q.eq("userId", userId))
+      .unique();
+    if (profile === null)
+      throw new Error("Tried to fetch non-existent user profile");
+
+    return profile;
   },
 });
 

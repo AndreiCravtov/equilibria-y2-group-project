@@ -22,6 +22,7 @@ import { tryGetUserProfile } from "@/convex/userProfiles";
 import { useQuery } from "convex/react";
 import { ScrollView } from "tamagui";
 import { useAuthActions } from "@convex-dev/auth/react";
+import { LoadingView } from "@/components/Loading";
 
 function isNumber(v: string) {
   return /^\d*$/.test(v);
@@ -30,25 +31,24 @@ function isNumber(v: string) {
 type SetMessage = (msg: string) => void;
 
 function UserDetails({ setMessage }: { setMessage: SetMessage }) {
-  let profile = useQuery(api.userProfiles.tryGetUserProfile);
-  const profile_err = profile === "USER_PROFILE_MISSING" || !profile;
+  let profile = useQuery(api.userProfiles.getUserProfile);
+  const profileLoading = !profile;
   const [updated, setUpdated] = useState(false);
-  const [name, setName] = useState(profile_err ? "" : profile.name);
-  const [age, setAge] = useState(profile_err ? "" : profile.age.toString());
+  const [name, setName] = useState(profileLoading ? "" : profile.name);
+  const [age, setAge] = useState(profileLoading ? "" : profile.age.toString());
   const [weight, setWeight] = useState(
-    profile_err ? "" : profile.weight.toString()
+    profileLoading ? "" : profile.weight.toString()
   );
-  const [gender, setGender] = useState(profile_err ? "" : profile.gender);
+  const [gender, setGender] = useState(profileLoading ? "" : profile.gender);
   const [height, setHeight] = useState(
-    profile_err ? "" : profile.height.toString()
+    profileLoading ? "" : profile.height.toString()
   );
   const [target, setTarget] = useState(
-    profile_err ? "" : profile.dailyTarget.toString()
+    profileLoading ? "" : profile.dailyTarget.toString()
   );
   const updateProfile = useMutation(api.userProfiles.updateUserProfile);
-  if (profile_err) {
-    setMessage("Could not find user profile");
-    return;
+  if (profileLoading) {
+    return <LoadingView />;
   }
 
   function update() {
@@ -134,7 +134,7 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
       <Text fontSize="$8" fontWeight="bold" pb="$1" color="$indigo4Dark">
         Weight
       </Text>
-      <XStack alignItems="center">
+      <XStack items="center">
         <Input
           value={weight}
           flex={1}
@@ -148,7 +148,7 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
           color="$indigo8Dark"
           bg="$indigo2"
         />
-        <Text ml="$2" alignSelf="center" color="$indigo8Dark">
+        <Text ml="$2" self="center" color="$indigo8Dark">
           kg
         </Text>
       </XStack>
@@ -157,7 +157,7 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
       <Text fontSize="$8" fontWeight="bold" pb="$1" color="$indigo4Dark">
         Height
       </Text>
-      <XStack alignItems="center">
+      <XStack items="center">
         <Input
           value={height}
           flex={1}
@@ -171,7 +171,7 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
           color="$indigo8Dark"
           bg="$indigo2"
         />
-        <Text ml="$2" alignSelf="center" color="$indigo8Dark">
+        <Text ml="$2" self="center" color="$indigo8Dark">
           cm
         </Text>
       </XStack>
@@ -180,7 +180,7 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
       <Text fontSize="$8" fontWeight="bold" pb="$1" color="$indigo4Dark">
         Daily Intake Target
       </Text>
-      <XStack alignItems="center">
+      <XStack items="center">
         <Input
           value={target}
           flex={1}
@@ -194,7 +194,7 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
           color="$indigo8Dark"
           bg="$indigo2"
         />
-        <Text ml="$2" alignSelf="center" color="$indigo8Dark">
+        <Text ml="$2" self="center" color="$indigo8Dark">
           ml
         </Text>
       </XStack>
@@ -238,12 +238,12 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView bg="$background">
-      <YStack gap="$4" padding="$4">
+      <YStack gap="$4" p="$4">
         <Text fontSize="$8" fontWeight="bold" color="$indigo4Dark">
           Add a Friend
         </Text>
 
-        <XStack gap="$2" alignItems="center">
+        <XStack gap="$2" items="center">
           <Input
             color="$indigo8Dark"
             bg="$indigo2"
@@ -307,7 +307,7 @@ export function ChooseGender(
             </Sheet.ScrollView>
           </Sheet.Frame>
           <Sheet.Overlay
-            backgroundColor="$shadowColor"
+            bg="$shadowColor"
             animation="lazy"
             enterStyle={{ opacity: 0 }}
             exitStyle={{ opacity: 0 }}
@@ -317,8 +317,8 @@ export function ChooseGender(
 
       <Select.Content zIndex={200000}>
         <Select.ScrollUpButton
-          alignItems="center"
-          justifyContent="center"
+          items="center"
+          justify="center"
           position="relative"
           width="100%"
           height="$3"
@@ -335,7 +335,7 @@ export function ChooseGender(
           />
         </Select.ScrollUpButton>
 
-        <Select.Viewport minWidth={200}>
+        <Select.Viewport minW={200}>
           <Select.Group>
             <Select.Label>Gender</Select.Label>
             <Select.Item index={0} key="Male" value="male">
@@ -354,13 +354,13 @@ export function ChooseGender(
         </Select.Viewport>
 
         <Select.ScrollDownButton
-          alignItems="center"
-          justifyContent="center"
+          items="center"
+          content="center"
           position="relative"
           width="100%"
           height="$3"
         >
-          <YStack zIndex={10}>
+          <YStack z={10}>
             <ChevronDown size={20} />
           </YStack>
           <LinearGradient

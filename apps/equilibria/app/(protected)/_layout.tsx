@@ -1,5 +1,6 @@
 import { LoadingView } from "@/components/Loading";
 import { api } from "@/convex/_generated/api";
+import { useProfileStore } from "@/hooks/useProfile";
 import { useQueries, useQuery } from "convex/react";
 import { Stack } from "expo-router";
 import { use, useEffect } from "react";
@@ -11,16 +12,19 @@ export const unstable_settings = {
 
 export default function ProtectedLayout() {
   const theme = useTheme();
+  // const { maybeProfile, setProfile } = useProfileStore();
 
   // load user profile
   const userProfile = useQuery(api.userProfiles.tryGetUserProfile);
   if (userProfile === undefined) return <LoadingView />;
   const userOnboarded = userProfile !== "USER_PROFILE_MISSING";
 
-  // TODO: save it to some kind of global state?? maybe even with some useEffect/zustand thing??
-  // if (userProfile !== "USER_PROFILE_MISSING") {
-  //   zustand-set-user-profile-func()
-  // }
+  // Save loaded profile to global state
+  // useEffect(() => {
+  //   if (userProfile !== "USER_PROFILE_MISSING") {
+  //     setProfile(userProfile);
+  //   }
+  // }, []);
 
   return (
     <Stack>
