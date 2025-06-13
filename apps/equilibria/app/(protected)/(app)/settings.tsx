@@ -1,5 +1,14 @@
-import { useEffect, useState } from "react";
-import { View, XStack, Input, Button, Text, YStack, Separator } from "tamagui";
+import { ReactNode, useEffect, useState } from "react";
+import {
+  View,
+  XStack,
+  Input,
+  Button,
+  Text,
+  YStack,
+  Separator,
+  H2,
+} from "tamagui";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
@@ -27,14 +36,14 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
   const [name, setName] = useState(profile_err ? "" : profile.name);
   const [age, setAge] = useState(profile_err ? "" : profile.age.toString());
   const [weight, setWeight] = useState(
-    profile_err ? "" : profile.weight.toString(),
+    profile_err ? "" : profile.weight.toString()
   );
   const [gender, setGender] = useState(profile_err ? "" : profile.gender);
   const [height, setHeight] = useState(
-    profile_err ? "" : profile.height.toString(),
+    profile_err ? "" : profile.height.toString()
   );
   const [target, setTarget] = useState(
-    profile_err ? "" : profile.dailyTarget.toString(),
+    profile_err ? "" : profile.dailyTarget.toString()
   );
   const updateProfile = useMutation(api.userProfiles.updateUserProfile);
   if (profile_err) {
@@ -77,7 +86,7 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
     });
   }
   return (
-    <YStack space="$4">
+    <YStack gap="$4">
       {/* User's name: */}
       <Text fontSize="$8" fontWeight="bold" pb="$1" color="$indigo4Dark">
         Name
@@ -203,7 +212,7 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
   );
 }
 
-export default function SettingsScreen({ set }) {
+export default function SettingsScreen() {
   const [username, setUsername] = useState("");
   const [message, setMessage] = useState("");
   const { signOut } = useAuthActions();
@@ -228,13 +237,13 @@ export default function SettingsScreen({ set }) {
   };
 
   return (
-    <ScrollView>
-      <YStack space="$4" padding="$4">
+    <ScrollView bg="$background">
+      <YStack gap="$4" padding="$4">
         <Text fontSize="$8" fontWeight="bold" color="$indigo4Dark">
           Add a Friend
         </Text>
 
-        <XStack space="$2" alignItems="center">
+        <XStack gap="$2" alignItems="center">
           <Input
             color="$indigo8Dark"
             bg="$indigo2"
@@ -264,7 +273,7 @@ export default function SettingsScreen({ set }) {
 }
 
 export function ChooseGender(
-  props: SelectProps & { trigger?: React.ReactNode },
+  props: SelectProps & { trigger?: React.ReactNode }
 ) {
   const [val, setVal] = useState("something");
 

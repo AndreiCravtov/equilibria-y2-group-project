@@ -28,7 +28,6 @@ export const updateUserProfile = mutation({
     target: v.int64(),
   },
   handler: async (ctx, { name, age, gender, weight, height, target }) => {
-    const userId = await getUserId(ctx);
     const profile = await ctx.runQuery(api.userProfiles.tryGetUserProfile);
     // user profile must already exist
     if (profile === USER_PROFILE_MISSING)
