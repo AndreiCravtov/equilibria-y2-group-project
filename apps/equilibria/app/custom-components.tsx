@@ -25,7 +25,7 @@ export function EquilibriaButton({ children, pressFunc }: EquilibriaButtonProps)
       color="$indigo4"
       bg="$blue8Dark"
       fontWeight={"bold"}
-      fontSize={17}
+      fontSize="$6"
       pressStyle={{
         bg: '$blue10',
         scale: 0.96,

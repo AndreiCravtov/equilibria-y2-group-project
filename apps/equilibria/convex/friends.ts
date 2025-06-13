@@ -1,5 +1,5 @@
 import { mutation, query } from '@/convex/_generated/server'
-import { v } from 'convex/values'
+import { v, ConvexError } from 'convex/values'
 import {getUserId} from "@/convex/users";
 
 export const addFriend = mutation({
@@ -19,14 +19,14 @@ export const addFriend = mutation({
       .collect();
 
     if (matchingUsers.length === 0) {
-      throw new Error('User not found.');
+      throw new ConvexError('User not found.');
     }
 
     const friend = matchingUsers[0];
     const friendId = friend._id;
 
     if (friendId === userId) {
-      throw new Error("You can't add yourself as a friend.");
+      throw new ConvexError("You can't add yourself as a friend.");
     }
 
     // Prevent duplicate friendships
@@ -38,7 +38,7 @@ export const addFriend = mutation({
     const alreadyFriends = existing.some((f) => f.friendId === friendId);
 
     if (alreadyFriends) {
-      throw new Error('You are already friends.');
+      throw new ConvexError('You are already friends.');
     }
 
     await ctx.db.insert('friends', {

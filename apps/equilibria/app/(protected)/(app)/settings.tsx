@@ -22,6 +22,7 @@ import { tryGetUserProfile } from "@/convex/userProfiles";
 import { useQuery } from "convex/react";
 import { ScrollView } from "tamagui";
 import { useAuthActions } from "@convex-dev/auth/react";
+import {EquilibriaButton} from "@/app/custom-components";
 
 function isNumber(v: string) {
   return /^\d*$/.test(v);
@@ -202,8 +203,13 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
       <Button
         disabled={!updated}
         {...(updated
-          ? { color: "$indigo8Dark", backgroundColor: "lightgrey" }
-          : {})}
+          ? { color: "$indigo4", backgroundColor: "$blue8Dark", fontWeight: "bold", fontSize: "$6",
+            pressStyle: {
+              backgroundColor: '$blue10',
+              scale: 0.96,
+            }
+          }
+          : {color: "gray"})}
         onPress={update}
       >
         Update
@@ -215,6 +221,7 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
 export default function SettingsScreen() {
   const [username, setUsername] = useState("");
   const [message, setMessage] = useState("");
+  const [friendMessage, setFriendMessage] = useState("");
   const { signOut } = useAuthActions();
 
   const addFriend = useMutation(api.friends.addFriend);
@@ -228,11 +235,11 @@ export default function SettingsScreen() {
     }
     try {
       await addFriend({ username });
-      setMessage(`Friend request sent to ${username}`);
+      setFriendMessage(`Friend request sent to ${username}`);
       setUsername("");
     } catch (err) {
       console.error(err);
-      setMessage("Failed to send friend request");
+      setFriendMessage("Failed to send friend request");
     }
   };
 
@@ -252,14 +259,14 @@ export default function SettingsScreen() {
             value={username}
             onChangeText={setUsername}
           />
-          <Button onPress={handleAddFriend}>Add</Button>
+          <EquilibriaButton pressFunc={handleAddFriend}>Add</EquilibriaButton>
         </XStack>
+        {friendMessage !== "" && <Text color="red">{friendMessage}</Text>}
 
         <Separator borderColor={"black"} />
 
         <UserDetails setMessage={setMessage} />
 
-        {message !== "" && <Text color="red">{message}</Text>}
         {message !== "" && <Text color="red">{message}</Text>}
 
         <Separator borderColor={"black"} />
