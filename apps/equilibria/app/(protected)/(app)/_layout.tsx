@@ -33,17 +33,10 @@ export default function TabsLayout() {
       }}
     >
       <Tabs.Screen
-        name="analysis"
+        name="leaderboard"
         options={{
-          title: "Analysis",
-          tabBarIcon: ({ color }) => <ChartColumn color={color as any} />,
-          headerRight: () => (
-            <Link href="/modal" asChild>
-              <Button mr="$4" bg="$green8" color="$green12">
-                Hello!
-              </Button>
-            </Link>
-          ),
+          title: "Leaderboard",
+          tabBarIcon: ({ color }) => <BarChart color={color as any} />,
         }}
       />
 
@@ -66,13 +59,6 @@ export default function TabsLayout() {
         options={{
           title: "Settings",
           tabBarIcon: ({ color }) => <Settings color={color as any} />,
-        }}
-      />
-      <Tabs.Screen
-        name="leaderboard"
-        options={{
-          title: "Leaderboard",
-          tabBarIcon: ({ color }) => <BarChart color={color as any} />,
         }}
       />
     </Tabs>

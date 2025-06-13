@@ -46,25 +46,24 @@ export default function ProtectedLayout() {
         <Stack.Screen
           name="add-water"
           options={{
-          title: "Add Water",
-          presentation: "modal",
-          animation: "slide_from_right",
-          gestureEnabled: true,
-          gestureDirection: "horizontal",
-          contentStyle: {
-            backgroundColor: theme.indigo12.val,
-            borderBottomColor: theme.borderColor.val,
-          },
-          headerStyle: {
-            backgroundColor: theme.indigo12.val,
-          },
-          headerTintColor: '#FFFFFF',
-          headerTitleStyle: {
-            color: '#FFFFFF',
-          },
-        }}
+            title: "Add Water",
+            presentation: "modal",
+            animation: "slide_from_right",
+            gestureEnabled: true,
+            gestureDirection: "horizontal",
+            contentStyle: {
+              backgroundColor: theme.indigo12.val,
+              borderBottomColor: theme.borderColor.val,
+            },
+            headerStyle: {
+              backgroundColor: theme.indigo12.val,
+            },
+            headerTintColor: "#FFFFFF",
+            headerTitleStyle: {
+              color: "#FFFFFF",
+            },
+          }}
         />
-
 
         <Stack.Screen
           name="modal"

@@ -33,17 +33,13 @@ export default defineSchema({
     gender: v.union(v.literal("male"), v.literal("female")),
     weight: v.int64(),
     height: v.int64(),
+    dailyTarget: v.int64(),
   }).index("userId", ["userId"]),
 
   water: defineTable({
     userId: v.id("users"),
     dateUnixTimestamp: v.int64(),
     waterIntake: v.int64(),
-  }).index("userId", ["userId"]),
-
-  goals: defineTable({
-    userId: v.id("users"),
-    waterGoal: v.int64(),
   }).index("userId", ["userId"]),
 
   friends: defineTable({
