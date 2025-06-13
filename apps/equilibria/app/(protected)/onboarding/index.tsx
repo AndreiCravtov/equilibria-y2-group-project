@@ -20,6 +20,7 @@ import {
 import { LoadingView } from "@/components/Loading";
 import { Link, Redirect } from "expo-router";
 import { useState } from "react";
+import {EquilibriaInput, EquilibriaH2} from "@/app/custom-components";
 
 const Item = styled(ToggleGroup.Item, {
   variants: {
@@ -71,41 +72,40 @@ export default function OnboardingScreen() {
       px="$9"
       bg="$background"
     >
-      <H4 fontWeight="bold">Please enter details</H4>
+      <H4 fontWeight="bold" color={"$indigo12"}>Please enter details</H4>
 
       <Form onSubmit={onSubmit} asChild>
         <YStack width="100%" gap="$4" mb="$10">
           {/* Name input */}
           <View>
-            <Label htmlFor="name" lineHeight="$6">
+            <Label htmlFor="name" lineHeight="$6" color={"$indigo12"}>
               Name
             </Label>
-            <Input
-              id="name"
-              placeholder="John Doe"
-              inputMode="text"
-              onChangeText={setName}
+            <EquilibriaInput
+              id={"name"}
               value={name}
+              onChangeText={setName}
+              placeholder="John Doe"
             />
           </View>
 
           {/* Age input */}
           <View>
-            <Label htmlFor="age" lineHeight="$6">
+            <Label htmlFor="age" lineHeight="$6" color={"$indigo12"}>
               Age
             </Label>
-            <Input
-              id="age"
-              placeholder="Enter your age"
-              inputMode="numeric"
-              onChangeText={setAge}
+            <EquilibriaInput
+              id={"age"}
               value={age}
+              onChangeText={setAge}
+              placeholder="Enter your age"
+              keyboardType="numeric"
             />
           </View>
 
           {/* Gender input */}
           <View>
-            <Label htmlFor="gender" lineHeight="$6">
+            <Label htmlFor="gender" lineHeight="$6" color={"$indigo12"}>
               Gender
             </Label>
             <ToggleGroup
@@ -113,11 +113,14 @@ export default function OnboardingScreen() {
               type="single"
               orientation="horizontal"
               disableDeactivation={true}
+              borderColor={"$indigo4"}
             >
               <Item
                 value="male"
                 active={gender === "male"}
                 onPress={() => setGender("male")}
+                bg={gender === "male" ? "$blue4" : "transparent"}
+                pressStyle={{ bg: "$blue4" }}
               >
                 <Text>Male</Text>
               </Item>
@@ -125,6 +128,8 @@ export default function OnboardingScreen() {
                 value="female"
                 active={gender === "female"}
                 onPress={() => setGender("female")}
+                bg={gender === "female" ? "$blue4" : "transparent"}
+                pressStyle={{ bg: "$blue4" }}
               >
                 <Text>Female</Text>
               </Item>
@@ -133,29 +138,29 @@ export default function OnboardingScreen() {
 
           {/* Weight input */}
           <View>
-            <Label htmlFor="weight" lineHeight="$6">
+            <Label htmlFor="weight" lineHeight="$6" color={"$indigo12"}>
               Weight (kg)
             </Label>
-            <Input
+            <EquilibriaInput
               id="weight"
-              placeholder="Enter your weight in kg"
-              inputMode="numeric"
-              onChangeText={setWeight}
               value={weight}
+              onChangeText={setWeight}
+              keyboardType="numeric"
+              placeholder="Enter your weight in kg"
             />
           </View>
 
           {/* Height input */}
           <View>
-            <Label htmlFor="height" lineHeight="$6">
+            <Label htmlFor="height" lineHeight="$6" color={"$indigo12"}>
               Height (cm)
             </Label>
-            <Input
+            <EquilibriaInput
               id="height"
-              placeholder="Enter your height in cm"
-              inputMode="numeric"
-              onChangeText={setHeight}
               value={height}
+              onChangeText={setHeight}
+              keyboardType="numeric"
+              placeholder="Enter your height in cm"
             />
           </View>
 
@@ -164,7 +169,14 @@ export default function OnboardingScreen() {
             <Form.Trigger asChild disabled={status !== "off"}>
               <Button
                 width="100%"
-                themeInverse
+                color="$indigo4"
+                bg="$indigo12"
+                fontWeight={"bold"}
+                fontSize="$6"
+                pressStyle={{
+                  bg: '$blue10',
+                  scale: 0.96,
+                }}
                 icon={
                   status === "submitting"
                     ? () => <Spinner color="$color" />

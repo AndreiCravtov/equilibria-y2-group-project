@@ -1,13 +1,8 @@
-import { H2, Button } from 'tamagui'
+import {H2, Button, Input} from 'tamagui'
 import { ReactNode } from 'react'
 
 type EquilibriaH2Props = {
   children: ReactNode
-}
-
-type EquilibriaButtonProps = {
-  children: ReactNode,
-  pressFunc: () => any,
 }
 
 export function EquilibriaH2({ children }: EquilibriaH2Props) {
@@ -17,6 +12,13 @@ export function EquilibriaH2({ children }: EquilibriaH2Props) {
     </H2>
   )
 }
+
+type EquilibriaButtonProps = {
+  children: ReactNode,
+  bg?: string,
+  pressFunc: () => any,
+}
+
 
 export function EquilibriaButton({ children, pressFunc }: EquilibriaButtonProps) {
   return (
@@ -33,5 +35,37 @@ export function EquilibriaButton({ children, pressFunc }: EquilibriaButtonProps)
     >
       {children}
     </Button>
+  )
+}
+
+type EquilibriaInputProps = {
+  id?: string
+  placeholder: string
+  keyboardType?: 'default' | 'numeric' | 'email-address' | 'phone-pad'
+  secureTextEntry?: boolean
+  value: string
+  onChangeText: (text: string) => void
+}
+
+export function EquilibriaInput({ id,
+                                  placeholder,
+                                  keyboardType = 'default',
+                                  value,
+                                  onChangeText,
+                                  secureTextEntry = false,
+                                }: EquilibriaInputProps) {
+  return (
+    <Input
+      id={id}
+      placeholder={placeholder}
+      keyboardType={keyboardType}
+      value={value}
+      onChangeText={onChangeText}
+      placeholderTextColor="$indigo8Dark"
+      color="$indigo8Dark"
+      bg="$indigo2"
+      borderColor="$indigo4"
+      secureTextEntry={secureTextEntry}
+    />
   )
 }

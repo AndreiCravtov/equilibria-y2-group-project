@@ -263,13 +263,13 @@ export default function SettingsScreen() {
         </XStack>
         {friendMessage !== "" && <Text color="red">{friendMessage}</Text>}
 
-        <Separator borderColor={"black"} />
+        <Separator my={"$1"} borderColor="$indigo8Dark" />
 
         <UserDetails setMessage={setMessage} />
 
         {message !== "" && <Text color="red">{message}</Text>}
 
-        <Separator borderColor={"black"} />
+        <Separator my={"$1"} borderColor="$indigo8Dark" />
 
         <Button theme="red" themeInverse onPress={() => void signOut()}>
           Sign Out

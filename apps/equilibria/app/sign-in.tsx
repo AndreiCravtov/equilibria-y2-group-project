@@ -20,6 +20,7 @@ import { Link, Redirect } from "expo-router";
 import { useState } from "react";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { Pressable } from "react-native";
+import {EquilibriaInput, EquilibriaH2} from "@/app/custom-components";
 
 const CONTENT = {
   signIn: {
@@ -90,50 +91,48 @@ export default function SignInScreen() {
       px="$9"
       bg="$background"
     >
-      <H4 fontWeight="bold">{CONTENT[step].header}</H4>
+      <H4 fontWeight="bold" color={"$$indigo12"}>{CONTENT[step].header}</H4>
 
       <Form onSubmit={onSubmit} asChild>
-        <YStack width="100%" gap="$4" mb="$10">
+        <YStack width="100%" gap="$4" mb="$10">   q
           <View>
-            <Label htmlFor="email" lineHeight="$6">
+            <Label htmlFor="email" lineHeight="$6" color={"$indigo12"}>
               Email
             </Label>
-            <Input
-              id="email"
-              placeholder="email@example.com"
-              inputMode="email"
-              autoCapitalize="none"
-              onChangeText={setEmail}
+            <EquilibriaInput
+              id={"email"}
               value={email}
-            />
+              onChangeText={setEmail}
+              placeholder="email@example.com"
+              keyboardType="email-address"
+              />
           </View>
 
           {step === "signUp" ? (
             <View>
-              <Label htmlFor="username" lineHeight="$6">
+              <Label htmlFor="username" lineHeight="$6" color={"$indigo12"}>
                 Username
               </Label>
-              <Input
-                id="username"
-                placeholder="Enter username"
-                inputMode="text"
-                autoCapitalize="none"
-                onChangeText={setUsername}
+              <EquilibriaInput
+                id={"username"}
                 value={username}
+                onChangeText={setUsername}
+                placeholder="Enter username"
+                keyboardType="default"
               />
             </View>
           ) : undefined}
 
           <View>
-            <Label htmlFor="password" lineHeight="$6">
+            <Label htmlFor="password" lineHeight="$6" color={"$indigo12"}>
               Password
             </Label>
-            <Input
-              id="password"
-              placeholder="Enter password"
-              secureTextEntry
-              onChangeText={setPassword}
+            <EquilibriaInput
+              id={"password"}
               value={password}
+              onChangeText={setPassword}
+              placeholder="Enter password"
+              secureTextEntry={true}
             />
           </View>
 
@@ -141,7 +140,14 @@ export default function SignInScreen() {
             <Form.Trigger asChild disabled={status !== "off"}>
               <Button
                 width="100%"
-                themeInverse
+                color="$indigo4"
+                bg="$indigo12"
+                fontWeight={"bold"}
+                fontSize="$6"
+                pressStyle={{
+                  bg: '$blue10',
+                  scale: 0.96,
+                }}
                 icon={
                   status === "submitting"
                     ? () => <Spinner color="$color" />

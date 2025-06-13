@@ -124,7 +124,7 @@ export default function AddWaterScreen() {
           <EquilibriaButton pressFunc={() => handleAddEntry(Number(newAmount))}>Add Entry</EquilibriaButton>
         </YStack>
 
-        <Separator my={15} bg="$indigo8Dark" />
+        <Separator my={15} borderColor="$indigo8Dark" />
 
         <EquilibriaH2>
           {date_to_string(selectedDate)} entries
