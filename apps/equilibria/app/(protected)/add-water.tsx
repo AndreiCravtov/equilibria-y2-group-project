@@ -31,10 +31,10 @@ import { useState } from "react";
 import { Result } from "@/util/result";
 import { useDatePicker } from "@/components/DatePicker";
 import { formatDateDay, MS_IN_SEC, timestampToDate } from "@/util/date";
-import { EquilibriaH2, EquilibriaButton } from "@/app/custom-components";
 import { Id } from "./_generated/dataModel";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { Pressable } from "react-native";
+import { AppButton, AppH2 } from "@/components/app-components";
 
 export default function AddWaterScreen() {
   const theme = useTheme();
@@ -94,8 +94,8 @@ export default function AddWaterScreen() {
 
   return (
     <ScrollView padding="$4" bounces={false} bg="#FFFFFF">
-      <YStack space="$4">
-        <EquilibriaH2>Add entries</EquilibriaH2>
+      <YStack gap="$4">
+        <AppH2 self="center">Add entries</AppH2>
         {/* Input to add water */}
         <Group orientation="horizontal" width="100%">
           <GroupButton
@@ -128,14 +128,14 @@ export default function AddWaterScreen() {
             bg="$indigo2"
             borderColor={"$indigo8"}
           />
-          <EquilibriaButton pressFunc={() => handleAddEntry(Number(newAmount))}>
+          <AppButton onPress={() => handleAddEntry(Number(newAmount))}>
             Add Entry
-          </EquilibriaButton>
+          </AppButton>
         </YStack>
 
         <Separator my={15} borderColor="$indigo8Dark" />
 
-        <EquilibriaH2>Entries for {formatDateDay(selectedDate)}</EquilibriaH2>
+        <AppH2 self="center">Entries for {formatDateDay(selectedDate)}</AppH2>
 
         {/* Show entries */}
         {waterEntries.length === 0 ? (

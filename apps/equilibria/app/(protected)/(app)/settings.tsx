@@ -22,8 +22,8 @@ import { tryGetUserProfile } from "@/convex/userProfiles";
 import { useQuery } from "convex/react";
 import { ScrollView } from "tamagui";
 import { useAuthActions } from "@convex-dev/auth/react";
-import { EquilibriaButton } from "@/app/custom-components";
 import { LoadingView } from "@/components/Loading";
+import { AppButton } from "@/components/app-components";
 
 function isNumber(v: string) {
   return /^\d*$/.test(v);
@@ -288,7 +288,7 @@ export default function SettingsScreen() {
             value={username}
             onChangeText={setUsername}
           />
-          <EquilibriaButton pressFunc={handleAddFriend}>Add</EquilibriaButton>
+          <AppButton onPress={handleAddFriend}>Add</AppButton>
         </XStack>
         {friendMessage !== "" && <Text color="red">{friendMessage}</Text>}
 
@@ -300,9 +300,13 @@ export default function SettingsScreen() {
 
         <Separator my={"$1"} borderColor="$indigo8Dark" />
 
-        <EquilibriaButton bg={"$red10"} pressFunc={() => void signOut()}>
+        <AppButton
+          bg="$red10"
+          pressStyle={{ bg: "$red11" }}
+          onPress={() => void signOut()}
+        >
           Sign Out
-        </EquilibriaButton>
+        </AppButton>
       </YStack>
     </ScrollView>
   );

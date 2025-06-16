@@ -20,7 +20,7 @@ import { Link, Redirect } from "expo-router";
 import { useState } from "react";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { Pressable } from "react-native";
-import {EquilibriaInput, EquilibriaH2} from "@/app/custom-components";
+import { AppButton, AppH2, AppH4, AppInput } from "@/components/app-components";
 
 const CONTENT = {
   signIn: {
@@ -91,30 +91,29 @@ export default function SignInScreen() {
       px="$9"
       bg="$background"
     >
-      <H4 fontWeight="bold" color={"$indigo12"}>{CONTENT[step].header}</H4>
+      <AppH4>{CONTENT[step].header}</AppH4>
 
       <Form onSubmit={onSubmit} asChild>
-        <YStack width="100%" gap="$4" mb="$10">   q
+        <YStack width="100%" gap="$4" mb="$10">
           <View>
             <Label htmlFor="email" lineHeight="$6" color={"$indigo12"}>
               Email
             </Label>
-            <EquilibriaInput
-              id={"email"}
+            <AppInput
+              id="email"
               value={email}
               onChangeText={setEmail}
               placeholder="email@example.com"
               keyboardType="email-address"
-              />
+            />
           </View>
-
           {step === "signUp" ? (
             <View>
               <Label htmlFor="username" lineHeight="$6" color={"$indigo12"}>
                 Username
               </Label>
-              <EquilibriaInput
-                id={"username"}
+              <AppInput
+                id="username"
                 value={username}
                 onChangeText={setUsername}
                 placeholder="Enter username"
@@ -122,40 +121,30 @@ export default function SignInScreen() {
               />
             </View>
           ) : undefined}
-
           <View>
             <Label htmlFor="password" lineHeight="$6" color={"$indigo12"}>
               Password
             </Label>
-            <EquilibriaInput
-              id={"password"}
+            <AppInput
+              id="password"
               value={password}
               onChangeText={setPassword}
               placeholder="Enter password"
               secureTextEntry={true}
             />
           </View>
-
           <View height="min-content" items="center" mt="$4" gap="$2">
             <Form.Trigger asChild disabled={status !== "off"}>
-              <Button
+              <AppButton
                 width="100%"
-                color="$indigo4"
-                bg="$indigo12"
-                fontWeight={"bold"}
-                fontSize="$6"
-                pressStyle={{
-                  bg: '$blue10',
-                  scale: 0.96,
-                }}
                 icon={
                   status === "submitting"
-                    ? () => <Spinner color="$color" />
+                    ? () => <Spinner color="$color1" />
                     : undefined
                 }
               >
                 {CONTENT[step].button}
-              </Button>
+              </AppButton>
             </Form.Trigger>
 
             <Pressable onPress={onChangeStep} disabled={status !== "off"}>

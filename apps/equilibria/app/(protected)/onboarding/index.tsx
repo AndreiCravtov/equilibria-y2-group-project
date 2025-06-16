@@ -20,7 +20,7 @@ import {
 import { LoadingView } from "@/components/Loading";
 import { Link, Redirect } from "expo-router";
 import { useState } from "react";
-import {EquilibriaInput, EquilibriaH2} from "@/app/custom-components";
+import { AppButton, AppH4, AppInput } from "@/components/app-components";
 
 const Item = styled(ToggleGroup.Item, {
   variants: {
@@ -72,7 +72,7 @@ export default function OnboardingScreen() {
       px="$9"
       bg="$background"
     >
-      <H4 fontWeight="bold" color={"$indigo12"}>Please enter details</H4>
+      <AppH4>Please enter details</AppH4>
 
       <Form onSubmit={onSubmit} asChild>
         <YStack width="100%" gap="$4" mb="$10">
@@ -81,8 +81,8 @@ export default function OnboardingScreen() {
             <Label htmlFor="name" lineHeight="$6" color={"$indigo12"}>
               Name
             </Label>
-            <EquilibriaInput
-              id={"name"}
+            <AppInput
+              id="name"
               value={name}
               onChangeText={setName}
               placeholder="John Doe"
@@ -94,8 +94,8 @@ export default function OnboardingScreen() {
             <Label htmlFor="age" lineHeight="$6" color={"$indigo12"}>
               Age
             </Label>
-            <EquilibriaInput
-              id={"age"}
+            <AppInput
+              id="age"
               value={age}
               onChangeText={setAge}
               placeholder="Enter your age"
@@ -141,7 +141,7 @@ export default function OnboardingScreen() {
             <Label htmlFor="weight" lineHeight="$6" color={"$indigo12"}>
               Weight (kg)
             </Label>
-            <EquilibriaInput
+            <AppInput
               id="weight"
               value={weight}
               onChangeText={setWeight}
@@ -155,7 +155,7 @@ export default function OnboardingScreen() {
             <Label htmlFor="height" lineHeight="$6" color={"$indigo12"}>
               Height (cm)
             </Label>
-            <EquilibriaInput
+            <AppInput
               id="height"
               value={height}
               onChangeText={setHeight}
@@ -167,24 +167,16 @@ export default function OnboardingScreen() {
           {/* Submit form */}
           <View height="min-content" items="center" mt="$4" gap="$2">
             <Form.Trigger asChild disabled={status !== "off"}>
-              <Button
+              <AppButton
                 width="100%"
-                color="$indigo4"
-                bg="$indigo12"
-                fontWeight={"bold"}
-                fontSize="$6"
-                pressStyle={{
-                  bg: '$blue10',
-                  scale: 0.96,
-                }}
                 icon={
                   status === "submitting"
-                    ? () => <Spinner color="$color" />
+                    ? () => <Spinner color="$color1" />
                     : undefined
                 }
               >
                 Submit
-              </Button>
+              </AppButton>
             </Form.Trigger>
           </View>
         </YStack>
