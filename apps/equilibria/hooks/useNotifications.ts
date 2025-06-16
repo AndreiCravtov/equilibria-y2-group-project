@@ -58,8 +58,8 @@ export async function scheduleWaterReminders() {
 
     trigger: {
       type: SchedulableTriggerInputTypes.TIME_INTERVAL,
-      // seconds: 2 * 60 * 60,
-      seconds: 2,
+      seconds: 2 * 60 * 60,
+      // seconds: 2,
       repeats: true,
     },
   });
