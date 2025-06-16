@@ -146,7 +146,7 @@ function Content({
   return (
     <ZStack flex={1} items="center" bg={bg}>
       <YStack flex={1} items="center" pt="$10">
-        <H2 color={color} fontWeight="bold" fontSize="$8" lineHeight="$6">
+        <H2 color={color} fontWeight="bold" fontSize="$8" lineHeight="$9">
           {goalMessage}
         </H2>
         <H4 color={color} fontSize="$5">

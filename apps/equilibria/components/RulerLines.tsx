@@ -29,7 +29,7 @@ interface RulerLinesSvgProps extends IconProps {
 
 const RulerLinesSvgBare = (props: RulerLinesSvgProps) => {
   const {
-    yPad = 1,
+    yPad = 2,
     color = "currentColor",
     width = "100%",
     height = "100%",
@@ -108,7 +108,7 @@ interface RulerLinesProps {
 }
 
 export function RulerLines(props: RulerLinesProps) {
-  const { yPad = 1, rulerStroke, ...otherProps } = props;
+  const { yPad = 2, rulerStroke, ...otherProps } = props;
   const theme = useTheme();
 
   // measure ZStack size
@@ -180,7 +180,7 @@ export function RulerLines(props: RulerLinesProps) {
             position="absolute"
             t={posY - LABEL_LINE_HEIGHT / 2}
             l={posX + LABEL_GAP}
-            // color={rulerStroke ? theme.color.get(rulerStroke) : undefined}
+            color={rulerStroke}
           >
             {pc}%
           </SizableText>
