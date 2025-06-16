@@ -53,34 +53,29 @@ export default function LeaderboardStaticView() {
   })();
   const renderLearboardRow = (
     background: string,
-    ix: number,
     v: {
       username: string;
       name: string;
       score: number;
+      place: number;
     },
     key?: React.Key | null | undefined
   ) => {
-    const place = ix + 1;
     const you = v.username === user.username;
     const name = you ? "You" : v.username;
     return (
       <LeaderboardRow
         key={key}
-        place={place}
+        place={v.place}
         name={name}
         score={v.score}
-        background={match(place)
-          .with(1, (_) => "#FBBF24")
-          .with(2, (_) => "$gray11Dark")
-          .with(3, (_) => "#A18072")
-          .otherwise((_) => "#0954A5")}
+        background={background}
         color={you ? "#FFFFFF" : undefined}
       />
     );
   };
   const Ellipsis = () => (
-    <XStack gap="$2" my="$2">
+    <XStack gap="$2" my="$2" self="center">
       <Dot />
       <Dot />
       <Dot />
@@ -121,73 +116,54 @@ export default function LeaderboardStaticView() {
         <AppH2 self="center">Daily scores</AppH2>
         <YStack width="100%" gap="$2">
           {A.mapWithIndex(
-            A.filterWithIndex(dailyLeaderboard, (ix, _v) => ix < 3),
+            dailyLeaderboard.filter((v) => v.place <= 3),
             (ix, v) =>
               renderLearboardRow(
-                match(ix + 1)
+                match(v.place)
                   .with(1, (_) => "#FBBF24")
                   .with(2, (_) => "$gray11Dark")
                   .with(3, (_) => "#A18072")
                   .otherwise((_) => "#0954A5"),
-                ix,
                 v,
                 ix
               )
           )}
+
+          {/* Ellipsis separator */}
+          {match(ellipsis)
+            .with("none", (_) =>
+              A.mapWithIndex(
+                dailyLeaderboard.filter((v) => v.place === 4 || v.place === 5),
+                (ix, v) => renderLearboardRow("#0954A5", v, ix)
+              )
+            )
+            .with("bottom", (_) => (
+              <>
+                {renderLearboardRow("#0954A5", dailyLeaderboard[3], 3)}
+                <Ellipsis />
+              </>
+            ))
+            .with("above-user", (_) => {
+              // find username index
+              let userIx = 0;
+              while (dailyLeaderboard[userIx].username !== user.username) {
+                userIx++;
+              }
+
+              return (
+                <>
+                  <Ellipsis />
+                  {renderLearboardRow(
+                    "#0954A5",
+                    dailyLeaderboard[userIx],
+                    userIx
+                  )}
+                </>
+              );
+            })
+            .exhaustive()}
         </YStack>
 
-        {/* Ellipsis separator */}
-        {match(ellipsis)
-          .with("none", (_) =>
-            A.mapWithIndex(
-              A.filterWithIndex(
-                dailyLeaderboard,
-                (ix, _v) => ix === 3 || ix === 4
-              ),
-              (ix, v) => renderLearboardRow("#0954A5", ix, v, ix)
-            )
-          )
-          .with("bottom", (_) => (
-            <>
-              {renderLearboardRow("#0954A5", 3, dailyLeaderboard[3], 3)}
-              <Ellipsis />
-            </>
-          ))
-          .with("above-user", (_) => {
-            // find username index
-            let userIx = 0;
-            while (dailyLeaderboard[userIx].username !== user.username) {
-              userIx++;
-            }
-
-            return (
-              <>
-                <Ellipsis />
-                {renderLearboardRow(
-                  "#0954A5",
-                  userIx,
-                  dailyLeaderboard[userIx],
-                  userIx
-                )}
-              </>
-            );
-          })
-          .exhaustive()}
-
-        {/* <XStack gap="$2" my="$2">
-          <Dot />
-          <Dot />
-          <Dot />
-        </XStack> */}
-
-        {/* User */}
-        {/* <LeaderboardRow
-          place={yourIndex + 1}
-          name="You"
-          score={you.score}
-          background="#0954A5"
-          color={"#FFFFFF"}
-        /> */}
         <View
           style={{
             alignSelf: "stretch",

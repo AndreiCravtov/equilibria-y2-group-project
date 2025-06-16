@@ -10,6 +10,7 @@ import {
   roundDownToDayTimestamp,
 } from "@/util/date";
 import { Id } from "./_generated/dataModel";
+import { A } from "@mobily/ts-belt";
 
 export const getWeekScores = query({
   args: {},
@@ -113,7 +114,16 @@ export const getDailyLeaderboard = query({
       });
     }
     leaderboardDataUsername.sort((l, r) => r.score - l.score);
-    return leaderboardDataUsername;
+
+    // Add in their place in the leaderboard
+    const leaderboardDataRanked = A.mapWithIndex(
+      leaderboardDataUsername,
+      (ix, d) => ({
+        ...d,
+        place: ix + 1,
+      })
+    );
+    return leaderboardDataRanked;
   },
 });
 
