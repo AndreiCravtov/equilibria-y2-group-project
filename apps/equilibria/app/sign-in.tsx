@@ -20,6 +20,7 @@ import { Link, Redirect } from "expo-router";
 import { useState } from "react";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { Pressable } from "react-native";
+import { AppButton, AppH2, AppH4, AppInput } from "@/components/app-components";
 
 const CONTENT = {
   signIn: {
@@ -90,66 +91,60 @@ export default function SignInScreen() {
       px="$9"
       bg="$background"
     >
-      <H4 fontWeight="bold">{CONTENT[step].header}</H4>
+      <AppH4>{CONTENT[step].header}</AppH4>
 
       <Form onSubmit={onSubmit} asChild>
         <YStack width="100%" gap="$4" mb="$10">
           <View>
-            <Label htmlFor="email" lineHeight="$6">
+            <Label htmlFor="email" lineHeight="$6" color={"$indigo12"}>
               Email
             </Label>
-            <Input
+            <AppInput
               id="email"
-              placeholder="email@example.com"
-              inputMode="email"
-              autoCapitalize="none"
-              onChangeText={setEmail}
               value={email}
+              onChangeText={setEmail}
+              placeholder="email@example.com"
+              keyboardType="email-address"
             />
           </View>
-
           {step === "signUp" ? (
             <View>
-              <Label htmlFor="username" lineHeight="$6">
+              <Label htmlFor="username" lineHeight="$6" color={"$indigo12"}>
                 Username
               </Label>
-              <Input
+              <AppInput
                 id="username"
-                placeholder="Enter username"
-                inputMode="text"
-                autoCapitalize="none"
-                onChangeText={setUsername}
                 value={username}
+                onChangeText={setUsername}
+                placeholder="Enter username"
+                keyboardType="default"
               />
             </View>
           ) : undefined}
-
           <View>
-            <Label htmlFor="password" lineHeight="$6">
+            <Label htmlFor="password" lineHeight="$6" color={"$indigo12"}>
               Password
             </Label>
-            <Input
+            <AppInput
               id="password"
-              placeholder="Enter password"
-              secureTextEntry
-              onChangeText={setPassword}
               value={password}
+              onChangeText={setPassword}
+              placeholder="Enter password"
+              secureTextEntry={true}
             />
           </View>
-
           <View height="min-content" items="center" mt="$4" gap="$2">
             <Form.Trigger asChild disabled={status !== "off"}>
-              <Button
+              <AppButton
                 width="100%"
-                themeInverse
                 icon={
                   status === "submitting"
-                    ? () => <Spinner color="$color" />
+                    ? () => <Spinner color="$color1" />
                     : undefined
                 }
               >
                 {CONTENT[step].button}
-              </Button>
+              </AppButton>
             </Form.Trigger>
 
             <Pressable onPress={onChangeStep} disabled={status !== "off"}>

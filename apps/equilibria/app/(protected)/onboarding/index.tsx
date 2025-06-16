@@ -20,6 +20,7 @@ import {
 import { LoadingView } from "@/components/Loading";
 import { Link, Redirect } from "expo-router";
 import { useState } from "react";
+import { AppButton, AppH4, AppInput } from "@/components/app-components";
 
 const Item = styled(ToggleGroup.Item, {
   variants: {
@@ -71,41 +72,40 @@ export default function OnboardingScreen() {
       px="$9"
       bg="$background"
     >
-      <H4 fontWeight="bold">Please enter details</H4>
+      <AppH4>Please enter details</AppH4>
 
       <Form onSubmit={onSubmit} asChild>
         <YStack width="100%" gap="$4" mb="$10">
           {/* Name input */}
           <View>
-            <Label htmlFor="name" lineHeight="$6">
+            <Label htmlFor="name" lineHeight="$6" color={"$indigo12"}>
               Name
             </Label>
-            <Input
+            <AppInput
               id="name"
-              placeholder="John Doe"
-              inputMode="text"
-              onChangeText={setName}
               value={name}
+              onChangeText={setName}
+              placeholder="John Doe"
             />
           </View>
 
           {/* Age input */}
           <View>
-            <Label htmlFor="age" lineHeight="$6">
+            <Label htmlFor="age" lineHeight="$6" color={"$indigo12"}>
               Age
             </Label>
-            <Input
+            <AppInput
               id="age"
-              placeholder="Enter your age"
-              inputMode="numeric"
-              onChangeText={setAge}
               value={age}
+              onChangeText={setAge}
+              placeholder="Enter your age"
+              keyboardType="numeric"
             />
           </View>
 
           {/* Gender input */}
           <View>
-            <Label htmlFor="gender" lineHeight="$6">
+            <Label htmlFor="gender" lineHeight="$6" color={"$indigo12"}>
               Gender
             </Label>
             <ToggleGroup
@@ -113,11 +113,14 @@ export default function OnboardingScreen() {
               type="single"
               orientation="horizontal"
               disableDeactivation={true}
+              borderColor={"$indigo4"}
             >
               <Item
                 value="male"
                 active={gender === "male"}
                 onPress={() => setGender("male")}
+                bg={gender === "male" ? "$blue4" : "transparent"}
+                pressStyle={{ bg: "$blue4" }}
               >
                 <Text>Male</Text>
               </Item>
@@ -125,6 +128,8 @@ export default function OnboardingScreen() {
                 value="female"
                 active={gender === "female"}
                 onPress={() => setGender("female")}
+                bg={gender === "female" ? "$blue4" : "transparent"}
+                pressStyle={{ bg: "$blue4" }}
               >
                 <Text>Female</Text>
               </Item>
@@ -133,46 +138,45 @@ export default function OnboardingScreen() {
 
           {/* Weight input */}
           <View>
-            <Label htmlFor="weight" lineHeight="$6">
+            <Label htmlFor="weight" lineHeight="$6" color={"$indigo12"}>
               Weight (kg)
             </Label>
-            <Input
+            <AppInput
               id="weight"
-              placeholder="Enter your weight in kg"
-              inputMode="numeric"
-              onChangeText={setWeight}
               value={weight}
+              onChangeText={setWeight}
+              keyboardType="numeric"
+              placeholder="Enter your weight in kg"
             />
           </View>
 
           {/* Height input */}
           <View>
-            <Label htmlFor="height" lineHeight="$6">
+            <Label htmlFor="height" lineHeight="$6" color={"$indigo12"}>
               Height (cm)
             </Label>
-            <Input
+            <AppInput
               id="height"
-              placeholder="Enter your height in cm"
-              inputMode="numeric"
-              onChangeText={setHeight}
               value={height}
+              onChangeText={setHeight}
+              keyboardType="numeric"
+              placeholder="Enter your height in cm"
             />
           </View>
 
           {/* Submit form */}
           <View height="min-content" items="center" mt="$4" gap="$2">
             <Form.Trigger asChild disabled={status !== "off"}>
-              <Button
+              <AppButton
                 width="100%"
-                themeInverse
                 icon={
                   status === "submitting"
-                    ? () => <Spinner color="$color" />
+                    ? () => <Spinner color="$color1" />
                     : undefined
                 }
               >
                 Submit
-              </Button>
+              </AppButton>
             </Form.Trigger>
           </View>
         </YStack>

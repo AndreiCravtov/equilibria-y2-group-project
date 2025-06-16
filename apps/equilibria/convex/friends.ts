@@ -1,6 +1,6 @@
-import { mutation, query } from '@/convex/_generated/server'
-import { v } from 'convex/values'
-import {getUserId} from "@/convex/users";
+import { mutation, query } from "@/convex/_generated/server";
+import { ConvexError, v } from "convex/values";
+import { getUserId } from "@/convex/users";
 
 export const addFriend = mutation({
   args: {
@@ -12,36 +12,34 @@ export const addFriend = mutation({
 
     // Find the user by username
     const matchingUsers = await ctx.db
-      .query('users')
-      .withIndex('username',
-        (q) => q.eq('username', username)
-      )
+      .query("users")
+      .withIndex("username", (q) => q.eq("username", username))
       .collect();
 
     if (matchingUsers.length === 0) {
-      throw new Error('User not found.');
+      throw new ConvexError("User not found.");
     }
 
     const friend = matchingUsers[0];
     const friendId = friend._id;
 
     if (friendId === userId) {
-      throw new Error("You can't add yourself as a friend.");
+      throw new ConvexError("You can't add yourself as a friend.");
     }
 
     // Prevent duplicate friendships
     const existing = await ctx.db
-      .query('friends')
-      .withIndex('userId', (q) => q.eq('userId', userId))
+      .query("friends")
+      .withIndex("userId", (q) => q.eq("userId", userId))
       .collect();
 
     const alreadyFriends = existing.some((f) => f.friendId === friendId);
 
     if (alreadyFriends) {
-      throw new Error('You are already friends.');
+      throw new ConvexError("You are already friends.");
     }
 
-    await ctx.db.insert('friends', {
+    await ctx.db.insert("friends", {
       userId,
       friendId,
     });
@@ -81,10 +79,7 @@ export const getLeaderboardList = query({
         const scoreEntry = await ctx.db
           .query("scores")
           .filter((q) =>
-            q.and(
-              q.eq(q.field("userId"), uid),
-              q.eq(q.field("date"), today)
-            )
+            q.and(q.eq(q.field("userId"), uid), q.eq(q.field("date"), today))
           )
           .first();
 
@@ -95,6 +90,8 @@ export const getLeaderboardList = query({
         };
       })
     );
-    return leaderboard;
+    return leaderboard
+      .filter((u): u is NonNullable<typeof u> => u !== null)
+      .sort((a, b) => Number(b.score) - Number(a.score));
   },
 });

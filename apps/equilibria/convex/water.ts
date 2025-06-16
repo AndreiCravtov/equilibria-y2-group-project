@@ -4,12 +4,14 @@ import { v } from "convex/values";
 import { getUserId, tryGetUserId } from "./users";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import {
+  getCurrentDayTimestamp,
   MS_IN_SEC,
   nextDayTimestamp,
   roundDownToDayDate,
   roundDownToDayTimestamp,
   SECS_IN_DAY,
 } from "@/util/date";
+import { api, internal } from "./_generated/api";
 
 export function extractDate(d: String) {
   return d.split("T")[0];
@@ -49,13 +51,63 @@ export const addWaterEntry = mutation({
   handler: async (ctx, { dateUnixTimestamp, waterIntake }) => {
     const userId = await getUserId(ctx);
 
-    // TODO: if backdating, ignore hour
-    const currentDay = roundDownToDayTimestamp(Number(dateUnixTimestamp));
-
+    // Add water
     await ctx.db.insert("water", {
       userId,
       dateUnixTimestamp,
       waterIntake,
     });
+
+    // If we are backdating, then no score should be computed
+    const currentDay = getCurrentDayTimestamp();
+    if (dateUnixTimestamp < currentDay) return;
+
+    // Otherwise compute trigger adding the score
+    ctx.runMutation(internal.scores.addScoreFromWaterIntake, {
+      dateUnixTimestamp,
+      waterIntake,
+    });
+  },
+});
+
+/**
+ * This one is the same as {@link addWaterEntry} but doesn't block score back-dating
+ */
+export const addWaterEntryDebug = mutation({
+  args: {
+    dateUnixTimestamp: v.int64(),
+    waterIntake: v.int64(),
+  },
+  handler: async (ctx, { dateUnixTimestamp, waterIntake }) => {
+    const userId = await getUserId(ctx);
+
+    // Add water
+    await ctx.db.insert("water", {
+      userId,
+      dateUnixTimestamp,
+      waterIntake,
+    });
+
+    // Trigger adding the score
+    ctx.runMutation(internal.scores.addScoreFromWaterIntake, {
+      dateUnixTimestamp,
+      waterIntake,
+    });
+  },
+});
+
+export const removeWaterEntry = mutation({
+  args: {
+    waterEntryId: v.id("water"),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getUserId(ctx);
+
+    const entry = await ctx.db.get(args.waterEntryId);
+    if (!entry || entry.userId !== userId) {
+      throw new Error("Unauthorized or entry not found");
+    }
+
+    await ctx.db.delete(args.waterEntryId);
   },
 });
