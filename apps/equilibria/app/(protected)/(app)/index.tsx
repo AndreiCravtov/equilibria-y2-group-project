@@ -12,6 +12,7 @@ import {
   GetThemeValueForKey,
   Button,
   View,
+  H4,
 } from "tamagui";
 import { Authenticated, Unauthenticated, useQuery } from "convex/react";
 import Animated, {
@@ -23,9 +24,9 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import AppAnimated from "@/components/app-animated";
-import { useEffect, useMemo } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { DropletPlusFill } from "@/components/DropletPlusFill";
-import { OpaqueColorValue, Pressable } from "react-native";
+import { ColorValue, OpaqueColorValue, Pressable } from "react-native";
 import MaskedView from "@react-native-masked-view/masked-view";
 import { WaterProgress } from "@/components/WaterProgress";
 import { Link } from "expo-router";
@@ -33,6 +34,9 @@ import { api } from "@/convex/_generated/api";
 import { DatePicker, useDatePicker } from "@/components/DatePicker";
 import { scheduleWaterReminders } from "@/hooks/useNotifications";
 import { LoadingView } from "@/components/Loading";
+import Svg, { Path as SvgPath } from "react-native-svg";
+import { match, P } from "ts-pattern";
+import { RulerLines } from "@/components/RulerLines";
 
 export default function TabTwoScreen() {
   const { selectedDayTimestamp } = useDatePicker();
@@ -41,6 +45,7 @@ export default function TabTwoScreen() {
     dateUnixTimestamp: BigInt(selectedDayTimestamp),
   });
   const profile = useQuery(api.userProfiles.getUserProfile);
+  const dailyScore = useQuery(api.scores.getDailyScore);
 
   function getTotalWaterIntake(entries: { waterIntake: number | bigint }[]) {
     return entries.reduce(
@@ -50,7 +55,11 @@ export default function TabTwoScreen() {
   }
 
   // Loading screen
-  if (waterEntries === undefined || profile === undefined) {
+  if (
+    waterEntries === undefined ||
+    profile === undefined ||
+    dailyScore === undefined
+  ) {
     return <LoadingView />;
   }
 
@@ -65,8 +74,10 @@ export default function TabTwoScreen() {
       <Content
         bg="$background"
         color="$indigo8Dark"
+        rulerStroke="$indigo12"
         totalWaterIntake={totalWaterIntake}
         userGoal={userGoal}
+        score={dailyScore}
       />
       {/* Create masked view based on water progress */}
       <MaskedView
@@ -80,8 +91,10 @@ export default function TabTwoScreen() {
         <Content
           bg="$indigo8Dark"
           color="$background"
+          rulerStroke="white"
           totalWaterIntake={totalWaterIntake}
           userGoal={userGoal}
+          score={dailyScore}
         />
       </MaskedView>
       {/* Create hidden clickable item to act as the button */}
@@ -110,14 +123,37 @@ interface ContentProps {
   color?: OpaqueColorValue | GetThemeValueForKey<"color"> | undefined;
   totalWaterIntake: number;
   userGoal: number;
+  score: number;
+  rulerStroke?: GetThemeValueForKey<"color"> | undefined;
 }
 
-function Content({ bg, color, totalWaterIntake, userGoal }: ContentProps) {
+function Content({
+  bg,
+  color,
+  totalWaterIntake,
+  userGoal,
+  score,
+  rulerStroke,
+}: ContentProps) {
+  const leftToDrinkMl = Math.max(0, userGoal - totalWaterIntake);
+  const goalMessage = match(leftToDrinkMl)
+    .when(
+      (v) => v === 0,
+      (_) => "Today's goal reached"
+    )
+    .otherwise((v) => `${v} ml remaining`);
+
   return (
-    <YStack flex={1} items="center" bg={bg}>
-      <H2 color={color} fontWeight={"bold"} pt={"$10"} fontSize={50}>
-        {totalWaterIntake}/{userGoal} ml
-      </H2>
+    <ZStack flex={1} items="center" bg={bg}>
+      <YStack flex={1} items="center" pt="$10">
+        <H2 color={color} fontWeight="bold" fontSize="$8" lineHeight="$6">
+          {goalMessage}
+        </H2>
+        <H4 color={color} fontSize="$5">
+          Score: {score}
+        </H4>
+      </YStack>
+
       {/* Relative button */}
       <View
         style={{
@@ -133,6 +169,9 @@ function Content({ bg, color, totalWaterIntake, userGoal }: ContentProps) {
           color={color}
         />
       </View>
-    </YStack>
+
+      {/* Relative scale */}
+      <RulerLines rulerStroke={rulerStroke} />
+    </ZStack>
   );
 }

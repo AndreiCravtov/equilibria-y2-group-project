@@ -11,6 +11,7 @@ import {
 } from "@/util/date";
 import { Id } from "./_generated/dataModel";
 import { A } from "@mobily/ts-belt";
+import { use } from "react";
 
 export const getWeekScores = query({
   args: {},
@@ -124,6 +125,29 @@ export const getDailyLeaderboard = query({
       })
     );
     return leaderboardDataRanked;
+  },
+});
+
+export const getDailyScore = query({
+  args: {},
+  handler: async (ctx, _args) => {
+    // grab all friends of user
+    const userId = await getUserId(ctx);
+
+    // Grab all score records recorded for today, and filter for those by the user
+    const todayTimestamp = getCurrentDayTimestamp();
+    const allTodayScores = await ctx.db
+      .query("scores")
+      .withIndex("by_creation_time", (q) =>
+        q.gte("_creationTime", todayTimestamp * MS_IN_SEC)
+      )
+      .collect();
+    const userScores = allTodayScores
+      .filter((s) => s.userId === userId)
+      .map((s) => s.score);
+
+    // Add them all up and return final score
+    return A.reduce(userScores, 0, (a, b) => a + Number(b));
   },
 });
 
