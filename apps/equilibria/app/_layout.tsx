@@ -9,7 +9,6 @@ import { ReactNode } from "react";
 import { useColorScheme } from "react-native";
 import { TamaguiProvider, useTheme, type TamaguiProviderProps } from "tamagui";
 import { ToastProvider, ToastViewport } from "@tamagui/toast";
-import { CurrentToast } from "./CurrentToast";
 import { tamaguiConfig } from "@/tamagui.config";
 import { useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
@@ -76,7 +75,6 @@ export function AppTamaguiProvider({
         ]}
       >
         {children}
-        <CurrentToast />
         <ToastViewport top="$8" left={0} right={0} />
       </ToastProvider>
     </TamaguiProvider>

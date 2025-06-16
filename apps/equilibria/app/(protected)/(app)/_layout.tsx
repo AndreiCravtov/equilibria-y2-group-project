@@ -11,11 +11,21 @@ import {
   BarChart,
 } from "@tamagui/lucide-icons";
 import StatusBarView from "@/components/StatusBarView";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DatePicker } from "@/components/DatePicker";
+import { scheduleWaterReminders } from "@/hooks/useNotifications";
+
+export const unstable_settings = {
+  initialRouteName: "(app)", // anchor
+};
 
 export default function TabsLayout() {
   const theme = useTheme();
+
+  // Start water reminders
+  useEffect(() => {
+    scheduleWaterReminders();
+  }, []);
 
   return (
     <Tabs
@@ -33,17 +43,10 @@ export default function TabsLayout() {
       }}
     >
       <Tabs.Screen
-        name="analysis"
+        name="leaderboard"
         options={{
-          title: "Analysis",
-          tabBarIcon: ({ color }) => <ChartColumn color={color as any} />,
-          headerRight: () => (
-            <Link href="/modal" asChild>
-              <Button mr="$4" bg="$green8" color="$green12">
-                Hello!
-              </Button>
-            </Link>
-          ),
+          title: "Leaderboard",
+          tabBarIcon: ({ color }) => <BarChart color={color as any} />,
         }}
       />
 
@@ -66,13 +69,6 @@ export default function TabsLayout() {
         options={{
           title: "Settings",
           tabBarIcon: ({ color }) => <Settings color={color as any} />,
-        }}
-      />
-      <Tabs.Screen
-        name="leaderboard"
-        options={{
-          title: "Leaderboard",
-          tabBarIcon: ({ color }) => <BarChart color={color as any} />,
         }}
       />
     </Tabs>

@@ -1,56 +1,134 @@
-import { query } from "./_generated/server";
-import { v } from "convex/values";
-import {getUserId} from "@/convex/users";
+import { internalMutation, query } from "./_generated/server";
+import { ConvexError, v } from "convex/values";
+import { getUserId } from "@/convex/users";
+import { api } from "./_generated/api";
+import {
+  getCurrentDayTimestamp,
+  MS_IN_SEC,
+  previousDayTimestamp,
+  roundDownToDayDate,
+  roundDownToDayTimestamp,
+} from "@/util/date";
+import { Id } from "./_generated/dataModel";
 
-export const getWeekData = query({
-  handler: async (ctx, args) => {
+export const getWeekScores = query({
+  args: {},
+  handler: async (ctx, _args) => {
     const userId = await getUserId(ctx);
-    const now = new Date();
-    const days: string[] = [];
 
-    // Helper to format date as YYYY-MM-DD
-    const formatDateISO = (date: Date) =>
-      date.toISOString().split("T")[0];
-
-    // Helper to format MM.DD label
-    const formatLabel = (date: Date) =>
-      `${(date.getMonth() + 1).toString().padStart(2, "0")}.${date
-        .getDate()
-        .toString()
-        .padStart(2, "0")}`;
-
-    // Build last 7 days list
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date(now);
-      d.setDate(d.getDate() - i);
-      days.push(formatDateISO(d));
+    // compute timestamps for seven days back
+    const weekTimestamps = [];
+    let dayTimestamp = getCurrentDayTimestamp();
+    for (let i = 0; i < 7; i++) {
+      weekTimestamps.push(dayTimestamp);
+      dayTimestamp = previousDayTimestamp(dayTimestamp);
     }
 
-    // Fetch scores for user
+    // Smallest value is the earliest timestamp & it should be converted to milliseconds
+    // Since the DB uses that instead of seconds timestamp
+    const earliestMsTimestamp = weekTimestamps[6] * MS_IN_SEC;
+
+    // Fetch scores for user for the last week
     const allScores = await ctx.db
       .query("scores")
-      .withIndex("userId",
-        (q) => q.eq("userId", userId)
+      .withIndex("userId", (q) =>
+        q.eq("userId", userId).gte("_creationTime", earliestMsTimestamp)
       )
       .collect();
 
-    // Build lookup: { date: score }
-    const scoreMap = new Map(
-      allScores.map((s) => [s.date, Number(s.score)])
-    );
-    console.log(scoreMap);
-
-    // Build full data for 7 days
-    const result = days.map((isoDate) => {
-      const date = new Date(isoDate);
-      console.log(isoDate);
-      return {
-        value: scoreMap.get(isoDate) ?? 0,
-        label: formatLabel(date),
-        frontColor: (scoreMap.get(isoDate) ?? 0) > 15 ? "#FBBF24" : "#0954A5",
-      };
+    // Accumulate the score for each day
+    const accumulatedData: Record<number, number> = {};
+    weekTimestamps.forEach((t) => {
+      accumulatedData[t] = 0;
     });
+    for (let s of allScores) {
+      // Compute timestamp and slot in for the right day
+      const timestamp = roundDownToDayTimestamp(
+        Number(s._creationTime) / MS_IN_SEC
+      );
+      accumulatedData[timestamp] += Number(s.score);
+    }
 
-    return result;
+    return accumulatedData;
+  },
+});
+
+/**
+ * Returns username-score pairs in descending order
+ */
+export const getDailyLeaderboard = query({
+  args: {},
+  handler: async (ctx, _args) => {
+    // grab all friends of user
+    const userId = await getUserId(ctx);
+
+    const friendLinks = await ctx.db
+      .query("friends")
+      .withIndex("userId", (q) => q.eq("userId", userId))
+      .collect();
+
+    // combine into one giant ID list
+    const leaderboardIds = friendLinks.map((l) => l.friendId);
+    leaderboardIds.push(userId);
+
+    // Grab all score records recorded for today, and filter for those in the friend-list
+    const todayTimestamp = getCurrentDayTimestamp();
+    const allTodayScores = await ctx.db
+      .query("scores")
+      .withIndex("by_creation_time", (q) =>
+        q.gte("_creationTime", todayTimestamp * MS_IN_SEC)
+      )
+      .collect();
+    const leaderboardTodayScores = allTodayScores.filter((s) =>
+      leaderboardIds.includes(s.userId)
+    );
+
+    // Tally up the scores to create a leaderboard output
+    const leaderboardDataId: Record<Id<"users">, number> = {};
+    leaderboardIds.forEach((id) => {
+      leaderboardDataId[id] = 0;
+    });
+    for (const s of leaderboardTodayScores) {
+      leaderboardDataId[s.userId] += Number(s.score);
+    }
+
+    // Obtain usernames from user IDs for better data presentation
+    const leaderboardDataUsername: {
+      username: string;
+      name: string;
+      score: number;
+    }[] = [];
+    for (const id of leaderboardIds) {
+      const user = await ctx.db.get(id);
+      const profile = await ctx.db
+        .query("userProfiles")
+        .withIndex("userId", (q) => q.eq("userId", id))
+        .unique();
+      if (user == null || profile == null)
+        throw new ConvexError("Data corruption error: user not found by ID");
+      leaderboardDataUsername.push({
+        username: user.username,
+        name: profile.name,
+        score: leaderboardDataId[id],
+      });
+    }
+    leaderboardDataUsername.sort((l, r) => r.score - l.score);
+    return leaderboardDataUsername;
+  },
+});
+
+export const addScoreFromWaterIntake = internalMutation({
+  args: {
+    dateUnixTimestamp: v.int64(),
+    waterIntake: v.int64(),
+  },
+  handler: async (ctx, { dateUnixTimestamp, waterIntake }) => {
+    const profile = await ctx.runQuery(api.userProfiles.getUserProfile);
+
+    // adjust score function to actually be good
+    ctx.db.insert("scores", {
+      userId: profile.userId,
+      score: waterIntake,
+    });
   },
 });

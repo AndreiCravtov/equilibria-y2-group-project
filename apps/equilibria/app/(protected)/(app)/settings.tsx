@@ -1,5 +1,14 @@
-import { useEffect, useState } from "react";
-import { View, XStack, Input, Button, Text, YStack, Separator } from "tamagui";
+import { ReactNode, useEffect, useState } from "react";
+import {
+  View,
+  XStack,
+  Input,
+  Button,
+  Text,
+  YStack,
+  Separator,
+  H2,
+} from "tamagui";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
@@ -11,6 +20,10 @@ import React from "react";
 import { LinearGradient } from "react-native-svg";
 import { tryGetUserProfile } from "@/convex/userProfiles";
 import { useQuery } from "convex/react";
+import { ScrollView } from "tamagui";
+import { useAuthActions } from "@convex-dev/auth/react";
+import { LoadingView } from "@/components/Loading";
+import { AppButton } from "@/components/app-components";
 
 function isNumber(v: string) {
   return /^\d*$/.test(v);
@@ -19,22 +32,27 @@ function isNumber(v: string) {
 type SetMessage = (msg: string) => void;
 
 function UserDetails({ setMessage }: { setMessage: SetMessage }) {
-  let profile = useQuery(api.userProfiles.tryGetUserProfile);
-  const profile_err = profile === "USER_PROFILE_MISSING" || !profile;
+  let profile = useQuery(api.userProfiles.getUserProfile);
+  const profileLoading = !profile;
   const [updated, setUpdated] = useState(false);
-  const [name, setName] = useState(profile_err ? "" : profile.name);
-  const [age, setAge] = useState(profile_err ? "" : profile.age.toString());
+  const [name, setName] = useState(profileLoading ? "" : profile.name);
+  const [age, setAge] = useState(profileLoading ? "" : profile.age.toString());
   const [weight, setWeight] = useState(
-    profile_err ? "" : profile.weight.toString(),
+    profileLoading ? "" : profile.weight.toString()
   );
-  const [gender, setGender] = useState(profile_err ? "" : profile.gender);
+  const [gender, setGender] = useState(profileLoading ? "" : profile.gender);
   const [height, setHeight] = useState(
-    profile_err ? "" : profile.height.toString(),
+    profileLoading ? "" : profile.height.toString()
+  );
+  const [target, setTarget] = useState(
+    profileLoading ? "" : profile.dailyTarget.toString()
+  );
+  const [bottleSize, setBottleSize] = useState(
+    profileLoading ? "" : profile.bottleSize.toString()
   );
   const updateProfile = useMutation(api.userProfiles.updateUserProfile);
-  if (profile_err) {
-    setMessage("Could not find user profile");
-    return;
+  if (profileLoading) {
+    return <LoadingView />;
   }
 
   function update() {
@@ -56,6 +74,14 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
       setMessage("Please enter your height");
       return;
     }
+    if (!target) {
+      setMessage("Please enter your daily intake target");
+      return;
+    }
+    if (!bottleSize) {
+      setMessage("Please enter your bottle size");
+      return;
+    }
     // do the update
     setUpdated(false);
     updateProfile({
@@ -63,13 +89,15 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
       age: BigInt(age),
       gender: gender as "male" | "female",
       weight: BigInt(weight),
-      height: BigInt(10),
+      height: BigInt(height),
+      target: BigInt(target),
+      bottleSize: BigInt(bottleSize),
     });
   }
   return (
-    <YStack>
+    <YStack gap="$4">
       {/* User's name: */}
-      <Text fontSize="$6" fontWeight="bold">
+      <Text fontSize="$8" fontWeight="bold" pb="$1" color="$indigo4Dark">
         Name
       </Text>
       <Input
@@ -78,10 +106,12 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
           setName(newName);
           setUpdated(true);
         }}
+        color="$indigo8Dark"
+        bg="$indigo2"
       />
 
       {/* User's age */}
-      <Text fontSize="$6" fontWeight="bold">
+      <Text fontSize="$8" fontWeight="bold" pb="$1" color="$indigo4Dark">
         Age
       </Text>
       <Input
@@ -93,10 +123,12 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
             setUpdated(true);
           }
         }}
+        color="$indigo8Dark"
+        bg="$indigo2"
       />
 
       {/* User's gender */}
-      <Text fontSize="$6" fontWeight="bold">
+      <Text fontSize="$8" fontWeight="bold" pb="$1" color="$indigo4Dark">
         Gender
       </Text>
       <ChooseGender
@@ -108,44 +140,105 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
       />
 
       {/* User's weight */}
-      <Text fontSize="$6" fontWeight="bold">
+      <Text fontSize="$8" fontWeight="bold" pb="$1" color="$indigo4Dark">
         Weight
       </Text>
       <XStack alignItems="center">
         <Input
           value={weight}
           flex={1}
+          keyboardType="numeric"
           onChangeText={(newWeight) => {
             if (isNumber(newWeight)) {
               setWeight(newWeight);
               setUpdated(true);
             }
           }}
+          color="$indigo8Dark"
+          bg="$indigo2"
         />
-        <Text marginLeft="$2">kg</Text>
+        <Text ml="$2" alignSelf="center" color="$indigo8Dark">
+          kg
+        </Text>
       </XStack>
 
       {/* User's height */}
-      <Text fontSize="$6" fontWeight="bold">
+      <Text fontSize="$8" fontWeight="bold" pb="$1" color="$indigo4Dark">
         Height
       </Text>
       <XStack alignItems="center">
         <Input
           value={height}
           flex={1}
+          keyboardType="numeric"
           onChangeText={(newHeight) => {
             if (isNumber(newHeight)) {
               setHeight(newHeight);
               setUpdated(true);
             }
           }}
+          color="$indigo8Dark"
+          bg="$indigo2"
         />
-        <Text marginLeft="$2">cm</Text>
+        <Text ml="$2" alignSelf="center" color="$indigo8Dark">
+          cm
+        </Text>
       </XStack>
+
+      {/* User's daily intake goal */}
+      <Text fontSize="$8" fontWeight="bold" pb="$1" color="$indigo4Dark">
+        Daily Intake Target
+      </Text>
+      <XStack alignItems="center">
+        <Input
+          value={target}
+          flex={1}
+          keyboardType="numeric"
+          onChangeText={(newTarget) => {
+            if (isNumber(newTarget)) {
+              setTarget(newTarget);
+              setUpdated(true);
+            }
+          }}
+          color="$indigo8Dark"
+          bg="$indigo2"
+        />
+        <Text ml="$2" alignSelf="center" color="$indigo8Dark">
+          ml
+        </Text>
+      </XStack>
+
+      {/* User's water bottle size */}
+      <Text fontSize="$8" fontWeight="bold" pb="$1" color="$indigo4Dark">
+        Water Bottle Size
+      </Text>
+      <Input
+        keyboardType="numeric"
+        value={bottleSize}
+        onChangeText={(newbs) => {
+          if (isNumber(newbs)) {
+            setBottleSize(newbs);
+            setUpdated(true);
+          }
+        }}
+        color="$indigo8Dark"
+        bg="$indigo2"
+      />
 
       <Button
         disabled={!updated}
-        {...(updated ? { color: "red", backgroundColor: "lightgrey" } : {})}
+        {...(updated
+          ? {
+              color: "$indigo4",
+              backgroundColor: "$blue8Dark",
+              fontWeight: "bold",
+              fontSize: "$6",
+              pressStyle: {
+                backgroundColor: "$blue10",
+                scale: 0.96,
+              },
+            }
+          : { color: "gray" })}
         onPress={update}
       >
         Update
@@ -154,9 +247,11 @@ function UserDetails({ setMessage }: { setMessage: SetMessage }) {
   );
 }
 
-export default function SettingsScreen({ set }) {
+export default function SettingsScreen() {
   const [username, setUsername] = useState("");
   const [message, setMessage] = useState("");
+  const [friendMessage, setFriendMessage] = useState("");
+  const { signOut } = useAuthActions();
 
   const addFriend = useMutation(api.friends.addFriend);
 
@@ -169,41 +264,56 @@ export default function SettingsScreen({ set }) {
     }
     try {
       await addFriend({ username });
-      setMessage(`Friend request sent to ${username}`);
+      setFriendMessage(`Friend request sent to ${username}`);
       setUsername("");
     } catch (err) {
       console.error(err);
-      setMessage("Failed to send friend request");
+      setFriendMessage("Failed to send friend request");
     }
   };
 
   return (
-    <YStack space="$4" padding="$4">
-      <Text fontSize="$6" fontWeight="bold">
-        Add a Friend
-      </Text>
+    <ScrollView bg="$background">
+      <YStack gap="$4" padding="$4">
+        <Text fontSize="$8" fontWeight="bold" color="$indigo4Dark">
+          Add a Friend
+        </Text>
 
-      <XStack space="$2" alignItems="center">
-        <Input
-          flex={1}
-          placeholder="Enter username"
-          value={username}
-          onChangeText={setUsername}
-        />
-        <Button onPress={handleAddFriend}>Add</Button>
-      </XStack>
+        <XStack gap="$2" alignItems="center">
+          <Input
+            color="$indigo8Dark"
+            bg="$indigo2"
+            flex={1}
+            placeholder="Enter username"
+            value={username}
+            onChangeText={setUsername}
+          />
+          <AppButton onPress={handleAddFriend}>Add</AppButton>
+        </XStack>
+        {friendMessage !== "" && <Text color="red">{friendMessage}</Text>}
 
-      <Separator borderColor={"black"} />
+        <Separator my={"$1"} borderColor="$indigo8Dark" />
 
-      <UserDetails setMessage={setMessage} />
+        <UserDetails setMessage={setMessage} />
 
-      {message !== "" && <Text color="red">{message}</Text>}
-    </YStack>
+        {message !== "" && <Text color="red">{message}</Text>}
+
+        <Separator my={"$1"} borderColor="$indigo8Dark" />
+
+        <AppButton
+          bg="$red10"
+          pressStyle={{ bg: "$red11" }}
+          onPress={() => void signOut()}
+        >
+          Sign Out
+        </AppButton>
+      </YStack>
+    </ScrollView>
   );
 }
 
 export function ChooseGender(
-  props: SelectProps & { trigger?: React.ReactNode },
+  props: SelectProps & { trigger?: React.ReactNode }
 ) {
   const [val, setVal] = useState("something");
 
@@ -215,8 +325,12 @@ export function ChooseGender(
       {...props}
     >
       {props?.trigger || (
-        <Select.Trigger maxWidth={220} iconAfter={ChevronDown}>
-          <Select.Value placeholder="Something" />
+        <Select.Trigger
+          maxWidth={220}
+          iconAfter={ChevronDown}
+          backgroundColor="white"
+        >
+          <Select.Value placeholder=" " color="$indigo8Dark" />
         </Select.Trigger>
       )}
 

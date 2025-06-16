@@ -16,7 +16,6 @@ import type {
 import type * as auth from "../auth.js";
 import type * as errors from "../errors.js";
 import type * as friends from "../friends.js";
-import type * as goals from "../goals.js";
 import type * as http from "../http.js";
 import type * as scores from "../scores.js";
 import type * as userProfiles from "../userProfiles.js";
@@ -35,7 +34,6 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   errors: typeof errors;
   friends: typeof friends;
-  goals: typeof goals;
   http: typeof http;
   scores: typeof scores;
   userProfiles: typeof userProfiles;
