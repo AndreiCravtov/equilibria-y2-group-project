@@ -14,28 +14,21 @@ import { api } from "@/convex/_generated/api";
 import { BarChart } from "react-native-gifted-charts";
 import { LoadingView } from "@/components/Loading";
 import { MS_IN_SEC } from "@/util/date";
-import { AppH2 } from "@/components/app-components";
+import { AppButton, AppH2 } from "@/components/app-components";
 import useProfile from "@/hooks/useProfile";
 import { match, P } from "ts-pattern";
 import { OpaqueColorValue } from "react-native";
 import { A } from "@mobily/ts-belt";
+import { Link } from "expo-router";
 
 export default function LeaderboardStaticView() {
+  const profile = useQuery(api.userProfiles.getUserProfile);
   const user = useQuery(api.users.getCurrentUser);
   const dailyLeaderboard = useQuery(api.scores.getDailyLeaderboard);
-  // const leaderboardList = useQuery(api.friends.getLeaderboardList);
   const weekData = useQuery(api.scores.getWeekScores);
-  if (!user || !dailyLeaderboard || !weekData) {
+  if (!profile || !user || !dailyLeaderboard || !weekData) {
     return <LoadingView />;
   }
-
-  // console.log("leaderboardList: ", leaderboardList);
-  // const [first, second, third] = leaderboardList || [];
-  // const yourIndex = leaderboardList.findIndex(
-  //   (item) => (item?.id || 0) === user._id
-  // );
-  // const you = leaderboardList[yourIndex];
-  // console.log("weekData: ", weekData);
 
   // Process leaderboard data
   type EllipsisMode = "none" | "bottom" | "above-user";
@@ -105,7 +98,7 @@ export default function LeaderboardStaticView() {
     processedWeekData.push({
       value: score,
       label: formatLabel(date),
-      frontColor: score > 15 ? "#FBBF24" : "#0954A5",
+      frontColor: score > 85 ? "#FBBF24" : "#0954A5",
     });
   }
 
@@ -163,6 +156,14 @@ export default function LeaderboardStaticView() {
             })
             .exhaustive()}
         </YStack>
+
+        {dailyLeaderboard.length <= 3 ? (
+          <Link href="/(protected)/(app)/settings" asChild>
+            <AppButton mt="$4" width="$13" height="$5">
+              Add Friends
+            </AppButton>
+          </Link>
+        ) : undefined}
 
         <View
           style={{

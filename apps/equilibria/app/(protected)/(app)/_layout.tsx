@@ -14,6 +14,10 @@ import StatusBarView from "@/components/StatusBarView";
 import { useEffect, useRef, useState } from "react";
 import { DatePicker } from "@/components/DatePicker";
 import { scheduleWaterReminders } from "@/hooks/useNotifications";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { LoadingView } from "@/components/Loading";
+import { useProfileStore } from "@/hooks/useProfile";
 
 export const unstable_settings = {
   initialRouteName: "(app)", // anchor

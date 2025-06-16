@@ -81,6 +81,12 @@ export const removeWaterEntry = mutation({
       throw new Error("Unauthorized or entry not found");
     }
 
+    // Delete water entry
     await ctx.db.delete(args.waterEntryId);
+
+    // Delete score associated with water entry
+    await ctx.runMutation(internal.scores.removeScoreFromWaterIntake, {
+      waterEntryId: args.waterEntryId,
+    });
   },
 });

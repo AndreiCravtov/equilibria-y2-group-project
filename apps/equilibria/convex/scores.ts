@@ -12,7 +12,6 @@ import {
 } from "@/util/date";
 import { Id } from "./_generated/dataModel";
 import { A } from "@mobily/ts-belt";
-import { use } from "react";
 
 export const getWeekScores = query({
   args: {},
@@ -171,7 +170,7 @@ export const addScoreFromWaterIntake = internalMutation({
     let totalPenalty = 0;
 
     // Grab all previous water entries within the penalty window
-    const previousEntries = await ctx.db
+    const previousEntriesAll = await ctx.db
       .query("water")
       .withIndex("by_creation_time", (q) =>
         q
@@ -182,6 +181,9 @@ export const addScoreFromWaterIntake = internalMutation({
           .lt("_creationTime", waterEntry._creationTime)
       )
       .collect();
+    const previousEntries = previousEntriesAll.filter(
+      (e) => e.userId === profile.userId
+    );
     previousEntries.sort((l, r) => r._creationTime - l._creationTime);
 
     // Use most recent entry to apply frequency penalty
@@ -203,8 +205,9 @@ export const addScoreFromWaterIntake = internalMutation({
 
     // Compute score as percentage of user goal +buffs -penalties
     const percentage =
-      Number(waterEntry.waterIntake / profile.dailyTarget) * 100;
-    const score = percentage * (1 - totalPenalty);
+      (Number(waterEntry.waterIntake) / Number(profile.dailyTarget)) * 100;
+    console.log("percentage", percentage);
+    const score = Math.round(percentage * (1 - totalPenalty));
 
     // adjust score function to actually be good
     ctx.db.insert("scores", {
@@ -212,5 +215,19 @@ export const addScoreFromWaterIntake = internalMutation({
       waterId: waterEntryId,
       score: BigInt(score),
     });
+  },
+});
+
+export const removeScoreFromWaterIntake = internalMutation({
+  args: {
+    waterEntryId: v.id("water"),
+  },
+  handler: async (ctx, { waterEntryId }) => {
+    // Grab scores
+    const previousEntries = await ctx.db
+      .query("scores")
+      .withIndex("waterId", (q) => q.eq("waterId", waterEntryId))
+      .collect();
+    previousEntries.forEach((e) => ctx.db.delete(e._id));
   },
 });
