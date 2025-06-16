@@ -8,6 +8,7 @@ import {
   previousDayTimestamp,
   roundDownToDayDate,
   roundDownToDayTimestamp,
+  SECS_IN_HOUR,
 } from "@/util/date";
 import { Id } from "./_generated/dataModel";
 import { A } from "@mobily/ts-belt";
@@ -153,16 +154,63 @@ export const getDailyScore = query({
 
 export const addScoreFromWaterIntake = internalMutation({
   args: {
-    dateUnixTimestamp: v.int64(),
-    waterIntake: v.int64(),
+    waterEntryId: v.id("water"),
   },
-  handler: async (ctx, { dateUnixTimestamp, waterIntake }) => {
+  handler: async (ctx, { waterEntryId }) => {
+    const WATER_FREQ_PENALTY = 0.15;
+    const FREQ_PENALTY_COOLDOWN = SECS_IN_HOUR;
+
+    // Grab user profile and water entry
     const profile = await ctx.runQuery(api.userProfiles.getUserProfile);
+    const waterEntry = await ctx.db.get(waterEntryId);
+    if (waterEntry === null)
+      throw new ConvexError(
+        `Water entry with ID ${waterEntryId} doesn't exist`
+      );
+
+    let totalPenalty = 0;
+
+    // Grab all previous water entries within the penalty window
+    const previousEntries = await ctx.db
+      .query("water")
+      .withIndex("by_creation_time", (q) =>
+        q
+          .gte(
+            "_creationTime",
+            waterEntry._creationTime - FREQ_PENALTY_COOLDOWN * MS_IN_SEC
+          )
+          .lt("_creationTime", waterEntry._creationTime)
+      )
+      .collect();
+    previousEntries.sort((l, r) => r._creationTime - l._creationTime);
+
+    // Use most recent entry to apply frequency penalty
+    if (previousEntries[0] !== undefined) {
+      const mostPreviousEntryTimestamp =
+        previousEntries[0]._creationTime / MS_IN_SEC;
+      const penaltyFinishesTimestamp =
+        mostPreviousEntryTimestamp + FREQ_PENALTY_COOLDOWN;
+      const waterEntryTimestamp = waterEntry._creationTime / MS_IN_SEC;
+
+      // Penalty easing coefficient = how close it is to finishing (linear)
+      const coeff =
+        (penaltyFinishesTimestamp - waterEntryTimestamp) /
+        FREQ_PENALTY_COOLDOWN;
+      console.log("coeff", coeff);
+      totalPenalty += coeff * WATER_FREQ_PENALTY;
+      console.log("totalPenalty", totalPenalty);
+    }
+
+    // Compute score as percentage of user goal +buffs -penalties
+    const percentage =
+      Number(waterEntry.waterIntake / profile.dailyTarget) * 100;
+    const score = percentage * (1 - totalPenalty);
 
     // adjust score function to actually be good
     ctx.db.insert("scores", {
       userId: profile.userId,
-      score: waterIntake,
+      waterId: waterEntryId,
+      score: BigInt(score),
     });
   },
 });
