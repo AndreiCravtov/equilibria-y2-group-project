@@ -37,18 +37,15 @@ export const getWeekData = query({
 
     // Accumulate the score for each day
     const accumulatedData: Record<number, number> = {};
+    weekTimestamps.forEach((t) => {
+      accumulatedData[t] = 0;
+    });
     for (let s of allScores) {
       // Compute timestamp and slot in for the right day
       const timestamp = roundDownToDayTimestamp(
         Number(s._creationTime) / MS_IN_SEC
       );
-
-      // Find the right slot and add to the score, creating it if it doesn't exist
-      if (accumulatedData[timestamp] === undefined) {
-        accumulatedData[timestamp] = Number(s.score);
-      } else {
-        accumulatedData[timestamp] += Number(s.score);
-      }
+      accumulatedData[timestamp] += Number(s.score);
     }
 
     return accumulatedData;
