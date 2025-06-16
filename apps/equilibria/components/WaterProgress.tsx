@@ -30,7 +30,7 @@ export interface WaterProgressProps {
 export function WaterProgress(props: WaterProgressProps) {
   // Unpack & default props
   const { percentage, yPad, fill } = {
-    yPad: props.yPad ?? 1,
+    yPad: props.yPad ?? 2,
     fill: props.fill ?? WATER_COLOR,
     ...props,
   };

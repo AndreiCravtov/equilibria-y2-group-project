@@ -52,7 +52,7 @@ export const addWaterEntry = mutation({
     const userId = await getUserId(ctx);
 
     // Add water
-    await ctx.db.insert("water", {
+    const waterEntryId = await ctx.db.insert("water", {
       userId,
       dateUnixTimestamp,
       waterIntake,
@@ -64,34 +64,7 @@ export const addWaterEntry = mutation({
 
     // Otherwise compute trigger adding the score
     ctx.runMutation(internal.scores.addScoreFromWaterIntake, {
-      dateUnixTimestamp,
-      waterIntake,
-    });
-  },
-});
-
-/**
- * This one is the same as {@link addWaterEntry} but doesn't block score back-dating
- */
-export const addWaterEntryDebug = mutation({
-  args: {
-    dateUnixTimestamp: v.int64(),
-    waterIntake: v.int64(),
-  },
-  handler: async (ctx, { dateUnixTimestamp, waterIntake }) => {
-    const userId = await getUserId(ctx);
-
-    // Add water
-    await ctx.db.insert("water", {
-      userId,
-      dateUnixTimestamp,
-      waterIntake,
-    });
-
-    // Trigger adding the score
-    ctx.runMutation(internal.scores.addScoreFromWaterIntake, {
-      dateUnixTimestamp,
-      waterIntake,
+      waterEntryId,
     });
   },
 });
@@ -108,6 +81,12 @@ export const removeWaterEntry = mutation({
       throw new Error("Unauthorized or entry not found");
     }
 
+    // Delete water entry
     await ctx.db.delete(args.waterEntryId);
+
+    // Delete score associated with water entry
+    await ctx.runMutation(internal.scores.removeScoreFromWaterIntake, {
+      waterEntryId: args.waterEntryId,
+    });
   },
 });

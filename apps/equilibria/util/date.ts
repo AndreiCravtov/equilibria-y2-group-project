@@ -1,5 +1,6 @@
 export const MS_IN_SEC = 1_000;
 export const SECS_IN_DAY = 86_400;
+export const SECS_IN_HOUR = 3_600;
 
 const DAYS = [
   "Sunday",

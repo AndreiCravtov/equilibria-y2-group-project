@@ -12,19 +12,11 @@ export const unstable_settings = {
 
 export default function ProtectedLayout() {
   const theme = useTheme();
-  // const { maybeProfile, setProfile } = useProfileStore();
 
   // load user profile
   const userProfile = useQuery(api.userProfiles.tryGetUserProfile);
   if (userProfile === undefined) return <LoadingView />;
   const userOnboarded = userProfile !== "USER_PROFILE_MISSING";
-
-  // Save loaded profile to global state
-  // useEffect(() => {
-  //   if (userProfile !== "USER_PROFILE_MISSING") {
-  //     setProfile(userProfile);
-  //   }
-  // }, []);
 
   return (
     <Stack>
@@ -65,20 +57,6 @@ export default function ProtectedLayout() {
             headerTintColor: "#FFFFFF",
             headerTitleStyle: {
               color: "#FFFFFF",
-            },
-          }}
-        />
-
-        <Stack.Screen
-          name="modal"
-          options={{
-            title: "Tamagui + Expo",
-            presentation: "modal",
-            animation: "slide_from_right",
-            gestureEnabled: true,
-            gestureDirection: "horizontal",
-            contentStyle: {
-              backgroundColor: theme.background.val,
             },
           }}
         />

@@ -50,6 +50,9 @@ export default defineSchema({
 
   scores: defineTable({
     userId: v.id("users"),
+    waterId: v.id("water"),
     score: v.int64(),
-  }).index("userId", ["userId"]),
+  })
+    .index("userId", ["userId"])
+    .index("waterId", ["waterId"]),
 });

@@ -8,8 +8,10 @@ import {
   previousDayTimestamp,
   roundDownToDayDate,
   roundDownToDayTimestamp,
+  SECS_IN_HOUR,
 } from "@/util/date";
 import { Id } from "./_generated/dataModel";
+import { A } from "@mobily/ts-belt";
 
 export const getWeekScores = query({
   args: {},
@@ -113,22 +115,119 @@ export const getDailyLeaderboard = query({
       });
     }
     leaderboardDataUsername.sort((l, r) => r.score - l.score);
-    return leaderboardDataUsername;
+
+    // Add in their place in the leaderboard
+    const leaderboardDataRanked = A.mapWithIndex(
+      leaderboardDataUsername,
+      (ix, d) => ({
+        ...d,
+        place: ix + 1,
+      })
+    );
+    return leaderboardDataRanked;
+  },
+});
+
+export const getDailyScore = query({
+  args: {},
+  handler: async (ctx, _args) => {
+    // grab all friends of user
+    const userId = await getUserId(ctx);
+
+    // Grab all score records recorded for today, and filter for those by the user
+    const todayTimestamp = getCurrentDayTimestamp();
+    const allTodayScores = await ctx.db
+      .query("scores")
+      .withIndex("by_creation_time", (q) =>
+        q.gte("_creationTime", todayTimestamp * MS_IN_SEC)
+      )
+      .collect();
+    const userScores = allTodayScores
+      .filter((s) => s.userId === userId)
+      .map((s) => s.score);
+
+    // Add them all up and return final score
+    return A.reduce(userScores, 0, (a, b) => a + Number(b));
   },
 });
 
 export const addScoreFromWaterIntake = internalMutation({
   args: {
-    dateUnixTimestamp: v.int64(),
-    waterIntake: v.int64(),
+    waterEntryId: v.id("water"),
   },
-  handler: async (ctx, { dateUnixTimestamp, waterIntake }) => {
+  handler: async (ctx, { waterEntryId }) => {
+    const WATER_FREQ_PENALTY = 0.15;
+    const FREQ_PENALTY_COOLDOWN = SECS_IN_HOUR;
+
+    // Grab user profile and water entry
     const profile = await ctx.runQuery(api.userProfiles.getUserProfile);
+    const waterEntry = await ctx.db.get(waterEntryId);
+    if (waterEntry === null)
+      throw new ConvexError(
+        `Water entry with ID ${waterEntryId} doesn't exist`
+      );
+
+    let totalPenalty = 0;
+
+    // Grab all previous water entries within the penalty window
+    const previousEntriesAll = await ctx.db
+      .query("water")
+      .withIndex("by_creation_time", (q) =>
+        q
+          .gte(
+            "_creationTime",
+            waterEntry._creationTime - FREQ_PENALTY_COOLDOWN * MS_IN_SEC
+          )
+          .lt("_creationTime", waterEntry._creationTime)
+      )
+      .collect();
+    const previousEntries = previousEntriesAll.filter(
+      (e) => e.userId === profile.userId
+    );
+    previousEntries.sort((l, r) => r._creationTime - l._creationTime);
+
+    // Use most recent entry to apply frequency penalty
+    if (previousEntries[0] !== undefined) {
+      const mostPreviousEntryTimestamp =
+        previousEntries[0]._creationTime / MS_IN_SEC;
+      const penaltyFinishesTimestamp =
+        mostPreviousEntryTimestamp + FREQ_PENALTY_COOLDOWN;
+      const waterEntryTimestamp = waterEntry._creationTime / MS_IN_SEC;
+
+      // Penalty easing coefficient = how close it is to finishing (linear)
+      const coeff =
+        (penaltyFinishesTimestamp - waterEntryTimestamp) /
+        FREQ_PENALTY_COOLDOWN;
+      console.log("coeff", coeff);
+      totalPenalty += coeff * WATER_FREQ_PENALTY;
+      console.log("totalPenalty", totalPenalty);
+    }
+
+    // Compute score as percentage of user goal +buffs -penalties
+    const percentage =
+      (Number(waterEntry.waterIntake) / Number(profile.dailyTarget)) * 100;
+    console.log("percentage", percentage);
+    const score = Math.round(percentage * (1 - totalPenalty));
 
     // adjust score function to actually be good
     ctx.db.insert("scores", {
       userId: profile.userId,
-      score: waterIntake,
+      waterId: waterEntryId,
+      score: BigInt(score),
     });
+  },
+});
+
+export const removeScoreFromWaterIntake = internalMutation({
+  args: {
+    waterEntryId: v.id("water"),
+  },
+  handler: async (ctx, { waterEntryId }) => {
+    // Grab scores
+    const previousEntries = await ctx.db
+      .query("scores")
+      .withIndex("waterId", (q) => q.eq("waterId", waterEntryId))
+      .collect();
+    previousEntries.forEach((e) => ctx.db.delete(e._id));
   },
 });

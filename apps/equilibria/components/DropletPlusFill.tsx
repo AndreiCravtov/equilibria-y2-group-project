@@ -3,11 +3,7 @@ import { Svg, Path } from "react-native-svg";
 import { type IconProps, themed } from "@tamagui/helpers-icon";
 
 const Icon = (props: IconProps) => {
-  const { color, size, ...otherProps } = {
-    color: props.color ?? "currentColor",
-    size: props.size ?? 24,
-    ...props,
-  };
+  const { color = "currentColor", size = 24, ...otherProps } = props;
   return (
     <Svg
       viewBox="0 0 14 19"
