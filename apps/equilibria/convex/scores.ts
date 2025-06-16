@@ -1,5 +1,5 @@
 import { internalMutation, query } from "./_generated/server";
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { getUserId } from "@/convex/users";
 import { api } from "./_generated/api";
 import {
@@ -9,10 +9,11 @@ import {
   roundDownToDayDate,
   roundDownToDayTimestamp,
 } from "@/util/date";
+import { Id } from "./_generated/dataModel";
 
-export const getWeekData = query({
+export const getWeekScores = query({
   args: {},
-  handler: async (ctx, args) => {
+  handler: async (ctx, _args) => {
     const userId = await getUserId(ctx);
 
     // compute timestamps for seven days back
@@ -49,6 +50,70 @@ export const getWeekData = query({
     }
 
     return accumulatedData;
+  },
+});
+
+/**
+ * Returns username-score pairs in descending order
+ */
+export const getDailyLeaderboard = query({
+  args: {},
+  handler: async (ctx, _args) => {
+    // grab all friends of user
+    const userId = await getUserId(ctx);
+
+    const friendLinks = await ctx.db
+      .query("friends")
+      .withIndex("userId", (q) => q.eq("userId", userId))
+      .collect();
+
+    // combine into one giant ID list
+    const leaderboardIds = friendLinks.map((l) => l.friendId);
+    leaderboardIds.push(userId);
+
+    // Grab all score records recorded for today, and filter for those in the friend-list
+    const todayTimestamp = getCurrentDayTimestamp();
+    const allTodayScores = await ctx.db
+      .query("scores")
+      .withIndex("by_creation_time", (q) =>
+        q.gte("_creationTime", todayTimestamp * MS_IN_SEC)
+      )
+      .collect();
+    const leaderboardTodayScores = allTodayScores.filter((s) =>
+      leaderboardIds.includes(s.userId)
+    );
+
+    // Tally up the scores to create a leaderboard output
+    const leaderboardDataId: Record<Id<"users">, number> = {};
+    leaderboardIds.forEach((id) => {
+      leaderboardDataId[id] = 0;
+    });
+    for (const s of leaderboardTodayScores) {
+      leaderboardDataId[s.userId] += Number(s.score);
+    }
+
+    // Obtain usernames from user IDs for better data presentation
+    const leaderboardDataUsername: {
+      username: string;
+      name: string;
+      score: number;
+    }[] = [];
+    for (const id of leaderboardIds) {
+      const user = await ctx.db.get(id);
+      const profile = await ctx.db
+        .query("userProfiles")
+        .withIndex("userId", (q) => q.eq("userId", id))
+        .unique();
+      if (user == null || profile == null)
+        throw new ConvexError("Data corruption error: user not found by ID");
+      leaderboardDataUsername.push({
+        username: user.username,
+        name: profile.name,
+        score: leaderboardDataId[id],
+      });
+    }
+    leaderboardDataUsername.sort((l, r) => r.score - l.score);
+    return leaderboardDataUsername;
   },
 });
 
