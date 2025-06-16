@@ -29,7 +29,6 @@ export async function scheduleWaterReminders() {
     },
 
     trigger: {
-      type: SchedulableTriggerInputTypes.TIME_INTERVAL,
       seconds: 4 * 60 * 60, // 4 hours //TODO: uncomment
       repeats: true,
     },
