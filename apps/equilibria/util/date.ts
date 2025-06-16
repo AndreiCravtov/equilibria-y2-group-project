@@ -1,6 +1,30 @@
 export const MS_IN_SEC = 1_000;
 export const SECS_IN_DAY = 86_400;
 
+const DAYS = [
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+];
+const MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
 export function roundDownToDayDate(date: Date) {
   // set everything to zero
   date.setUTCHours(0);
@@ -37,4 +61,19 @@ export function timestampToDate(unixTimestamp: number) {
 
 export function dateToTimestamp(date: Date) {
   return date.getTime() / MS_IN_SEC;
+}
+
+export function formatDateDay(date: Date) {
+  function getOrdinalSuffix(n: number) {
+    const SUFFIX = ["st", "nd", "rd"];
+    const n1 = n % 100;
+    const n2 = n % 10;
+    if (10 < n1 && n1 < 20) return "th";
+    return SUFFIX[n2 - 1] ?? "th";
+  }
+
+  const day = DAYS[date.getUTCDay()];
+  const monthDate = date.getUTCDate();
+
+  return `${day} ${monthDate}${getOrdinalSuffix(monthDate)}`;
 }

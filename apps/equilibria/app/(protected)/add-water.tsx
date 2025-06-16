@@ -29,10 +29,8 @@ import {
 import { api } from "@/convex/_generated/api";
 import { useState } from "react";
 import { Result } from "@/util/result";
-import { extractDate } from "@/components/date-selector";
-import { date_to_string } from "@/components/date-selector";
 import { useDatePicker } from "@/components/DatePicker";
-import { MS_IN_SEC, timestampToDate } from "@/util/date";
+import { formatDateDay, MS_IN_SEC, timestampToDate } from "@/util/date";
 import { EquilibriaH2, EquilibriaButton } from "@/app/custom-components";
 import { Id } from "./_generated/dataModel";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
@@ -137,7 +135,7 @@ export default function AddWaterScreen() {
 
         <Separator my={15} borderColor="$indigo8Dark" />
 
-        <EquilibriaH2>{date_to_string(selectedDate)} entries</EquilibriaH2>
+        <EquilibriaH2>Entries for {formatDateDay(selectedDate)}</EquilibriaH2>
 
         {/* Show entries */}
         {waterEntries.length === 0 ? (
@@ -145,7 +143,7 @@ export default function AddWaterScreen() {
         ) : (
           waterEntries.map((item) => (
             <Card key={item._id} p={"$3"} mb={"$3"} bg={"$indigo4"} radiused>
-              <XStack justifyContent="space-between" alignItems="center">
+              <XStack justify="space-between" items="center">
                 <Text fontWeight="bold" fontSize="$6" color="$indigo11">
                   {item.waterIntake} mL
                 </Text>
