@@ -48,6 +48,10 @@ export function getCurrentDayTimestamp() {
   return dateToTimestamp(todayDate);
 }
 
+export function getCurrentTimestamp() {
+  return Math.floor(Date.now() / MS_IN_SEC);
+}
+
 export function nextDayTimestamp(unixTimestamp: number) {
   return roundDownToDayTimestamp(unixTimestamp) + SECS_IN_DAY;
 }
@@ -61,7 +65,7 @@ export function timestampToDate(unixTimestamp: number) {
 }
 
 export function dateToTimestamp(date: Date) {
-  return date.getTime() / MS_IN_SEC;
+  return Math.floor(date.getTime() / MS_IN_SEC);
 }
 
 export function formatDateDay(date: Date) {

@@ -30,11 +30,18 @@ import { api } from "@/convex/_generated/api";
 import { useState } from "react";
 import { Result } from "@/util/result";
 import { useDatePicker } from "@/components/DatePicker";
-import { formatDateDay, MS_IN_SEC, timestampToDate } from "@/util/date";
+import {
+  formatDateDay,
+  getCurrentDayTimestamp,
+  getCurrentTimestamp,
+  MS_IN_SEC,
+  timestampToDate,
+} from "@/util/date";
 import { Id } from "./_generated/dataModel";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { Pressable } from "react-native";
 import { AppButton, AppH2 } from "@/components/app-components";
+import { P, match } from "ts-pattern";
 
 export default function AddWaterScreen() {
   const theme = useTheme();
@@ -54,8 +61,15 @@ export default function AddWaterScreen() {
 
   console.log(`waterEntries: ${waterEntries}`);
   const handleAddEntry = async (amount: number | bigint) => {
+    // If the selected day is today, use the current timestamp, otherwise default to beginning of previous day
+    const dateUnixTimestamp = (() => {
+      if (selectedDayTimestamp < getCurrentDayTimestamp())
+        return selectedDayTimestamp;
+      return getCurrentTimestamp();
+    })();
+
     await addWater({
-      dateUnixTimestamp: BigInt(selectedDayTimestamp),
+      dateUnixTimestamp: BigInt(dateUnixTimestamp),
       waterIntake: BigInt(amount),
     });
     setNewAmount("");

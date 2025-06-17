@@ -26,28 +26,38 @@ export const getWeekScores = query({
       dayTimestamp = previousDayTimestamp(dayTimestamp);
     }
 
-    // Smallest value is the earliest timestamp & it should be converted to milliseconds
-    // Since the DB uses that instead of seconds timestamp
-    const earliestMsTimestamp = weekTimestamps[6] * MS_IN_SEC;
+    // Smallest value is the earliest timestamp & is last element
+    const earliestTimestamp = weekTimestamps[weekTimestamps.length - 1];
 
     // Fetch scores for user for the last week
-    const allScores = await ctx.db
+    const allScoresEver = await ctx.db
       .query("scores")
-      .withIndex("userId", (q) =>
-        q.eq("userId", userId).gte("_creationTime", earliestMsTimestamp)
-      )
+      .withIndex("userId", (q) => q.eq("userId", userId))
       .collect();
+    const allScoresLastWeek = (
+      await Promise.all(
+        allScoresEver.map(async (s) => {
+          const waterEntry = await ctx.db.get(s.waterId);
+          if (waterEntry === null)
+            throw new ConvexError(
+              `Data corruption error: water ID ${s.userId} doesn't exist`
+            );
+          return {
+            ...s,
+            dateUnixTimestamp: waterEntry.dateUnixTimestamp,
+          };
+        })
+      )
+    ).filter((s) => s.dateUnixTimestamp >= earliestTimestamp);
 
     // Accumulate the score for each day
     const accumulatedData: Record<number, number> = {};
     weekTimestamps.forEach((t) => {
       accumulatedData[t] = 0;
     });
-    for (let s of allScores) {
+    for (let s of allScoresLastWeek) {
       // Compute timestamp and slot in for the right day
-      const timestamp = roundDownToDayTimestamp(
-        Number(s._creationTime) / MS_IN_SEC
-      );
+      const timestamp = roundDownToDayTimestamp(Number(s.dateUnixTimestamp));
       accumulatedData[timestamp] += Number(s.score);
     }
 
@@ -73,17 +83,26 @@ export const getDailyLeaderboard = query({
     const leaderboardIds = friendLinks.map((l) => l.friendId);
     leaderboardIds.push(userId);
 
-    // Grab all score records recorded for today, and filter for those in the friend-list
+    // Grab all score records for those in the friend-list, and filter for those today
     const todayTimestamp = getCurrentDayTimestamp();
-    const allTodayScores = await ctx.db
-      .query("scores")
-      .withIndex("by_creation_time", (q) =>
-        q.gte("_creationTime", todayTimestamp * MS_IN_SEC)
+    const allScoresFromLeaderboardParticipants = (
+      await ctx.db.query("scores").collect()
+    ).filter((s) => leaderboardIds.includes(s.userId));
+    const leaderboardTodayScores = (
+      await Promise.all(
+        allScoresFromLeaderboardParticipants.map(async (s) => {
+          const waterEntry = await ctx.db.get(s.waterId);
+          if (waterEntry === null)
+            throw new ConvexError(
+              `Data corruption error: water ID ${s.userId} doesn't exist`
+            );
+          return {
+            ...s,
+            dateUnixTimestamp: waterEntry.dateUnixTimestamp,
+          };
+        })
       )
-      .collect();
-    const leaderboardTodayScores = allTodayScores.filter((s) =>
-      leaderboardIds.includes(s.userId)
-    );
+    ).filter((s) => Number(s.dateUnixTimestamp) >= todayTimestamp);
 
     // Tally up the scores to create a leaderboard output
     const leaderboardDataId: Record<Id<"users">, number> = {};
@@ -134,19 +153,30 @@ export const getDailyScore = query({
     // grab all friends of user
     const userId = await getUserId(ctx);
 
-    // Grab all score records recorded for today, and filter for those by the user
+    // Grab all score records by the user and filter for those for today
     const todayTimestamp = getCurrentDayTimestamp();
-    const allTodayScores = await ctx.db
+    const allScoresByUser = await ctx.db
       .query("scores")
-      .withIndex("by_creation_time", (q) =>
-        q.gte("_creationTime", todayTimestamp * MS_IN_SEC)
-      )
+      .withIndex("userId", (q) => q.eq("userId", userId))
       .collect();
-    const userScores = allTodayScores
-      .filter((s) => s.userId === userId)
-      .map((s) => s.score);
+    const userScoresToday = (
+      await Promise.all(
+        allScoresByUser.map(async (s) => {
+          const waterEntry = await ctx.db.get(s.waterId);
+          if (waterEntry === null)
+            throw new ConvexError(
+              `Data corruption error: water ID ${s.userId} doesn't exist`
+            );
+          return {
+            ...s,
+            dateUnixTimestamp: waterEntry.dateUnixTimestamp,
+          };
+        })
+      )
+    ).filter((s) => Number(s.dateUnixTimestamp) >= todayTimestamp);
 
     // Add them all up and return final score
+    const userScores = userScoresToday.map((s) => s.score);
     return A.reduce(userScores, 0, (a, b) => a + Number(b));
   },
 });
@@ -170,29 +200,30 @@ export const addScoreFromWaterIntake = internalMutation({
     let totalPenalty = 0;
 
     // Grab all previous water entries within the penalty window
-    const previousEntriesAll = await ctx.db
+    const earliestWaterEntryTimestamp =
+      waterEntry.dateUnixTimestamp - BigInt(FREQ_PENALTY_COOLDOWN);
+    const previousEntries = await ctx.db
       .query("water")
-      .withIndex("by_creation_time", (q) =>
+      .withIndex("by_user_timestamp", (q) =>
         q
-          .gte(
-            "_creationTime",
-            waterEntry._creationTime - FREQ_PENALTY_COOLDOWN * MS_IN_SEC
-          )
-          .lt("_creationTime", waterEntry._creationTime)
+          .gte("dateUnixTimestamp", earliestWaterEntryTimestamp)
+          .lt("dateUnixTimestamp", waterEntry.dateUnixTimestamp)
       )
+      .filter((q) => q.eq(q.field("userId"), profile.userId))
       .collect();
-    const previousEntries = previousEntriesAll.filter(
-      (e) => e.userId === profile.userId
+    previousEntries.sort((l, r) =>
+      Number(r.dateUnixTimestamp - l.dateUnixTimestamp)
     );
-    previousEntries.sort((l, r) => r._creationTime - l._creationTime);
+    console.log(previousEntries);
 
     // Use most recent entry to apply frequency penalty
     if (previousEntries[0] !== undefined) {
-      const mostPreviousEntryTimestamp =
-        previousEntries[0]._creationTime / MS_IN_SEC;
+      const mostPreviousEntryTimestamp = Number(
+        previousEntries[0].dateUnixTimestamp
+      );
       const penaltyFinishesTimestamp =
         mostPreviousEntryTimestamp + FREQ_PENALTY_COOLDOWN;
-      const waterEntryTimestamp = waterEntry._creationTime / MS_IN_SEC;
+      const waterEntryTimestamp = Number(waterEntry.dateUnixTimestamp);
 
       // Penalty easing coefficient = how close it is to finishing (linear)
       const coeff =
@@ -228,6 +259,6 @@ export const removeScoreFromWaterIntake = internalMutation({
       .query("scores")
       .withIndex("waterId", (q) => q.eq("waterId", waterEntryId))
       .collect();
-    previousEntries.forEach((e) => ctx.db.delete(e._id));
+    await Promise.all(previousEntries.map((e) => ctx.db.delete(e._id)));
   },
 });

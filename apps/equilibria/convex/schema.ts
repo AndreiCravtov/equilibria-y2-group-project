@@ -41,7 +41,10 @@ export default defineSchema({
     userId: v.id("users"),
     dateUnixTimestamp: v.int64(),
     waterIntake: v.int64(),
-  }).index("userId", ["userId"]),
+  })
+    .index("userId", ["userId"])
+    .index("dateUnixTimestamp", ["dateUnixTimestamp"])
+    .index("by_user_timestamp", ["dateUnixTimestamp", "userId"]),
 
   friends: defineTable({
     userId: v.id("users"),
